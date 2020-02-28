@@ -68,13 +68,59 @@ export default class ConfiguracaoComponente extends Component {
     gerarHoraAleatoria() {
         let estado = this.state;
         let dh1 = new Date();
-        let dh2 = new Date(Date.now() + 120000);
+        let dh2 = new Date();
         
         dh1.setHours(parseInt(estado.h1), parseInt(estado.m1), 0, 0);
         dh2.setHours(parseInt(estado.h2), parseInt(estado.m2), 59, 999);
         
         let horaNotificacao = objUtil.obterDataHoraAleatoria(dh1, dh2);
         estado.horaNotificacao = horaNotificacao.toLocaleTimeString();
+
+        let PushNotification = require("react-native-push-notification");
+        
+        PushNotification.configure({
+        // (optional) Called when Token is generated (iOS and Android)
+        onRegister: function(token) {
+            console.log("TOKEN:", token);
+        },
+
+        // (required) Called when a remote or local notification is opened or received
+        onNotification: function(notification) {
+            console.log("NOTIFICATION:", notification);
+
+            // process the notification
+
+            // required on iOS only (see fetchCompletionHandler docs: https://github.com/react-native-community/react-native-push-notification-ios)
+            //notification.finish(PushNotificationIOS.FetchResult.NoData);
+        },
+
+        // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
+        senderID: "456789",
+
+        // IOS ONLY (optional): default: all - Permissions to register.
+        permissions: {
+            alert: true,
+            badge: true,
+            sound: true
+        },
+
+        // Should the initial notification be popped automatically
+        // default: true
+        popInitialNotification: true,
+
+        /**
+         * (optional) default: true
+         * - Specified if permissions (ios) and token (android and ios) will requested or not,
+         * - if not, you must call PushNotificationsHandler.requestPermissions() later
+         */
+        requestPermissions: true
+        });
+
+        PushNotification.localNotificationSchedule({
+            //... You can use all the options from localNotifications
+            message: "My Notification Message", // (required)
+            date: new Date(horaNotificacao) // in 60 secs
+          });
         
         estado.dh1 = dh1.toLocaleTimeString();
         estado.dh2 = dh2.toLocaleTimeString();
