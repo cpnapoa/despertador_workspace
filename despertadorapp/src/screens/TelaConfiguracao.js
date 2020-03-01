@@ -1,60 +1,82 @@
-/**
- * Componente de tela para dados de cliente
- *
- * @format
- * @flow
- */
-
 import React, { Component } from 'react';
-import Configuracao from './Configuracao';
+import Mensagem from './Mensagem';
 import {
     StyleSheet,
     View,
     Button,
     Text,
-    TextInput
+    TextInput,
+    Alert
 } from 'react-native';
-// import { Input} from 'react-native-elements';
-import AsyncStorage from '@react-native-community/async-storage';
 import Util from '../common/Util';
 
-export default class ConfiguracaoComponente extends Component {
+    var PushNotification = require("react-native-push-notification");
 
-    static navigationOptions = {
-        title: 'ConfiguracaoComponente'
+    function configurarNotificacao(navigation){
+        PushNotification.configure({
+            // (optional) Called when Token is generated (iOS and Android)
+            onRegister: function(token) {
+                console.log("TOKEN:", token);
+            },
+
+            // (required) Called when a remote or local notification is opened or received
+            onNotification: async function(notificacao) {
+                console.log("NOTIFICATION:", notificacao);
+
+                // let mensagem = await objMensagem.exibirProximaMensagem();
+                navigation.navigate('TelaMensagem', { 'exibirMensagem': 'S' });
+
+                // process the notification
+
+                // required on iOS only (see fetchCompletionHandler docs: https://github.com/react-native-community/react-native-push-notification-ios)
+                //notification.finish(PushNotificationIOS.FetchResult.NoData);
+            },
+
+            // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
+            // senderID: "456789",
+
+            // IOS ONLY (optional): default: all - Permissions to register.
+            permissions: {
+                alert: true,
+                badge: true,
+                sound: false
+            },
+
+            // Should the initial notification be popped automatically
+            // default: true
+            popInitialNotification: true,
+
+            /**
+             * (optional) default: true
+             * - Specified if permissions (ios) and token (android and ios) will requested or not,
+             * - if not, you must call PushNotificationsHandler.requestPermissions() later
+             */
+            requestPermissions: true
+        });
     }
+export default class TelaConfiguracao extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {h1: '', m1: '', h2: '', m2: ''};
+        this.state = {h1: '', m1: '', h2: '', m2: '', qtdMensagensExibir: 0, qtdMensagensExibidas: 0};
         this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
         this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
+        this.agendarNotificacao = this.agendarNotificacao.bind(this);
 
-        // objConfiguracao = new Configuracao();
+        objMensagem = new Mensagem();
         objUtil = new Util();
+        configurarNotificacao(this.props.navigation);
         this.exibirEstatisticas();
     }
 
     async exibirEstatisticas() {
         let estado = this.state;
-        let mensagensExibir;
-        let mensagensExibidas;
+        let mensagensExibir = [];
+        let mensagensExibidas = [];
 
-        let promiseItensExibir = await AsyncStorage.getItem('msgExibir');
-            
-        if(promiseItensExibir) {
-            mensagensExibir = JSON.parse(promiseItensExibir);
-        }
-
-        let promiseItensExibidas = await AsyncStorage.getItem('msgExibidas');
-            
-        if(promiseItensExibidas) {
-            mensagensExibidas = JSON.parse(promiseItensExibidas);
-        }
+        mensagensExibir = await objMensagem.lerMensagensExibir();
+        mensagensExibidas = await objMensagem.lerMensagensExibidas();
         
-        estado.qtdMensagensExibir = 0;
-        estado.qtdMensagensExibidas = 0;
-
         if(mensagensExibir instanceof Array) {
             estado.qtdMensagensExibir = mensagensExibir.length;
         }
@@ -74,58 +96,25 @@ export default class ConfiguracaoComponente extends Component {
         dh2.setHours(parseInt(estado.h2), parseInt(estado.m2), 59, 999);
         
         let horaNotificacao = objUtil.obterDataHoraAleatoria(dh1, dh2);
-        estado.horaNotificacao = horaNotificacao.toLocaleTimeString();
-
-        let PushNotification = require("react-native-push-notification");
-        
-        PushNotification.configure({
-        // (optional) Called when Token is generated (iOS and Android)
-        onRegister: function(token) {
-            console.log("TOKEN:", token);
-        },
-
-        // (required) Called when a remote or local notification is opened or received
-        onNotification: function(notification) {
-            console.log("NOTIFICATION:", notification);
-
-            // process the notification
-
-            // required on iOS only (see fetchCompletionHandler docs: https://github.com/react-native-community/react-native-push-notification-ios)
-            //notification.finish(PushNotificationIOS.FetchResult.NoData);
-        },
-
-        // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
-        senderID: "456789",
-
-        // IOS ONLY (optional): default: all - Permissions to register.
-        permissions: {
-            alert: true,
-            badge: true,
-            sound: true
-        },
-
-        // Should the initial notification be popped automatically
-        // default: true
-        popInitialNotification: true,
-
-        /**
-         * (optional) default: true
-         * - Specified if permissions (ios) and token (android and ios) will requested or not,
-         * - if not, you must call PushNotificationsHandler.requestPermissions() later
-         */
-        requestPermissions: true
-        });
-
-        PushNotification.localNotificationSchedule({
-            //... You can use all the options from localNotifications
-            message: "My Notification Message", // (required)
-            date: new Date(horaNotificacao) // in 60 secs
-          });
         
         estado.dh1 = dh1.toLocaleTimeString();
         estado.dh2 = dh2.toLocaleTimeString();
-
+        estado.horaNotificacao = horaNotificacao.toLocaleTimeString();
         this.setState(estado);
+
+        return horaNotificacao;
+    }
+
+    agendarNotificacao() {
+        // let PushNotification = require("react-native-push-notification");
+        let dataHora = this.gerarHoraAleatoria();
+
+        PushNotification.localNotificationSchedule({
+            //... You can use all the options from localNotifications
+            message: 'Desperte sua consciência...',
+            playSound: false,
+            date: dataHora
+        });
     }
 
     render() {
@@ -144,7 +133,7 @@ export default class ConfiguracaoComponente extends Component {
                     </View>
                     
                     <Text>Hora aletoria entre {this.state.dh1} e {this.state.dh2} => {this.state.horaNotificacao}</Text>
-                    <Button title='Testar hora aleatória' onPress={this.gerarHoraAleatoria} ></Button>
+                    <Button title='Testar hora aleatória' onPress={this.agendarNotificacao} ></Button>
 
                     <Text>Mensagens exibidas: {this.state.qtdMensagensExibidas}</Text>
                     <Text>Mensagens a exibir: {this.state.qtdMensagensExibir}</Text>
