@@ -8,12 +8,12 @@
             "name": "Python: Django",
             "type": "python",
             "request": "launch",
-            "program": "C:\\Users\\ferna\\despertadorapp_workspace\\despertadorserverapp\\manage.py",
+            "program": "C:\\Users\\ferna\\despertador_workspace\\despertadorserverapp\\manage.py",
             "args": [
                 "runserver",
-                "--noreload"
-                // "192.168.0.3:8000"
-                "10.0.0.100:8000"
+                "--noreload",
+                "192.168.0.2:8000"
+                // "10.0.0.100:8000"
             ],
             "django": true
         }

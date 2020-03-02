@@ -1,10 +1,3 @@
-/**
- * Componente de tela para dados de cliente
- *
- * @format
- * @flow
- */
-
 import React, { Component } from 'react';
 import Mensagem from './Mensagem';
 import Util from '../common/Util';
@@ -53,12 +46,7 @@ export default class TelaMensagem extends Component {
     }
     
     render() {
-        // let { navigation } = this.props;
 
-        // if (navigation && navigation.getParam('exibirMensagem') === 'S') {
-        //     navigation.setParams({ 'exibirMensagem': 'N' });
-        //     await this.exibirProximaMensagem();
-        // }
         return (
             <View style={styles.areaTotal}>
                 <ImageBackground source={require('../images/parchment_back.png')} style={{height: '100%', width: '100%', justifyContent:'space-evenly'}}>

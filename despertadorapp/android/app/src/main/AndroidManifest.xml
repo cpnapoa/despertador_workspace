@@ -11,15 +11,15 @@
     <!-- < Only if you're using GCM or localNotificationSchedule() > -->
 
     <application
-      android:name=".MainApplication"
-      android:label="@string/app_name"
+      android:name="com.despertadorapp.MainApplication"
+      android:label="Despertador de Consciência"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
       android:theme="@style/AppTheme">
       <activity
-        android:name=".MainActivity"
-        android:label="@string/app_name"
+        android:name="com.despertadorapp.MainActivity"
+        android:label="Despertador de Consciência"
         android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
         android:windowSoftInputMode="adjustResize">
         <intent-filter>
