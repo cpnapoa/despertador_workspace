@@ -49,11 +49,15 @@ export default class TelaMensagem extends Component {
 
         return (
             <View style={styles.areaTotal}>
-                <ImageBackground source={require('../images/parchment_back.png')} style={{height: '100%', width: '100%', justifyContent:'space-evenly'}}>
-                    <Text style={{flexWrap:'wrap', fontFamily: 'serif', alignSelf:'center'}}>
-                        {this.state.textoMensagem}
-                    </Text>
-                    <Icon name="caret-right" size={30} color="#022C18" onPress={this.voltar} style={{margin: 10}}  onPress={this.exibirProximaMensagem}/>
+                <ImageBackground source={require('../images/parchment_back.png')} style={{ flex: 1, height: '100%', width: '100%', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+                        <Text style={styles.formataFrase}>
+                            {this.state.textoMensagem}
+                        </Text>
+                    </View>
+                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+                        <Icon name="caret-right" size={30} color="#022C18" onPress={this.voltar} style={{margin: 10}}  onPress={this.exibirProximaMensagem}/>
+                    </View>                    
                 </ImageBackground>
             </View>
         );
@@ -69,11 +73,19 @@ TelaMensagem.navigationOptions = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
+    
     areaTotal: {
         flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5'
+        flexDirection:'row',
+        alignItems:'center',
+        justifyContent:'center',
+    },
+
+    formataFrase: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        width: '80%',
+        //backgroundColor: 'yellow',
+        textAlign: 'center',
     }
 });
