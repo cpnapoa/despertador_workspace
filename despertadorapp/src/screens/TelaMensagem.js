@@ -82,8 +82,9 @@ const styles = StyleSheet.create({
     },
 
     formataFrase: {
+        fontFamily: 'AutumnMoon',
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: 30,
         width: '80%',
         //backgroundColor: 'yellow',
         textAlign: 'center',
