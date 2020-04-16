@@ -117,6 +117,7 @@ export default class TelaConfiguracao extends Component {
         });
     }
 
+
     render() {
         let estado = this.state;
 
@@ -137,6 +138,13 @@ export default class TelaConfiguracao extends Component {
 
                     <Text>Mensagens exibidas: {this.state.qtdMensagensExibidas}</Text>
                     <Text>Mensagens a exibir: {this.state.qtdMensagensExibir}</Text>
+
+                    <Button 
+                        onPress={objMensagem.sincronizarMensagensComServidor} 
+                        title="Buscar novas mensagens no servidor"
+                        color="#0000ff"
+                    />
+
                 </View>
             </View>
         );
