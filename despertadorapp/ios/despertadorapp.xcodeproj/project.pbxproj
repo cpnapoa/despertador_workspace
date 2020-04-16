@@ -33,6 +33,11 @@
 		E3AA09FC3C2A49B8AD2E6A9A /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A19808F674F74E62A1EEF7E3 /* SimpleLineIcons.ttf */; };
 		2395E0F1683446EB8FFB6A89 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 68A616D869E44F309BFA1EB9 /* Zocial.ttf */; };
 		55B5C37981584712BC3791D4 /* AutumnMoon.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1DF364A323E443E7A3EF20CC /* AutumnMoon.ttf */; };
+		65E2A1F933CB45A99CFA6206 /* AutumnMoon-OTF.otf in Resources */ = {isa = PBXBuildFile; fileRef = EED889EDD9CC420DB78BA2CE /* AutumnMoon-OTF.otf */; };
+		11CA2F8C039848ECB54C6D76 /* Aurella.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2FF589C33EFB49F9BF1108EE /* Aurella.ttf */; };
+		5AB33C9086F74518B441F689 /* aurella.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 246C39F73C694D3789CBC53D /* aurella.ttf */; };
+		E95B3CC650B34CFBB4102E45 /* autumnMoon-OTF.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6FAA9E4122C34408AAD8442B /* autumnMoon-OTF.otf */; };
+		47D59742E5B2494FB9C8FF47 /* autumnMoon.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 21FEFE547521493AA9CE8000 /* autumnMoon.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +90,11 @@
 		A19808F674F74E62A1EEF7E3 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; name = "SimpleLineIcons.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		68A616D869E44F309BFA1EB9 /* Zocial.ttf */ = {isa = PBXFileReference; name = "Zocial.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		1DF364A323E443E7A3EF20CC /* AutumnMoon.ttf */ = {isa = PBXFileReference; name = "AutumnMoon.ttf"; path = "../assets/fonts/AutumnMoon.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EED889EDD9CC420DB78BA2CE /* AutumnMoon-OTF.otf */ = {isa = PBXFileReference; name = "AutumnMoon-OTF.otf"; path = "../assets/fonts/AutumnMoon-OTF.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		2FF589C33EFB49F9BF1108EE /* Aurella.ttf */ = {isa = PBXFileReference; name = "Aurella.ttf"; path = "../assets/fonts/Aurella.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		246C39F73C694D3789CBC53D /* aurella.ttf */ = {isa = PBXFileReference; name = "aurella.ttf"; path = "../assets/fonts/aurella.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		6FAA9E4122C34408AAD8442B /* autumnMoon-OTF.otf */ = {isa = PBXFileReference; name = "autumnMoon-OTF.otf"; path = "../assets/fonts/autumnMoon-OTF.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		21FEFE547521493AA9CE8000 /* autumnMoon.ttf */ = {isa = PBXFileReference; name = "autumnMoon.ttf"; path = "../assets/fonts/autumnMoon.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +222,11 @@
 				A19808F674F74E62A1EEF7E3 /* SimpleLineIcons.ttf */,
 				68A616D869E44F309BFA1EB9 /* Zocial.ttf */,
 				1DF364A323E443E7A3EF20CC /* AutumnMoon.ttf */,
+				EED889EDD9CC420DB78BA2CE /* AutumnMoon-OTF.otf */,
+				2FF589C33EFB49F9BF1108EE /* Aurella.ttf */,
+				246C39F73C694D3789CBC53D /* aurella.ttf */,
+				6FAA9E4122C34408AAD8442B /* autumnMoon-OTF.otf */,
+				21FEFE547521493AA9CE8000 /* autumnMoon.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -370,6 +385,11 @@
 				E3AA09FC3C2A49B8AD2E6A9A /* SimpleLineIcons.ttf in Resources */,
 				2395E0F1683446EB8FFB6A89 /* Zocial.ttf in Resources */,
 				55B5C37981584712BC3791D4 /* AutumnMoon.ttf in Resources */,
+				65E2A1F933CB45A99CFA6206 /* AutumnMoon-OTF.otf in Resources */,
+				11CA2F8C039848ECB54C6D76 /* Aurella.ttf in Resources */,
+				5AB33C9086F74518B441F689 /* aurella.ttf in Resources */,
+				E95B3CC650B34CFBB4102E45 /* autumnMoon-OTF.otf in Resources */,
+				47D59742E5B2494FB9C8FF47 /* autumnMoon.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

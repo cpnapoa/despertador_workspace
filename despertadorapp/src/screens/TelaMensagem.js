@@ -49,14 +49,15 @@ export default class TelaMensagem extends Component {
 
         return (
             <View style={styles.areaTotal}>
-                <ImageBackground source={require('../images/parchment_back.png')} style={{ flex: 1, height: '100%', width: '100%', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
-                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+                <ImageBackground source={require('../images/parchment_back.png')} style={styles.imgBG}>
+                    <View style={{flex: 1, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
                         <Text style={styles.formataFrase}>
                             {this.state.textoMensagem}
                         </Text>
                     </View>
-                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
-                        <Icon name="caret-right" size={30} color="#022C18" onPress={this.voltar} style={{margin: 10}}  onPress={this.exibirProximaMensagem}/>
+                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', height: 50, marginBottom: 15}}>
+                        <Text>Próxima mensagem</Text>
+                        <Icon name="caret-right" size={50} color="#022C18" onPress={this.voltar} style={{margin: 10}}  onPress={this.exibirProximaMensagem}/>
                     </View>                    
                 </ImageBackground>
             </View>
@@ -81,12 +82,21 @@ const styles = StyleSheet.create({
         justifyContent:'center',
     },
 
+    imgBG: {
+        flex: 1,
+        height: '100%',
+        width: '100%',
+        flexDirection:'column',
+        alignItems:'center',
+        justifyContent:'flex-end'
+    },
+
     formataFrase: {
-        fontFamily: 'AutumnMoon',
-        fontWeight: 'bold',
-        fontSize: 30,
+        //backgroundColor: 'red',
+        fontSize: 35,
         width: '80%',
-        //backgroundColor: 'yellow',
+        marginTop: 60,
         textAlign: 'center',
+        fontFamily: 'autumnMoon'
     }
 });
