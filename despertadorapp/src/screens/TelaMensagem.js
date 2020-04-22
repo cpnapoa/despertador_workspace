@@ -20,7 +20,10 @@ export default class TelaMensagem extends Component {
         
         objMensagem = new Mensagem();
         objUtil = new Util();
+        
         objMensagem.sincronizarMensagensComServidor();
+
+        this.exibirProximaMensagem();
     }
 
     async obterProximaMensagem() {
@@ -43,11 +46,14 @@ export default class TelaMensagem extends Component {
             navigation.setParams({ 'exibirMensagem': 'N' });
             this.exibirProximaMensagem();
         }
-    }
+    };
+
+    
     
     render() {
-
+        
         return (
+            
             <View style={styles.areaTotal}>
                 <ImageBackground source={require('../images/parchment_back.png')} style={styles.imgBG}>
                     <View style={{flex: 1, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
@@ -93,10 +99,10 @@ const styles = StyleSheet.create({
 
     formataFrase: {
         //backgroundColor: 'red',
-        fontSize: 35,
+        fontSize: 50,
         width: '80%',
         marginTop: 60,
         textAlign: 'center',
-        fontFamily: 'autumnMoon'
+        fontFamily: 'ErisblueScript'
     }
 });

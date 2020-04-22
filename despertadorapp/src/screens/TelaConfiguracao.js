@@ -120,7 +120,7 @@ export default class TelaConfiguracao extends Component {
 
     render() {
         let estado = this.state;
-
+        this.exibirEstatisticas();
         return (
             <View style={styles.areaTotal}>
                 <View style={styles.areaConfiguracao}>
