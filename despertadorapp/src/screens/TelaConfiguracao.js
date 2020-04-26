@@ -54,6 +54,8 @@ import Util from '../common/Util';
             requestPermissions: true
         });
     }
+
+
 export default class TelaConfiguracao extends Component {
 
     constructor(props) {
@@ -65,6 +67,7 @@ export default class TelaConfiguracao extends Component {
 
         objMensagem = new Mensagem();
         objUtil = new Util();
+
         configurarNotificacao(this.props.navigation);
         this.exibirEstatisticas();
     }
@@ -143,6 +146,21 @@ export default class TelaConfiguracao extends Component {
                         onPress={objMensagem.sincronizarMensagensComServidor} 
                         title="Buscar novas mensagens no servidor"
                         color="#0000ff"
+                    />
+                    <Button 
+                        onPress={this.exibirEstatisticas} 
+                        title="Atualizar contadores"
+                        color="#ff0000"
+                    />
+                    <Button 
+                        onPress={
+                            //o .then não está funcionando. this.exibirEstatisticas nao espera o outro método acabar para ser executado
+                            () => {objMensagem.sincronizarMensagensComServidor().then( () => {this.exibirEstatisticas()} )
+                                    
+                            } 
+                        } 
+                        title="Fazer os dois"
+                        color="#ff00ff"
                     />
 
                 </View>

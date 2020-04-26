@@ -27,7 +27,8 @@ export default class Mensagem {
         let listaMensagensExibir = await this.lerMensagensExibir();
         
         if(!listaMensagensExibir || (listaMensagensExibir instanceof Array && listaMensagensExibir.length <= 0)) { 
-            objMensagem.listar(this.tratarBuscarMensagens);
+            objMensagem.listar(this.tratarBuscarMensagens);//como isso está funcionando? objMensagem não está definido..
+            //nao deveria ser this.listar(this.tratarBuscarMensagens) ?
         }
     }
 
@@ -78,7 +79,6 @@ export default class Mensagem {
         let msg = '';
         let listaMensagensExibir = await this.lerMensagensExibir();
 
-        // Este if ainda nao esta pronto. Comecamos a mexer em 03/10.
         if (listaMensagensExibir instanceof Array && listaMensagensExibir.length > 0){
             let indiceMensagem = 0;
 
