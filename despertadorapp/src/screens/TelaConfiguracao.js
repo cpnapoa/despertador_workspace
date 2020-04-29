@@ -9,6 +9,7 @@ import {
     Alert
 } from 'react-native';
 import Util from '../common/Util';
+import Slider from '@react-native-community/slider';
 
     var PushNotification = require("react-native-push-notification");
 
@@ -134,6 +135,47 @@ export default class TelaConfiguracao extends Component {
                     <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
                         <TextInput placeholder="Hora final" size={10} value={estado.h2} onChangeText={(valor) => { estado.h2 = valor;this.setState(estado);}}></TextInput>
                         <TextInput placeholder="Min. final" size={10} value={estado.m2} onChangeText={(valor) => { estado.m2 = valor;this.setState(estado);}}></TextInput>
+                    </View>
+                {/*implementando a seleção das horas com sliders*/}
+                    <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                        <Slider
+                            style={{width: '50%', height: 40}}
+                            title='Hora inicial'
+                            minimumValue={1}
+                            maximumValue={24}
+                            step={1}
+                            
+                            onSlidingComplete={(valor) => { estado.h1 = valor.toString(); this.setState(estado);}}
+                        />                       
+                        <Slider
+                            style={{width: '50%', height: 40}}
+                            title='Minuto inicial'
+                            minimumValue={1}
+                            maximumValue={60}
+                            step={1}
+                            
+                            onSlidingComplete={(valor) => { estado.m1 = valor.toString(); this.setState(estado);}}
+                        />
+                    </View>
+                    <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                         <Slider
+                            style={{width: '50%', height: 40}}
+                            title='Hora final'
+                            minimumValue={1}
+                            maximumValue={24}
+                            step={1}
+                            
+                            onSlidingComplete={(valor) => { estado.h2 = valor.toString();this.setState(estado);}}
+                        />                       
+                        <Slider
+                            style={{width: '50%', height: 40}}
+                            title='Minuto final'
+                            minimumValue={1}
+                            maximumValue={60}
+                            step={1}
+                            
+                            onSlidingComplete={(valor) => { estado.m2 = valor.toString();this.setState(estado);}}
+                        />
                     </View>
                     
                     <Text>Hora aletoria entre {this.state.dh1} e {this.state.dh2} => {this.state.horaNotificacao}</Text>

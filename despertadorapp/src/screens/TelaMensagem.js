@@ -57,9 +57,11 @@ export default class TelaMensagem extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         let { navigation } = this.props;
     
+        //acho que isso deveria mostrar uma mensagem quando voltamos da tela de config para a telaMensagem mas parece nao estar funcionando
         if(navigation && navigation.getParam('exibirMensagem') === 'S') {    
             navigation.setParams({ 'exibirMensagem': 'N' });
             this.exibirProximaMensagem();
+            this.contaMsg(); //adicionei esse método para ser executado quando voltamos para a tela de mensagens
         }
     }
 

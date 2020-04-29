@@ -33,7 +33,6 @@
 		E3AA09FC3C2A49B8AD2E6A9A /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A19808F674F74E62A1EEF7E3 /* SimpleLineIcons.ttf */; };
 		2395E0F1683446EB8FFB6A89 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 68A616D869E44F309BFA1EB9 /* Zocial.ttf */; };
 		F63D3D66B7C743908C7061EE /* ErisblueScript.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 40F0E95C96C24E0BAE7624C0 /* ErisblueScript.ttf */; };
-		
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
