@@ -14,7 +14,10 @@ export default class TelaMensagem extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {textoMensagem: '', textoBotao: <Text></Text>, botao: <Icon></Icon>, msgNum: ''};     
+        this.state = {textoMensagem: '', 
+            textoBotao: <Text>P</Text>,
+            botao: <Icon></Icon>,
+            msgNum: '1'}; //deixei o msgNum como 1 para que os botões sejam renderizados logo que o app é aberto    
 
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
         this.obterProximaMensagem = this.obterProximaMensagem.bind(this);
@@ -28,8 +31,12 @@ export default class TelaMensagem extends Component {
 
         //funcMaster é uma função teste que criei para fazer as outras funções async serem executadas em ordem (usando await)
         this.funcMaster = this.funcMaster.bind(this);
+    }
+
+    componentDidMount() {
         this.funcMaster();
     }
+
 
     async funcMaster () {
         //não sei porque o await no objMensagem.sincronizarMensagensComServidor não está funcionando.
