@@ -3,6 +3,7 @@ import Mensagem from './Mensagem';
 import {
     StyleSheet,
     View,
+    ScrollView,
     Button,
     Text,
     TextInput,
@@ -11,7 +12,6 @@ import {
 import Util from '../common/Util';
 import Slider from '@react-native-community/slider';
 import MasterSlider from '../common/MasterSlider';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
 
 var PushNotification = require("react-native-push-notification");
 
@@ -63,7 +63,13 @@ export default class TelaConfiguracao extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { h1: '', m1: '', h2: '', m2: '', qtdMensagensExibir: 0, qtdMensagensExibidas: 0, varTeste: [0, 0], varTeste2: 0 };
+        this.state = {
+            h1: '', m1: '', h2: '', m2: '',
+            qtdMensagensExibir: 0, qtdMensagensExibidas: 0,
+            scrollEnabled: true,
+            varTeste: [0, 0], varTeste2: ['', ''],
+            horaGeral: [0, 0, 0, 0]
+        };
         this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
         this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
         this.agendarNotificacao = this.agendarNotificacao.bind(this);
@@ -72,10 +78,11 @@ export default class TelaConfiguracao extends Component {
         objUtil = new Util();
 
         configurarNotificacao(this.props.navigation);
+        this.exibirEstatisticas();
     }
 
     componentDidMount() {
-        this.exibirEstatisticas();
+
     }
 
     async exibirEstatisticas() {
@@ -126,6 +133,20 @@ export default class TelaConfiguracao extends Component {
         });
     }
 
+    //esses métodos servem para fixar o scrollview enquanto selecionamos um valor no slider
+    enableScroll = () => this.setState({ scrollEnabled: true });
+    disableScroll = () => this.setState({ scrollEnabled: false });
+
+    setHoraGeral() {
+        let estado = this.state;
+
+        estado.h1 = estado.horaGeral[0]+'';
+        estado.m1 = estado.horaGeral[1]+'';
+        estado.h2 = estado.horaGeral[2]+'';
+        estado.m2 = estado.horaGeral[3]+'';
+
+        this.setState(estado);
+    }
 
     render() {
         let estado = this.state;
@@ -133,7 +154,7 @@ export default class TelaConfiguracao extends Component {
         return (
             <View style={styles.areaTotal}>
                 <View style={styles.areaConfiguracao}>
-                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={styles.areaHorasOld}>
                         <Text>Hora inicial</Text>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                             <Slider
@@ -157,7 +178,7 @@ export default class TelaConfiguracao extends Component {
                         </View>
 
                         <Text>Hora final: </Text>
-                        <View style={{ marginTop: 15, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                             <Slider
                                 style={{ width: '35%', height: 20 }}
                                 minimumValue={1}
@@ -182,43 +203,56 @@ export default class TelaConfiguracao extends Component {
                         <Button title='Testar hora aleatória' onPress={this.agendarNotificacao} ></Button>
                     </View>
 
-                    <Text>Mensagens exibidas: {this.state.qtdMensagensExibidas}</Text>
-                    <Text>Mensagens a exibir: {this.state.qtdMensagensExibir}</Text>
+                    <View style={{ padding: 5 }}>
+                        <Text>Mensagens exibidas: {this.state.qtdMensagensExibidas}</Text>
+                        <Text>Mensagens a exibir: {this.state.qtdMensagensExibir}</Text>
+                    </View>
 
-                    <Button
-                        onPress={objMensagem.sincronizarMensagensComServidor}
-                        title="Buscar novas mensagens no servidor"
-                        color="#0000ff"
-                    />
-                    <Button
-                        onPress={this.exibirEstatisticas}
-                        title="Atualizar contadores"
-                        color="#ff0000"
-                    />
-                    <Button
-                        onPress={
-                            //o .then não está funcionando. this.exibirEstatisticas nao espera o outro método acabar para ser executado
-                            () => {
-                                objMensagem.sincronizarMensagensComServidor().then(() => { this.exibirEstatisticas() })
-
+                    <View style={{ padding: 5 }}>
+                        <Button
+                            onPress={objMensagem.sincronizarMensagensComServidor}
+                            title="Buscar novas mensagens no servidor"
+                            color="#0000ff"
+                        />
+                        <Button
+                            onPress={this.exibirEstatisticas}
+                            title="Atualizar contadores"
+                            color="#ff0000"
+                        />
+                        <Button
+                            onPress={
+                                //o .then não está funcionando. this.exibirEstatisticas nao espera o outro método acabar para ser executado
+                                () => {
+                                    objMensagem.sincronizarMensagensComServidor().then(() => { this.exibirEstatisticas() })
+                                }
                             }
-                        }
-                        title="Fazer os dois"
-                        color="#ff00ff"
-                    />
+                            title="Fazer os dois"
+                            color="#ff00ff"
+                        />
+
+                    </View>
                 </View>
 
-                <View>
-                    <MasterSlider
-                        title='componente MasterSilder!'
-                        titlePosition='top'
-                        height={100}
-                        step={1}
-                        initialValues={[500, 1000]} //poderia inicializar o slider com o horário atual
-                        minimumValue={0}
-                        maximumValue={1440}
+                <Text>horaGeral[0,1]:{estado.horaGeral[0]}:{estado.horaGeral[1]} | horaGeral[2,3]:{estado.horaGeral[2]}:{estado.horaGeral[3]}</Text>
 
-                    ></MasterSlider>
+                <View style={styles.areaHoras} >
+                    <ScrollView scrollEnabled={this.state.scrollEnabled}>
+
+                        <MasterSlider
+                            title='componente MasterSilder!'
+                            titlePosition='top'
+                            height={100}
+                            step={1}
+                            initialValues={[500, 1000]} //poderia inicializar o slider com o horário atual
+                            minimumValue={0}
+                            maximumValue={1440}
+                            disableScroll={this.disableScroll}
+                            enableScroll={this.enableScroll}
+
+                            onTimeChange={(valor) => { estado.varTeste2 = valor; estado.horaGeral = valor; this.setState(estado); this.setHoraGeral(); }}
+                        ></MasterSlider>
+
+                    </ScrollView>
                 </View>
             </View>
         );
@@ -234,8 +268,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5'
     },
     areaConfiguracao: {
-        flex: 10,
-        alignSelf: 'stretch'
+        flexGrow: 1,
+        alignSelf: 'stretch',
+        padding: 5
     },
     areaMenu: {
         flex: 1,
@@ -244,7 +279,21 @@ const styles = StyleSheet.create({
         backgroundColor: '#5FC594',
         width: '100%'
     },
+    areaHorasOld: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 5
+    },
+    areaEstatisticas: {
+
+    },
     areaBotao: {
-        flex: 1
+
+    },
+    areaHoras: {
+        flexShrink: 1,
+        width: '100%',
+        padding: 5,
+        backgroundColor: 'black'
     }
 });

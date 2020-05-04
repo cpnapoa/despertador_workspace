@@ -15,15 +15,17 @@ import MultiSlider from '@ptomasroos/react-native-multi-slider';
 export default class MasterSlider extends Component {
 
     static defaultProps = {
+        titePosition: 'top',
         minimumValue: 0,
-        maximumValue: 100,
-        initialValues: [20, 80],
+        maximumValue: 1440,
+        step: 1,
+        initialValues: [500, 1000],
     }
 
     constructor(props) {
         super(props);
 
-        this.state = { valorSlider: [this.props.initialValues[0], this.props.initialValues[1]], valorHoras: [''] };
+        this.state = { valorSlider: [this.props.initialValues[0], this.props.initialValues[1]], valorHoras: [''], valorHoraGeral: [0,0,0,0] };
 
         this.calculaHoras = this.calculaHoras.bind(this);
         
@@ -71,7 +73,7 @@ export default class MasterSlider extends Component {
         }
     }
 
-
+    //trasnforma os minutos do contador do slider em horas:minutos para mostrar ao usuário
     calculaHoras() {
         let estado = this.state
         let horas = 0;
@@ -83,16 +85,21 @@ export default class MasterSlider extends Component {
                 horas = horas + 1;
             }
             estado.valorHoras[i] = horas + 'h' + minutos + 'min';
+            estado.valorHoraGeral[i*2] = horas;
+            estado.valorHoraGeral[i*2+1] = minutos;
             this.setState(estado);
+            
         }
+        this.props.onTimeChange(estado.valorHoraGeral)
     }
+
 
     render() {
 
 
         return (
 
-            <View style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: 'yellow' }}>
+            <View style={{ alignItems: 'center', justifyContent: 'center', margin: 5, backgroundColor: 'yellow' }}>
 
                 {this.titleTop()}
 
@@ -101,7 +108,7 @@ export default class MasterSlider extends Component {
 
                     <MultiSlider
 
-                        sliderLength= {270}
+                        sliderLength= {300}
                         values={[this.props.initialValues[0], this.props.initialValues[1]]}
                         isMarkersSeparated={true}
                         enabledOne={true}
@@ -109,23 +116,23 @@ export default class MasterSlider extends Component {
                         min={this.props.minimumValue}
                         max={this.props.maximumValue}
                         step={this.props.step}
+                        onValuesChangeStart={this.props.disableScroll}
+                        onValuesChangeFinish={this.props.enableScroll}
                         onValuesChange={
                             (valor) => { this.state.valorSlider = valor; this.calculaHoras() }
                         }
-                    ></MultiSlider>
+
+                    />
 
                     {this.numRight()}
                 </View>
                 <Text style={{ marginTop: 5, backgroundColor: 'pink' }}>
                     valorSlider[0]: {this.state.valorSlider[0]} | valorSlider[1]: {this.state.valorSlider[1]}</Text>
                 <Text style={{ margin: 5, backgroundColor: 'pink' }}>
-                    valorHoras[0]: {this.state.valorHoras[0]} | valorHoras[1]: {this.state.valorHoras[1]}</Text>
+                    valorHors[0]: {this.state.valorHoras[0]}| valorHoras[1]: {this.state.valorHoras[1]}</Text>
                 {this.titleBot()}
 
             </View>
-
-
-
 
         )
     }
