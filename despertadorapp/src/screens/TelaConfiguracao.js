@@ -10,7 +10,6 @@ import {
     Alert
 } from 'react-native';
 import Util from '../common/Util';
-import Slider from '@react-native-community/slider';
 import MasterSlider from '../common/MasterSlider';
 
 var PushNotification = require("react-native-push-notification");
@@ -140,10 +139,10 @@ export default class TelaConfiguracao extends Component {
     setHoraGeral() {
         let estado = this.state;
 
-        estado.h1 = estado.horaGeral[0]+'';
-        estado.m1 = estado.horaGeral[1]+'';
-        estado.h2 = estado.horaGeral[2]+'';
-        estado.m2 = estado.horaGeral[3]+'';
+        estado.h1 = estado.horaGeral[0].toString();
+        estado.m1 = estado.horaGeral[1].toString();
+        estado.h2 = estado.horaGeral[2].toString();
+        estado.m2 = estado.horaGeral[3].toString();
 
         this.setState(estado);
     }
@@ -154,71 +153,92 @@ export default class TelaConfiguracao extends Component {
         return (
             <View style={styles.areaTotal}>
                 <View style={styles.areaConfiguracao}>
-                    <View style={styles.areaHorasOld}>
-                        <Text>Hora inicial</Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={24}
-                                step={1}
-                                onValueChange={(valor) => { estado.h1 = valor.toString(); this.setState(estado); }}
-                            />
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={estado.h1} onChangeText={(valor) => { estado.h1 = valor; this.setState(estado); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={estado.m1} onChangeText={(valor) => { estado.m1 = valor; this.setState(estado); }}></TextInput>
-                            <Text>min</Text>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={60}
-                                step={1}
-                                onValueChange={(valor) => { estado.m1 = valor.toString(); this.setState(estado); }}
-                            />
+
+                    {/*VIEW COM OS INTERVALOS*/}
+                    <View style={{ borderBottomWidth: 2 }}>
+
+                        <Text style={styles.titulos}>Intervalos de exibição</Text>
+
+                        <View style={styles.areaHoras} >
+                            <ScrollView scrollEnabled={this.state.scrollEnabled} style={{ maxHeight: 150 }}>
+                                <MasterSlider
+                                    title='Intervalo 1'
+                                    initialValues={[500, 1000]} //poderia inicializar o slider com o horário atual
+                                    disableScroll={this.disableScroll} //essa linha é necessaria para não scrollar enquanto seleciona
+                                    enableScroll={this.enableScroll} //essa linha é necessaria para não scrollar enquanto seleciona
+
+                                    onTimeChange={(valor) => { estado.varTeste2 = valor; estado.horaGeral = valor; this.setState(estado); this.setHoraGeral(); }}
+                                ></MasterSlider>
+                                <MasterSlider
+                                    title='Intervalo 2'
+                                    initialValues={[500, 1000]} //poderia inicializar o slider com o horário atual
+                                    disableScroll={this.disableScroll} //essa linha é necessaria para não scrollar enquanto seleciona
+                                    enableScroll={this.enableScroll} //essa linha é necessaria para não scrollar enquanto seleciona
+
+                                    onTimeChange={(valor) => { estado.varTeste2 = valor; estado.horaGeral = valor; this.setState(estado); this.setHoraGeral(); }}
+                                ></MasterSlider>
+                            </ScrollView>
                         </View>
 
-                        <Text>Hora final: </Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={24}
-                                step={1}
-                                onValueChange={(valor) => { estado.h2 = valor.toString(); this.setState(estado); }}
-                            />
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={estado.h2} onChangeText={(valor) => { estado.h2 = valor; this.setState(estado); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={estado.m2} onChangeText={(valor) => { estado.m2 = valor; this.setState(estado); }}></TextInput>
-                            <Text>min</Text>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={60}
-                                step={1}
-                                onValueChange={(valor) => { estado.m2 = valor.toString(); this.setState(estado); }}
-                            />
+                        <View style={styles.areaBotao}>
+                            <Button title='ADD' onPress={() => {
+                                Alert.alert('adiciona um novo slider para seleção de novo intervalo')
+                            }} />
+                            <Button title='Remove' onPress={() => {
+                                Alert.alert('habilita o delete de intervalos quando o usuário tocar em um deles')
+                            }} />
+                        </View>
+                    </View>
+
+
+                    {/*VIEW COM OS HORÁRIOS FIXOS*/}
+                    <View style={{ borderBottomWidth: 2, justifyContent: 'space-around' }}>
+                        <Text style={styles.titulos}> Horários Fixos</Text>
+
+                        <View style={styles.areaHoraFixa}>
+
+                            <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+
+                                <View style={styles.intervaloFixo}>
+
+                                    <Text>Horário: </Text>
+                                    <TextInput style={{ textAlign: 'right' }} placeholder="HH" size={10} value={estado.h1} onChangeText={(valor) => { estado.h1 = valor; this.setState(estado); }}></TextInput>
+                                    <Text>h </Text>
+                                    <TextInput style={{ textAlign: 'right' }} placeholder="mm" size={10} value={estado.m1} onChangeText={(valor) => { estado.m1 = valor; this.setState(estado); }}></TextInput>
+                                    <Text>min</Text>
+                                </View>
+
+                                <Button title='Adicionar' onPress={() => {
+                                    Alert.alert('adiciona um novo horário fixo na lista ao lado')
+                                }} />
+
+                            </View>
+
+                            <View style={styles.areaHoras, { maxHeight: 50 }}>
+                                <ScrollView>
+                                    <Text style={{}}>hora fixa 1 (botao remover)</Text>
+                                    <Text style={{}}>hora fixa 2 (botao remover)</Text>
+                                    <Text style={{}}>hora fixa 3 (botao remover)</Text>
+                                    <Text style={{}}>hora fixa 4 (botao remover)</Text>
+                                    <Text style={{}}> . . . </Text>
+                                </ScrollView>
+                            </View>
+
+
                         </View>
 
+                    </View>
+
+                    <View style={styles.areaHorasStats}>
                         <Text>Hora aletoria entre {this.state.dh1} e {this.state.dh2} => {this.state.horaNotificacao}</Text>
                         <Button title='Testar hora aleatória' onPress={this.agendarNotificacao} ></Button>
                     </View>
 
                     <View style={{ padding: 5 }}>
+                        <Text style={styles.titulos}>Estatísticas</Text>
                         <Text>Mensagens exibidas: {this.state.qtdMensagensExibidas}</Text>
                         <Text>Mensagens a exibir: {this.state.qtdMensagensExibir}</Text>
-                    </View>
 
-                    <View style={{ padding: 5 }}>
-                        <Button
-                            onPress={objMensagem.sincronizarMensagensComServidor}
-                            title="Buscar novas mensagens no servidor"
-                            color="#0000ff"
-                        />
-                        <Button
-                            onPress={this.exibirEstatisticas}
-                            title="Atualizar contadores"
-                            color="#ff0000"
-                        />
                         <Button
                             onPress={
                                 //o .then não está funcionando. this.exibirEstatisticas nao espera o outro método acabar para ser executado
@@ -226,34 +246,14 @@ export default class TelaConfiguracao extends Component {
                                     objMensagem.sincronizarMensagensComServidor().then(() => { this.exibirEstatisticas() })
                                 }
                             }
-                            title="Fazer os dois"
-                            color="#ff00ff"
+                            title="Buscar novas mensagens e atualizar contadores"
+                            color="blue"
                         />
-
                     </View>
                 </View>
 
-                <Text>horaGeral[0,1]:{estado.horaGeral[0]}:{estado.horaGeral[1]} | horaGeral[2,3]:{estado.horaGeral[2]}:{estado.horaGeral[3]}</Text>
 
-                <View style={styles.areaHoras} >
-                    <ScrollView scrollEnabled={this.state.scrollEnabled}>
 
-                        <MasterSlider
-                            title='componente MasterSilder!'
-                            titlePosition='top'
-                            height={100}
-                            step={1}
-                            initialValues={[500, 1000]} //poderia inicializar o slider com o horário atual
-                            minimumValue={0}
-                            maximumValue={1440}
-                            disableScroll={this.disableScroll}
-                            enableScroll={this.enableScroll}
-
-                            onTimeChange={(valor) => { estado.varTeste2 = valor; estado.horaGeral = valor; this.setState(estado); this.setHoraGeral(); }}
-                        ></MasterSlider>
-
-                    </ScrollView>
-                </View>
             </View>
         );
     }
@@ -262,38 +262,63 @@ export default class TelaConfiguracao extends Component {
 const styles = StyleSheet.create({
     areaTotal: {
         flex: 1,
+        maxHeight: '100%',
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: '#f5f5f5'
     },
+
     areaConfiguracao: {
         flexGrow: 1,
         alignSelf: 'stretch',
         padding: 5
     },
-    areaMenu: {
-        flex: 1,
-        flexDirection: 'column',
-        alignItems: 'stretch',
-        backgroundColor: '#5FC594',
-        width: '100%'
-    },
-    areaHorasOld: {
+
+    areaHoras: {
+        //flexShrink: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 5
+        width: '100%',
+        padding: 5,
+        //backgroundColor: 'blue'
     },
+
+    areaBotao: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        marginBottom: 10,
+    },
+
+    areaHoraFixa: {
+        flexDirection: 'row',
+    },
+
+    intervaloFixo: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 5,
+    },
+
+
+
     areaEstatisticas: {
 
     },
-    areaBotao: {
 
-    },
-    areaHoras: {
-        flexShrink: 1,
-        width: '100%',
+    areaHorasStats: {
+        borderBottomWidth: 3,
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: 5,
-        backgroundColor: 'black'
+    },
+
+    titulos: {
+        fontSize: 25,
+        alignSelf: 'center',
+        padding: 5,
     }
+
 });
