@@ -12,9 +12,10 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Image } from 'react-native-elements';
 import { ContextoApp } from '../contexts/ContextoApp';
+import Configuracao from './Configuracao';
 
 export default class TelaMensagem extends Component {
-
+    
     constructor(props, value) {
         super(props);
 
@@ -29,7 +30,7 @@ export default class TelaMensagem extends Component {
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_mensagem;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
-
+            
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
 
@@ -41,7 +42,9 @@ export default class TelaMensagem extends Component {
         this.contaMsg = this.contaMsg.bind(this);
         //funcMaster é uma função teste que criei para fazer as outras funções async serem executadas em ordem (usando await)
         this.funcMaster = this.funcMaster.bind(this);
+        this.configurarEventoMensagemFocoTela = this.configurarEventoMensagemFocoTela.bind(this);
         
+        this.configurarEventoMensagemFocoTela();
         this.oMensagem = new Mensagem();
         this.oMensagem.sincronizarMensagensComServidor();
     }
@@ -66,14 +69,16 @@ export default class TelaMensagem extends Component {
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        let { navigation } = this.props;
-    
-        //acho que isso deveria mostrar uma mensagem quando voltamos da tela de config para a telaMensagem mas parece nao estar funcionando
-        if(this.oDadosControleApp.exibir_mensagem) {
-            this.exibirProximaMensagem();
-            this.contaMsg(); //adicionei esse método para ser executado quando voltamos para a tela de mensagens
-        }
+    configurarEventoMensagemFocoTela() {
+        this.oNavegacao.addListener('focus', () => {
+            
+            if(this.oDadosControleApp.exibir_mensagem) {
+                this.oDadosControleApp.exibir_mensagem = false;
+
+                this.exibirProximaMensagem();
+                this.contaMsg(); //adicionei esse método para ser executado quando voltamos para a tela de mensagens
+            }
+        });
     }
 
     //função contaMsg é async para poder usar o await e calcluar o length só depois de ter pego o array com as mensagens

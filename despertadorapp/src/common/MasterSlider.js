@@ -10,8 +10,6 @@ import {
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 
 
-
-
 export default class MasterSlider extends Component {
 
     static defaultProps = {

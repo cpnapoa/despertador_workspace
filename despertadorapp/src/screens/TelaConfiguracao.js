@@ -16,52 +16,7 @@ import MasterSlider from '../common/MasterSlider';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
-import { DADOS_INTERVALO, HORA_MENSAGEM } from '../contexts/DadosAppGeral';
-
-var PushNotification = require("react-native-push-notification");
-
-function configurarNotificacao(navigation) {
-    PushNotification.configure({
-        // (optional) Called when Token is generated (iOS and Android)
-        onRegister: function (token) {
-            console.log("TOKEN:", token);
-        },
-
-        // (required) Called when a remote or local notification is opened or received
-        onNotification: async function (notificacao) {
-            console.log("NOTIFICATION:", notificacao);
-
-            // let mensagem = await this.oMensagem.exibirProximaMensagem();
-            this.oNavegacao.navigate('TelaMensagem', { 'exibirMensagem': 'S' });
-
-            // process the notification
-
-            // required on iOS only (see fetchCompletionHandler docs: https://github.com/react-native-community/react-native-push-notification-ios)
-            //notification.finish(PushNotificationIOS.FetchResult.NoData);
-        },
-
-        // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
-        // senderID: "456789",
-
-        // IOS ONLY (optional): default: all - Permissions to register.
-        permissions: {
-            alert: true,
-            badge: true,
-            sound: false
-        },
-
-        // Should the initial notification be popped automatically
-        // default: true
-        popInitialNotification: true,
-
-        /**
-         * (optional) default: true
-         * - Specified if permissions (ios) and token (android and ios) will requested or not,
-         * - if not, you must call PushNotificationsHandler.requestPermissions() later
-         */
-        requestPermissions: false
-    });
-}
+import { DADOS_INTERVALO } from '../contexts/DadosAppGeral';
 
 export default class TelaConfiguracao extends Component {
 
@@ -76,9 +31,6 @@ export default class TelaConfiguracao extends Component {
             // Atribui o gerenciador de contexto, recebido da raiz de contexto do aplicativo (ContextoApp).
             this.oGerenciadorContextoApp = value.gerenciador;
             
-            this.oRegistradorLog = this.oGerenciadorContextoApp.registradorLog;            
-            this.oRegistradorLog.registrar('TelaConfiguracao.constructor() => Iniciou.');
-
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao;
@@ -89,21 +41,16 @@ export default class TelaConfiguracao extends Component {
         }
         
         this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
-        // this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
-        this.agendarNotificacao = this.agendarNotificacao.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
+        this.salvarConfiguracoes = this.salvarConfiguracoes.bind(this);
         this.atribuirListaIntervalosNoDispositivo = this.atribuirListaIntervalosNoDispositivo.bind(this);
 
         this.oMensagem = new Mensagem();
         this.oUtil = new Util();
 
-        configurarNotificacao(this.props.navigation);
+        this.oConfiguracao.configurarNotificacao(this.oNavegacao, this.oDadosControleApp);
         this.atribuirListaIntervalosNoDispositivo();
         this.exibirEstatisticas();
-    }
-
-    componentDidMount() {
-
     }
 
     async atribuirListaIntervalosNoDispositivo() {
@@ -131,46 +78,6 @@ export default class TelaConfiguracao extends Component {
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
-    // gerarHoraAleatoria() {
-    //     let dh1 = new Date();
-    //     let dh2 = new Date();
-
-    //     dh1.setHours(parseInt(this.oDadosTela.h1), parseInt(this.oDadosTela.m1), 0, 0);
-    //     dh2.setHours(parseInt(this.oDadosTela.h2), parseInt(this.oDadosTela.m2), 59, 999);
-
-    //     let horaNotificacao = this.oUtil.obterDataHoraAleatoria(dh1, dh2);
-
-    //     this.oDadosTela.dh1 = dh1.toLocaleTimeString();
-    //     this.oDadosTela.dh2 = dh2.toLocaleTimeString();
-    //     this.oDadosTela.hora_notificacao = horaNotificacao.toLocaleTimeString();
-        
-    //     this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-
-    //     return horaNotificacao;
-    // }
-
-    agendarNotificacao() {
-        // let PushNotification = require("react-native-push-notification");
-        let oHoraInicial = clonarObjeto(HORA_MENSAGEM);
-        let oHoraFinal = clonarObjeto(HORA_MENSAGEM);
-        
-        oHoraInicial.hora = this.oDadosTela.h1;
-        oHoraInicial.minuto = this.oDadosTela.m1;
-        oHoraFinal.hora = this.oDadosTela.h2;
-        oHoraFinal.minuto = this.oDadosTela.m2;
-
-        let dataHora = this.oConfiguracao.gerarHoraAleatoria(oHoraInicial, oHoraFinal);
-        
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-
-        PushNotification.localNotificationSchedule({
-            //... You can use all the options from localNotifications
-            message: 'Desperte sua consciência...',
-            playSound: false,
-            date: dataHora
-        });
-    }
-
     adicionarIntervalo() {
         let oNovoIntervalo = clonarObjeto(DADOS_INTERVALO);
         
@@ -181,6 +88,11 @@ export default class TelaConfiguracao extends Component {
         oNovoIntervalo.qtd_mensagens = 1;
         
         this.oConfiguracao.adicionarIntervaloDiaSemana(1, oNovoIntervalo);
+    }
+
+    salvarConfiguracoes() {
+        this.oConfiguracao.salvarIntervalosNoDispositivo();
+        this.oNavegacao.goBack();
     }
 
     //esses métodos servem para fixar o scrollview enquanto selecionamos um valor no slider
@@ -203,8 +115,7 @@ export default class TelaConfiguracao extends Component {
             <View style={styles.areaTotal}>
                 <ImageBackground source={require('../images/parchment_back_edge.png')} style={styles.imgBG} resizeMode='stretch'>
                     <View style={{flex: 0.10, flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'flex-start'}} >
-                        <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={
-                        () => {this.oNavegacao.goBack()}} />
+                        <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={this.salvarConfiguracoes} />
                     </View>
                 
                     <View style={styles.areaConfiguracao}>
@@ -254,7 +165,7 @@ export default class TelaConfiguracao extends Component {
                             </View>
 
                             <Text>Hora aletoria entre {this.oDadosTela.dh1} e {this.oDadosTela.dh2} => {this.oDadosTela.hora_notificacao}</Text>
-                            <Button title='Testar hora aleatória' onPress={this.agendarNotificacao} ></Button>
+                            <Button title='Testar hora aleatória' onPress={this.oConfiguracao.agendarNotificacao} ></Button>
                             <Button title='Testar adicionar intervalo' onPress={this.adicionarIntervalo} ></Button>
                         </View>
 

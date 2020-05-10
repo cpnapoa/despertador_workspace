@@ -18,7 +18,6 @@ export default class GerenciadorContextoApp {
         this._clonarObjeto = this._clonarObjeto.bind(this);
         this._transportarLogServidor = this._transportarLogServidor.bind(this);
         
-
         AppState.addEventListener('change', this._transportarLogServidor);
     };
 
@@ -73,7 +72,7 @@ export default class GerenciadorContextoApp {
         let tentarPreencher = false;
         
         this.oRegistradorLog.limpar();
-        this.oRegistradorLog.registrar(`GerenciadorContextoApp.atribuirDados => Vai atribuir ${nomeAtributo}: ${JSON.stringify(oDadosAtribuir)}`);
+        // this.oRegistradorLog.registrar(`GerenciadorContextoApp.atribuirDados => Vai atribuir ${nomeAtributo}: ${JSON.stringify(oDadosAtribuir)}`);
         
         if(oDadosAtribuir) {
             if(oDadosAtribuir instanceof Array) {
