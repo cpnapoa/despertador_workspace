@@ -37,7 +37,8 @@ export default class Configuracao {
         this.obterHoraMaisRecenteDiaSemana = this.obterHoraMaisRecenteDiaSemana.bind(this);
         this.obterProximaHoraMensagemDiaSemana = this.obterProximaHoraMensagemDiaSemana.bind(this);
         this.calcularHorasExibicaoDiaSemana = this.calcularHorasExibicaoDiaSemana.bind(this);
-        //this. = this..bind(this);
+        this.validarIntervalo = this.validarIntervalo.bind(this);
+        this.compararHora = this.compararHora.bind(this);
     }
     
     // Implementar a seguir as funcoes para configurar o aplicativo.
@@ -93,27 +94,84 @@ export default class Configuracao {
     }
 
     adicionarIntervaloDiaSemana(diaSemana, oIntervaloDiaAdicionar) {
-        let oIntervaloDiaSemanaAtual;
+        let oIntervaloDiaAtual;
 
-        this.oDadosTelaConfiguracao.intervalos_dias_semana.forEach(oIntervaloDiaItem => {
+        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.intervalos_dias_semana;
+        let oIntervaloDiaItem;
+
+        for(let i = 0; i < oIntervalosDiasSemana.length; i++) {
+            oIntervaloDiaItem = oIntervalosDiasSemana[i];
+            
             // Procura o dia da semana.
             if(oIntervaloDiaItem.dia_semana === diaSemana) {
-                oIntervaloDiaSemanaAtual = oIntervaloDiaItem;
-                return;
+                oIntervaloDiaAtual = oIntervaloDiaItem;
+                break;
             }
-        });
+        }
 
-        if(oIntervaloDiaSemanaAtual) {
-            // TODO: Deve ser validado se nao tem intervalos concomitantes.
-            oIntervaloDiaSemanaAtual.intervalos.push(oIntervaloDiaAdicionar);
+        if(oIntervaloDiaAtual) {
+            if(this.validarIntervalo(diaSemana, oIntervaloDiaAdicionar)) {
+
+                oIntervaloDiaAtual.intervalos.push(oIntervaloDiaAdicionar);
+            }
         } else {
             // Cria o dia da semana e adiciona o primeiro intervalo ao dia.
-            oIntervaloDiaSemanaAtual = clonarObjeto(DADOS_DIA_SEMANA);
-            oIntervaloDiaSemanaAtual.dia_semana = diaSemana;
-            oIntervaloDiaSemanaAtual.intervalos.push(oIntervaloDiaAdicionar);
+            oIntervaloDiaAtual = clonarObjeto(DADOS_DIA_SEMANA);
+            oIntervaloDiaAtual.dia_semana = diaSemana;
+            oIntervaloDiaAtual.intervalos.push(oIntervaloDiaAdicionar);
 
-            this.oDadosTelaConfiguracao.intervalos_dias_semana.push(oIntervaloDiaSemanaAtual);
+            this.oDadosTelaConfiguracao.intervalos_dias_semana.push(oIntervaloDiaAtual);
+        }    
+    }
+
+    validarIntervalo(diaSemana, oIntervaloValidar) {
+        let dh1 = new Date();
+        let dh2 = new Date();
+
+        dh1.setHours(parseInt(oIntervaloValidar.hora_inicial.hora), parseInt(oIntervaloValidar.hora_inicial.minuto), 0, 0);
+        dh2.setHours(parseInt(oIntervaloValidar.hora_final.hora), parseInt(oIntervaloValidar.hora_final.minuto), 59, 999);
+
+        let hora_inicial_validar = dh1;
+        let hora_final_validar = dh2;
+
+        if(hora_inicial_validar >= hora_final_validar) {
+            Alert.alert('A hora inicial deve ser menor que a hora final do intervalo.');
+            return false;
         }
+        
+        // Valida se há intervalos concomitantes.
+        let oDiaSemana = this.obterDiaSemana(diaSemana);
+        let intervaloOk = true;
+
+        if(oDiaSemana) {
+            let oIntervalosDia = oDiaSemana.intervalos;
+
+            if(oIntervalosDia) {
+                
+                for(let i = 0; i < oIntervalosDia.length; i++) {
+                    oIntervaloDiaItem = oIntervalosDia[i];
+
+                    dh1 = new Date();
+                    dh2 = new Date();
+                                        
+                    dh1.setHours(parseInt(oIntervaloDiaItem.hora_inicial.hora), parseInt(oIntervaloDiaItem.hora_inicial.minuto), 0, 0);
+                    dh2.setHours(parseInt(oIntervaloDiaItem.hora_final.hora), parseInt(oIntervaloDiaItem.hora_final.minuto), 59, 999);
+                    
+                    let hora_inicial_item = dh1;
+                    let hora_final_item = dh2;
+
+                    if(!(hora_inicial_validar > hora_final_item && hora_final_validar > hora_final_item) &&
+                       !(hora_inicial_validar < hora_inicial_item && hora_final_validar < hora_inicial_item)) {
+                        
+                        Alert.alert('Despertador de Consciência', `A intervalo informado coincide com outro. \nInforme a hora inicial maior que ${hora_final_item.toLocaleTimeString()} ou a hora final menor que ${hora_inicial_item.toLocaleTimeString()}.`);
+                        intervaloOk = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return intervaloOk;
     }
 
     obterProximaHoraMensagemDiaSemana(diaSemana) {
@@ -143,6 +201,16 @@ export default class Configuracao {
         }
     }
 
+    compararHora(dh1, dh2) {
+        if(dh1 === dh2){
+            return 0;
+        } else if(dh1 > dh2) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
     calcularHorasExibicaoDiaSemana(diaSemana) {
         let oIntervaloDiaSemanaAtual = this.obterDiaSemana(diaSemana);
         let oHoraExibicaoAtual = this.obterHoraMaisRecenteDiaSemana(diaSemana);
@@ -158,31 +226,32 @@ export default class Configuracao {
 
     obterHoraMaisRecenteDiaSemana(diaSemana) {
         let oIntervaloDiaSemanaAtual = this.obterDiaSemana(diaSemana);
-        let oHoraExibicaoAtual;
         
-        oIntervaloDiaSemanaAtual.intervalos.forEach(oIntervaloItem => {
+        let oIntervalosDia = oIntervaloDiaSemanaAtual.intervalos
+        let oIntervaloItem;
+        for (let i = 0; i < oIntervalosDia.length; i++) {
+            
+            oIntervaloItem = oIntervalosDia[i];
             if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
                 // Retorna a primeira hora previamente calculada do array e remove a mesma.
-                oHoraExibicaoAtual = oIntervaloItem.horas_exibicao.shift();
-                return;
+                return oIntervaloItem.horas_exibicao.shift();
             }
-        });
-        
-        return oHoraExibicaoAtual;
+        }
     }
 
-    obterDiaSemana (diaSemana){
-        let oIntervaloDiaItemAtual;
+    obterDiaSemana (diaSemana) {
 
-        this.oDadosTelaConfiguracao.intervalos_dias_semana.forEach(oIntervaloDiaItem => {
+        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.intervalos_dias_semana;
+        let oDiaSemanaItem;
+
+        for (let i = 0; i < oIntervalosDiasSemana.length; i++) {
+            oDiaSemanaItem = oIntervalosDiasSemana[i];
+
             // Procura o dia da semana.
-            if(oIntervaloDiaItem.dia_semana === diaSemana) {
-                oIntervaloDiaItemAtual = oIntervaloDiaItem;
-                return;
+            if(oDiaSemanaItem.dia_semana === diaSemana) {
+                return oDiaSemanaItem;
             }
-        });
-
-        return oIntervaloDiaItemAtual;
+        }
     }
 
     gerarHoraAleatoria(hora_inicial, hora_final) {
