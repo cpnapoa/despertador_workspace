@@ -5,68 +5,72 @@ import {
     StyleSheet,
     View,
     Text,
-    ImageBackground
+    ImageBackground,
+    Alert,
+    TouchableOpacity
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { Image } from 'react-native-elements';
+import { ContextoApp } from '../contexts/ContextoApp';
 
 export default class TelaMensagem extends Component {
 
-    constructor(props) {
+    constructor(props, value) {
         super(props);
 
-        this.state = {textoMensagem: '', 
-            textoBotao: <Text>P</Text>,
-            botao: <Icon></Icon>,
-            msgNum: '1'}; //deixei o msgNum como 1 para que os botões sejam renderizados logo que o app é aberto    
+        if(props && props.navigation) {
+            this.oNavegacao = props.navigation;
+        }
+        
+        if(value && value.gerenciador) {
+            // Atribui o gerenciador de contexto, recebido da raiz de contexto do aplicativo (ContextoApp).
+            this.oGerenciadorContextoApp = value.gerenciador;
+            this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
+            this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
+            this.oDadosTela = this.oDadosApp.tela_mensagem;
+            this.oUtil = new Util(this.oGerenciadorContextoApp);
+
+            this.state = this.oGerenciadorContextoApp.dadosAppGeral;
+        }
+
+        this.oDadosTela.texto_botao = <Text>P</Text>;
+        this.oDadosTela.elemento_botao = <Icon></Icon>;
+        this.oDadosTela.msg_num = '1'; //deixei o msgNum como 1 para que os botões sejam renderizados logo que o app é aberto    
 
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
-        this.obterProximaMensagem = this.obterProximaMensagem.bind(this);
         this.contaMsg = this.contaMsg.bind(this);
-        
-
-        objMensagem = new Mensagem();
-        objUtil = new Util();
-
-        objMensagem.sincronizarMensagensComServidor();
-
         //funcMaster é uma função teste que criei para fazer as outras funções async serem executadas em ordem (usando await)
         this.funcMaster = this.funcMaster.bind(this);
+        
+        this.oMensagem = new Mensagem();
+        this.oMensagem.sincronizarMensagensComServidor();
     }
 
     componentDidMount() {
         this.funcMaster();
     }
 
-
     async funcMaster () {
-        //não sei porque o await no objMensagem.sincronizarMensagensComServidor não está funcionando.
+        //não sei porque o await no this.oMensagem.sincronizarMensagensComServidor não está funcionando.
         //as outras ações estão sendo executadas antes desse await acabar
-        //await objMensagem.sincronizarMensagensComServidor();
+        //await this.oMensagem.sincronizarMensagensComServidor();
       
         //esse await funciona. consigo fazer o contaMsg esperar o exibirProximaMensagem terminar para ser atualizado
         await this.exibirProximaMensagem();       
         this.contaMsg();
     }
 
-
-    async obterProximaMensagem() {
-        return await objMensagem.obterProximaMensagem();
-    }
-
     async exibirProximaMensagem() {
-        let estado = this.state;
-         
-        estado.textoMensagem = await objMensagem.obterProximaMensagem();
+        this.oDadosApp.mensagem.texto = await this.oMensagem.obterProximaMensagem();
         
-        this.setState(estado);
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         let { navigation } = this.props;
     
         //acho que isso deveria mostrar uma mensagem quando voltamos da tela de config para a telaMensagem mas parece nao estar funcionando
-        if(navigation && navigation.getParam('exibirMensagem') === 'S') {    
-            navigation.setParams({ 'exibirMensagem': 'N' });
+        if(this.oDadosControleApp.exibir_mensagem) {
             this.exibirProximaMensagem();
             this.contaMsg(); //adicionei esse método para ser executado quando voltamos para a tela de mensagens
         }
@@ -75,52 +79,56 @@ export default class TelaMensagem extends Component {
     //função contaMsg é async para poder usar o await e calcluar o length só depois de ter pego o array com as mensagens
     //FALTA CONSEGUIR FAZER A contaMsg SER EXECUTADA QUANDO TROCA DE TELA E QUANDO AS MENSAGENS SAO ATUALIZADAS DO SERVIDOR
     async contaMsg() {
-        let estado = this.state;
         let msgArray = [];
-        
-        msgArray = await objMensagem.lerMensagensExibir();
-        estado.msgNum = msgArray.length
+
+        msgArray = await this.oMensagem.lerMensagensExibir();
+        this.oDadosTela.msg_num = msgArray.length;
 
 
         //esse if define o que vai aparecer no texto do botão
-        if (estado.msgNum == 0){
-            estado.textoBotao = <Text>Buscar mensagens</Text>;
-            estado.botao = <Icon name="caret-right" size={50} color="#022C18" style={{margin: 10}}  onPress={
-                () => {objMensagem.sincronizarMensagensComServidor()}                            
+        if (this.oDadosTela.msg_num == 0){
+            this.oDadosTela.texto_botao = <Text>Buscar mensagens</Text>;
+            this.oDadosTela.elemento_botao = <Icon name="caret-right" size={50} color="#022C18" style={{margin: 10}}  onPress={
+                () => {this.oMensagem.sincronizarMensagensComServidor()}
              }/>;
         } else {
-            estado.textoBotao = <Text>Próxima mensagem</Text>;
-            estado.botao = <Icon name="caret-right" size={50} color="#022C18" style={{margin: 10}}  onPress={
+            this.oDadosTela.texto_botao = <Text>Próxima mensagem</Text>;
+            this.oDadosTela.elemento_botao = <Icon name="caret-right" size={50} color="#022C18" style={{margin: 10}}  onPress={
                 () => {this.exibirProximaMensagem().then( () => {this.contaMsg()})}                            
              }/>;
         }
 
-        this.setState(estado);
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
-
-        
     
     render() {
         
         return (
             
             <View style={styles.areaTotal}>
-                <ImageBackground source={require('../images/parchment_back.png')} style={styles.imgBG}>
-                    <View style={{flex: 1, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+                <ImageBackground source={require('../images/parchment_back.png')} style={styles.imgBG} resizeMode='stretch'>
+                    <View style={{flex: 0.15, flexDirection:'row', alignSelf:'stretch', justifyContent:'flex-end'}} >
+                        <TouchableOpacity onPress={() => this.oNavegacao.navigate('Configuracao')}>
+                            <Image source={require('../images/botao_cera.png')} resizeMode='stretch' style={{width:85, height:95, marginRight:40, justifyContent:'center'}} >
+                                <Icon name="cog" size={25} color="#4d0000" style={{margin: 23}}/>
+                            </Image>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{flex: 0.70, margin: 50, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
                         <Text style={styles.formataFrase}>
-                            {this.state.textoMensagem}
+                            {this.oDadosApp.mensagem.texto}
                         </Text>
                     </View>
-                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', height: 50, marginBottom: 15}}>
+                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
                       
-                        {this.state.textoBotao}
-                        {this.state.botao}
+                        {this.oDadosTela.texto_botao}
+                        {this.oDadosTela.elemento_botao}
                         
                         {/*
                         esse render de Text e Icon abaixo é somente para monitorar o que esta acontecendo no msgNum
                         o botão azul serve para atualizar o msgNum para que o render do botão de mensagens funcione corretamente
                         */}
-                        <Text> Msgnum é: {this.state.msgNum}</Text>
+                        <Text> Msgnum é: {this.oDadosTela.msg_num}</Text>
                         <Icon name="caret-right" size={50} color="blue" onPress={this.contaMsg} style={{margin: 10}}/>
                     </View>                    
                 </ImageBackground>
@@ -129,36 +137,26 @@ export default class TelaMensagem extends Component {
     }
 }
 
-
-TelaMensagem.navigationOptions = ({navigation}) => {
-    return {
-        headerTitle: 'Mensagem',        
-        headerRight: () => <Icon name="bars" size={30} color="#022C18" onPress={() => navigation.navigate('TelaConfiguracao')} />,
-    }
-};
+TelaMensagem.contextType = ContextoApp;
 
 const styles = StyleSheet.create({
     
     areaTotal: {
         flex: 1,
-        flexDirection:'row',
-        alignItems:'center',
+        flexDirection:'column',
+        alignItems:'stretch',
         justifyContent:'center',
+        backgroundColor: '#F9F8E7'
     },
 
     imgBG: {
         flex: 1,
-        height: '100%',
-        width: '100%',
-        flexDirection:'column',
         alignItems:'center',
-        justifyContent:'flex-end'
+        justifyContent:'space-between'
     },
 
     formataFrase: {
         fontSize: 50,
-        width: '80%',
-        marginTop: 60,
         textAlign: 'center',
         fontFamily: 'ErisblueScript'
     }

@@ -5,13 +5,18 @@ import {
     View,
     ScrollView,
     Button,
+    ImageBackground,
     Text,
     TextInput,
-    Alert
+    Alert,
 } from 'react-native';
-import Util from '../common/Util';
+import Util, { clonarObjeto } from '../common/Util';
 import Slider from '@react-native-community/slider';
 import MasterSlider from '../common/MasterSlider';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { ContextoApp } from '../contexts/ContextoApp';
+import Configuracao from './Configuracao';
+import { DADOS_INTERVALO, HORA_MENSAGEM } from '../contexts/DadosAppGeral';
 
 var PushNotification = require("react-native-push-notification");
 
@@ -26,8 +31,8 @@ function configurarNotificacao(navigation) {
         onNotification: async function (notificacao) {
             console.log("NOTIFICATION:", notificacao);
 
-            // let mensagem = await objMensagem.exibirProximaMensagem();
-            navigation.navigate('TelaMensagem', { 'exibirMensagem': 'S' });
+            // let mensagem = await this.oMensagem.exibirProximaMensagem();
+            this.oNavegacao.navigate('TelaMensagem', { 'exibirMensagem': 'S' });
 
             // process the notification
 
@@ -54,30 +59,46 @@ function configurarNotificacao(navigation) {
          * - Specified if permissions (ios) and token (android and ios) will requested or not,
          * - if not, you must call PushNotificationsHandler.requestPermissions() later
          */
-        requestPermissions: true
+        requestPermissions: false
     });
 }
 
-
 export default class TelaConfiguracao extends Component {
 
-    constructor(props) {
+    constructor(props, value) {
         super(props);
-        this.state = {
-            h1: '', m1: '', h2: '', m2: '',
-            qtdMensagensExibir: 0, qtdMensagensExibidas: 0,
-            scrollEnabled: true,
-            varTeste: [0, 0], varTeste2: ['', ''],
-            horaGeral: [0, 0, 0, 0]
-        };
-        this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
-        this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
-        this.agendarNotificacao = this.agendarNotificacao.bind(this);
 
-        objMensagem = new Mensagem();
-        objUtil = new Util();
+        if(props && props.navigation) {
+            this.oNavegacao = props.navigation;
+        }
+        
+        if(value && value.gerenciador) {
+            // Atribui o gerenciador de contexto, recebido da raiz de contexto do aplicativo (ContextoApp).
+            this.oGerenciadorContextoApp = value.gerenciador;
+            
+            this.oRegistradorLog = this.oGerenciadorContextoApp.registradorLog;            
+            this.oRegistradorLog.registrar('TelaConfiguracao.constructor() => Iniciou.');
+
+            this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
+            this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
+            this.oDadosTela = this.oDadosApp.tela_configuracao;
+            this.oUtil = new Util(this.oGerenciadorContextoApp);
+            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
+            
+            this.state = this.oGerenciadorContextoApp.dadosAppGeral;
+        }
+        
+        this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
+        // this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
+        this.agendarNotificacao = this.agendarNotificacao.bind(this);
+        this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
+        this.atribuirListaIntervalosNoDispositivo = this.atribuirListaIntervalosNoDispositivo.bind(this);
+
+        this.oMensagem = new Mensagem();
+        this.oUtil = new Util();
 
         configurarNotificacao(this.props.navigation);
+        this.atribuirListaIntervalosNoDispositivo();
         this.exibirEstatisticas();
     }
 
@@ -85,45 +106,62 @@ export default class TelaConfiguracao extends Component {
 
     }
 
+    async atribuirListaIntervalosNoDispositivo() {
+        let oListaIntervalos = await this.oConfiguracao.obterListaIntervalosNoDispositivo();
+        
+        if(oListaIntervalos) {
+            this.oDadosTela.intervalos_dias_semana = oListaIntervalos;
+        }
+    }
     async exibirEstatisticas() {
-        let estado = this.state;
+        
         let mensagensExibir = [];
         let mensagensExibidas = [];
 
-        mensagensExibir = await objMensagem.lerMensagensExibir();
-        mensagensExibidas = await objMensagem.lerMensagensExibidas();
+        mensagensExibir = await this.oMensagem.lerMensagensExibir();
+        mensagensExibidas = await this.oMensagem.lerMensagensExibidas();
 
         if (mensagensExibir instanceof Array) {
-            estado.qtdMensagensExibir = mensagensExibir.length;
+            this.oDadosTela.qtd_mensagens_exibir = mensagensExibir.length;
         }
         if (mensagensExibidas instanceof Array) {
-            estado.qtdMensagensExibidas = mensagensExibidas.length;
+            this.oDadosTela.qtd_mensagens_exibidas = mensagensExibidas.length;
         }
 
-        this.setState(estado);
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
-    gerarHoraAleatoria() {
-        let estado = this.state;
-        let dh1 = new Date();
-        let dh2 = new Date();
+    // gerarHoraAleatoria() {
+    //     let dh1 = new Date();
+    //     let dh2 = new Date();
 
-        dh1.setHours(parseInt(estado.h1), parseInt(estado.m1), 0, 0);
-        dh2.setHours(parseInt(estado.h2), parseInt(estado.m2), 59, 999);
+    //     dh1.setHours(parseInt(this.oDadosTela.h1), parseInt(this.oDadosTela.m1), 0, 0);
+    //     dh2.setHours(parseInt(this.oDadosTela.h2), parseInt(this.oDadosTela.m2), 59, 999);
 
-        let horaNotificacao = objUtil.obterDataHoraAleatoria(dh1, dh2);
+    //     let horaNotificacao = this.oUtil.obterDataHoraAleatoria(dh1, dh2);
 
-        estado.dh1 = dh1.toLocaleTimeString();
-        estado.dh2 = dh2.toLocaleTimeString();
-        estado.horaNotificacao = horaNotificacao.toLocaleTimeString();
-        this.setState(estado);
+    //     this.oDadosTela.dh1 = dh1.toLocaleTimeString();
+    //     this.oDadosTela.dh2 = dh2.toLocaleTimeString();
+    //     this.oDadosTela.hora_notificacao = horaNotificacao.toLocaleTimeString();
+        
+    //     this.oGerenciadorContextoApp.atualizarEstadoTela(this);
 
-        return horaNotificacao;
-    }
+    //     return horaNotificacao;
+    // }
 
     agendarNotificacao() {
         // let PushNotification = require("react-native-push-notification");
-        let dataHora = this.gerarHoraAleatoria();
+        let oHoraInicial = clonarObjeto(HORA_MENSAGEM);
+        let oHoraFinal = clonarObjeto(HORA_MENSAGEM);
+        
+        oHoraInicial.hora = this.oDadosTela.h1;
+        oHoraInicial.minuto = this.oDadosTela.m1;
+        oHoraFinal.hora = this.oDadosTela.h2;
+        oHoraFinal.minuto = this.oDadosTela.m2;
+
+        let dataHora = this.oConfiguracao.gerarHoraAleatoria(oHoraInicial, oHoraFinal);
+        
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
 
         PushNotification.localNotificationSchedule({
             //... You can use all the options from localNotifications
@@ -133,151 +171,169 @@ export default class TelaConfiguracao extends Component {
         });
     }
 
+    adicionarIntervalo() {
+        let oNovoIntervalo = clonarObjeto(DADOS_INTERVALO);
+        
+        oNovoIntervalo.hora_inicial.hora = this.oDadosTela.h1;
+        oNovoIntervalo.hora_inicial.minuto = this.oDadosTela.m1;
+        oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
+        oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
+        oNovoIntervalo.qtd_mensagens = 1;
+        
+        this.oConfiguracao.adicionarIntervaloDiaSemana(1, oNovoIntervalo);
+    }
+
     //esses métodos servem para fixar o scrollview enquanto selecionamos um valor no slider
-    enableScroll = () => this.setState({ scrollEnabled: true });
-    disableScroll = () => this.setState({ scrollEnabled: false });
+    enableScroll = () => {this.oDadosTela.scroll_enabled = true;this.oGerenciadorContextoApp.atualizarEstadoTela(this);};
+    disableScroll = () => {this.oDadosTela.scroll_enabled = false;this.oGerenciadorContextoApp.atualizarEstadoTela(this);};
 
     setHoraGeral() {
-        let estado = this.state;
 
-        estado.h1 = estado.horaGeral[0]+'';
-        estado.m1 = estado.horaGeral[1]+'';
-        estado.h2 = estado.horaGeral[2]+'';
-        estado.m2 = estado.horaGeral[3]+'';
+        this.oDadosTela.h1 = this.oDadosTela.hora_geral[0]+'';
+        this.oDadosTela.m1 = this.oDadosTela.hora_geral[1]+'';
+        this.oDadosTela.h2 = this.oDadosTela.hora_geral[2]+'';
+        this.oDadosTela.m2 = this.oDadosTela.hora_geral[3]+'';
 
-        this.setState(estado);
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
     render() {
-        let estado = this.state;
 
         return (
             <View style={styles.areaTotal}>
-                <View style={styles.areaConfiguracao}>
-                    <View style={styles.areaHorasOld}>
-                        <Text>Hora inicial</Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={24}
-                                step={1}
-                                onValueChange={(valor) => { estado.h1 = valor.toString(); this.setState(estado); }}
-                            />
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={estado.h1} onChangeText={(valor) => { estado.h1 = valor; this.setState(estado); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={estado.m1} onChangeText={(valor) => { estado.m1 = valor; this.setState(estado); }}></TextInput>
-                            <Text>min</Text>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={60}
-                                step={1}
-                                onValueChange={(valor) => { estado.m1 = valor.toString(); this.setState(estado); }}
-                            />
+                <ImageBackground source={require('../images/parchment_back_edge.png')} style={styles.imgBG} resizeMode='stretch'>
+                    <View style={{flex: 0.10, flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'flex-start'}} >
+                        <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={
+                        () => {this.oNavegacao.goBack()}} />
+                    </View>
+                
+                    <View style={styles.areaConfiguracao}>
+                        <View style={styles.areaHorasOld}>
+                            <Text>Hora inicial</Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                <Slider
+                                    style={{ width: '35%', height: 20 }}
+                                    minimumValue={1}
+                                    maximumValue={24}
+                                    step={1}
+                                    onValueChange={(valor) => { this.oDadosTela.h1 = valor.toString(); this.oGerenciadorContextoApp.atualizarEstadoTela(this);; }}
+                                />
+                                <TextInput textAlign='right' placeholder="HH" size={10} value={this.oDadosTela.h1} onChangeText={(valor) => { this.oDadosTela.h1 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
+                                <Text>h </Text>
+                                <TextInput textAlign='right' placeholder="mm" size={10} value={this.oDadosTela.m1} onChangeText={(valor) => { this.oDadosTela.m1 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
+                                <Text>min</Text>
+                                <Slider
+                                    style={{ width: '35%', height: 20 }}
+                                    minimumValue={1}
+                                    maximumValue={60}
+                                    step={1}
+                                    onValueChange={(valor) => { this.oDadosTela.m1 = valor.toString(); this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}
+                                />
+                            </View>
+
+                            <Text>Hora final: </Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                <Slider
+                                    style={{ width: '35%', height: 20 }}
+                                    minimumValue={1}
+                                    maximumValue={24}
+                                    step={1}
+                                    onValueChange={(valor) => { this.oDadosTela.h2 = valor.toString(); this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}
+                                />
+                                <TextInput textAlign='right' placeholder="HH" size={10} value={this.oDadosTela.h2} onChangeText={(valor) => { this.oDadosTela.h2 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
+                                <Text>h </Text>
+                                <TextInput textAlign='right' placeholder="mm" size={10} value={this.oDadosTela.m2} onChangeText={(valor) => { this.oDadosTela.m2 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
+                                <Text>min</Text>
+                                <Slider
+                                    style={{ width: '35%', height: 20 }}
+                                    minimumValue={1}
+                                    maximumValue={60}
+                                    step={1}
+                                    onValueChange={(valor) => { this.oDadosTela.m2 = valor.toString(); this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}
+                                />
+                            </View>
+
+                            <Text>Hora aletoria entre {this.oDadosTela.dh1} e {this.oDadosTela.dh2} => {this.oDadosTela.hora_notificacao}</Text>
+                            <Button title='Testar hora aleatória' onPress={this.agendarNotificacao} ></Button>
+                            <Button title='Testar adicionar intervalo' onPress={this.adicionarIntervalo} ></Button>
                         </View>
 
-                        <Text>Hora final: </Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={24}
-                                step={1}
-                                onValueChange={(valor) => { estado.h2 = valor.toString(); this.setState(estado); }}
-                            />
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={estado.h2} onChangeText={(valor) => { estado.h2 = valor; this.setState(estado); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={estado.m2} onChangeText={(valor) => { estado.m2 = valor; this.setState(estado); }}></TextInput>
-                            <Text>min</Text>
-                            <Slider
-                                style={{ width: '35%', height: 20 }}
-                                minimumValue={1}
-                                maximumValue={60}
-                                step={1}
-                                onValueChange={(valor) => { estado.m2 = valor.toString(); this.setState(estado); }}
-                            />
+                        <View style={{ padding: 5 }}>
+                            <Text>Mensagens exibidas: {this.oDadosTela.qtd_mensagens_exibidas}</Text>
+                            <Text>Mensagens a exibir: {this.oDadosTela.qtd_mensagens_exibir}</Text>
                         </View>
 
-                        <Text>Hora aletoria entre {this.state.dh1} e {this.state.dh2} => {this.state.horaNotificacao}</Text>
-                        <Button title='Testar hora aleatória' onPress={this.agendarNotificacao} ></Button>
-                    </View>
-
-                    <View style={{ padding: 5 }}>
-                        <Text>Mensagens exibidas: {this.state.qtdMensagensExibidas}</Text>
-                        <Text>Mensagens a exibir: {this.state.qtdMensagensExibir}</Text>
-                    </View>
-
-                    <View style={{ padding: 5 }}>
-                        <Button
-                            onPress={objMensagem.sincronizarMensagensComServidor}
-                            title="Buscar novas mensagens no servidor"
-                            color="#0000ff"
-                        />
-                        <Button
-                            onPress={this.exibirEstatisticas}
-                            title="Atualizar contadores"
-                            color="#ff0000"
-                        />
-                        <Button
-                            onPress={
-                                //o .then não está funcionando. this.exibirEstatisticas nao espera o outro método acabar para ser executado
-                                () => {
-                                    objMensagem.sincronizarMensagensComServidor().then(() => { this.exibirEstatisticas() })
+                        <View style={{ padding: 5 }}>
+                            <Button
+                                onPress={this.oMensagem.sincronizarMensagensComServidor}
+                                title="Buscar novas mensagens no servidor"
+                                color="#0000ff"
+                            />
+                            <Button
+                                onPress={this.exibirEstatisticas}
+                                title="Atualizar contadores"
+                                color="#ff0000"
+                            />
+                            <Button
+                                onPress={
+                                    //o .then não está funcionando. this.exibirEstatisticas nao espera o outro método acabar para ser executado
+                                    () => {
+                                        this.oMensagem.sincronizarMensagensComServidor().then(() => { this.exibirEstatisticas() })
+                                    }
                                 }
-                            }
-                            title="Fazer os dois"
-                            color="#ff00ff"
-                        />
+                                title="Fazer os dois"
+                                color="#ff00ff"
+                            />
 
+                        </View>
                     </View>
-                </View>
 
-                <Text>horaGeral[0,1]:{estado.horaGeral[0]}:{estado.horaGeral[1]} | horaGeral[2,3]:{estado.horaGeral[2]}:{estado.horaGeral[3]}</Text>
+                    <Text>horaGeral[0,1]:{this.oDadosTela.hora_geral[0]}:{this.oDadosTela.hora_geral[1]} | horaGeral[2,3]:{this.oDadosTela.hora_geral[2]}:{this.oDadosTela.hora_geral[3]}</Text>
 
-                <View style={styles.areaHoras} >
-                    <ScrollView scrollEnabled={this.state.scrollEnabled}>
+                    <View style={styles.areaHoras} >
+                        <ScrollView scrollEnabled={this.oDadosTela.scroll_enabled}>
 
-                        <MasterSlider
-                            title='componente MasterSilder!'
-                            titlePosition='top'
-                            height={100}
-                            step={1}
-                            initialValues={[500, 1000]} //poderia inicializar o slider com o horário atual
-                            minimumValue={0}
-                            maximumValue={1440}
-                            disableScroll={this.disableScroll}
-                            enableScroll={this.enableScroll}
+                            <MasterSlider
+                                title='componente MasterSilder!'
+                                titlePosition='top'
+                                height={100}
+                                step={1}
+                                initialValues={[500, 1000]} //poderia inicializar o slider com o horário atual
+                                minimumValue={0}
+                                maximumValue={1440}
+                                disableScroll={this.disableScroll}
+                                enableScroll={this.enableScroll}
 
-                            onTimeChange={(valor) => { estado.varTeste2 = valor; estado.horaGeral = valor; this.setState(estado); this.setHoraGeral(); }}
-                        ></MasterSlider>
+                                onTimeChange={(valor) => { this.oDadosTela.var_teste2 = valor; this.oDadosTela.hora_geral = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); this.setHoraGeral(); }}
+                            ></MasterSlider>
 
-                    </ScrollView>
-                </View>
+                        </ScrollView>
+                    </View>
+                </ImageBackground>
             </View>
         );
     }
 }
 
+TelaConfiguracao.contextType = ContextoApp;
+
 const styles = StyleSheet.create({
     areaTotal: {
         flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5'
+        flexDirection:'column',
+        alignItems:'stretch',
+        justifyContent:'center',
+        backgroundColor: '#F9F8E7'
+    },
+    imgBG: {
+        flex: 1,
+        alignItems:'center',
+        justifyContent:'space-between'
     },
     areaConfiguracao: {
-        flexGrow: 1,
+        flex: .50,
         alignSelf: 'stretch',
         padding: 5
-    },
-    areaMenu: {
-        flex: 1,
-        flexDirection: 'column',
-        alignItems: 'stretch',
-        backgroundColor: '#5FC594',
-        width: '100%'
     },
     areaHorasOld: {
         justifyContent: 'center',
@@ -291,8 +347,8 @@ const styles = StyleSheet.create({
 
     },
     areaHoras: {
-        flexShrink: 1,
-        width: '100%',
+        flex: .38,
+        
         padding: 5,
         backgroundColor: 'black'
     }

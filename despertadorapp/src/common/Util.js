@@ -36,3 +36,9 @@ export default class Util {
         return d3;
     }
 }
+
+export function clonarObjeto(obj) {
+    let objString = JSON.stringify(obj);
+    
+    return JSON.parse(objString);
+}

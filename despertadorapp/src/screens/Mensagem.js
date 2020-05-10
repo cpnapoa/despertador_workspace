@@ -7,7 +7,6 @@ import AsyncStorage from '@react-native-community/async-storage';
 export default class Mensagem {
 
     constructor() {
-        this.state = {textoMensagem: ''};
         
         this.sincronizarMensagensComServidor = this.sincronizarMensagensComServidor.bind(this);
         this.tratarBuscarMensagens = this.tratarBuscarMensagens.bind(this);
@@ -19,7 +18,7 @@ export default class Mensagem {
         this.lerMensagensExibir = this.lerMensagensExibir.bind(this);
         this.lerMensagensExibidas = this.lerMensagensExibidas.bind(this);
 
-        objUtil = new Util();
+        this.oUtil = new Util();
     }
 
     // Busca na base de dados as mensagens cadastradas e salva no dispositivo.
@@ -27,8 +26,8 @@ export default class Mensagem {
         let listaMensagensExibir = await this.lerMensagensExibir();
         
         if(!listaMensagensExibir || (listaMensagensExibir instanceof Array && listaMensagensExibir.length <= 0)) { 
-            objMensagem.listar(this.tratarBuscarMensagens);//como isso está funcionando? objMensagem não está definido..
-            //nao deveria ser this.listar(this.tratarBuscarMensagens) ?
+            this.listar(this.tratarBuscarMensagens);//como isso está funcionando? this.oMensagem não está definido..
+            //nao deveria ser this.listar(this.tratarBuscarMensagens) ? Porque estava declarado errado antes, onde era usado. Foi declardo de forma global.
         }
     }
 
@@ -37,20 +36,20 @@ export default class Mensagem {
             
             this.salvarMensagensNoDispositivo(oJsonMensagens, []);
 
-            Alert.alert(oJsonMensagens.length + ' mensagens sincronizadas no seu dispositivo.');
+            Alert.alert('Despertador de Consciência', oJsonMensagens.length + ' mensagens sincronizadas no seu dispositivo.');
         } else {
-            Alert.alert('Cadastrado de mensagens não localizado.');
+            Alert.alert('Despertador de Consciência', 'Cadastrado de mensagens não localizado.');
         }
     }
 
     listar(funcaoTratamentoRetono) {
 
         try {
-            let url = objUtil.getURL('/mensagens');
+            let url = this.oUtil.getURL('/mensagens');
             
             this.chamarServico(url, {method: 'GET'}, funcaoTratamentoRetono);
         } catch (exc) {
-            Alert.alert(exc);
+            Alert.alert('Despertador de Consciência', exc);
         }
     }
     
@@ -61,7 +60,7 @@ export default class Mensagem {
             funcaoTratamentoRetono(oJsonDadosRetorno);
         })
         .catch(function (erro) {
-            Alert.alert(erro.message);
+            Alert.alert('Despertador de Consciência', erro.message);
             throw erro;
         });
     }
@@ -70,7 +69,7 @@ export default class Mensagem {
         if (oRespostaHTTP.ok) {
             return oRespostaHTTP.json();
         } else {
-            Alert.alert("Erro: " + oRespostaHTTP.status);
+            Alert.alert('Despertador de Consciência', "Erro: " + oRespostaHTTP.status);
         }
     }
 
@@ -83,7 +82,7 @@ export default class Mensagem {
             let indiceMensagem = 0;
 
             if(listaMensagensExibir.length > 1) {
-                indiceMensagem = objUtil.getRand(listaMensagensExibir.length);
+                indiceMensagem = this.oUtil.getRand(listaMensagensExibir.length);
             }
             let oMensagem = listaMensagensExibir[indiceMensagem];
             msg = oMensagem.texto;
@@ -97,7 +96,7 @@ export default class Mensagem {
             this.salvarMensagensNoDispositivo(listaMensagensExibir, listaMensagensExibidas);
             
         } else {
-            Alert.alert('Você não tem novas mensagens. :(');
+            Alert.alert('Despertador de Consciência', 'Você não tem novas mensagens. :(');
         }
         return await msg;
     }
@@ -112,7 +111,7 @@ export default class Mensagem {
             await promiseItensExibidos;
         } catch (error) {
             console.log(error);
-            Alert.alert('Erro ao salvar mensagens no dispositivo: ' + error);
+            Alert.alert('Despertador de Consciência', 'Erro ao salvar mensagens no dispositivo: ' + error);
         }
     }
 
@@ -126,7 +125,7 @@ export default class Mensagem {
             return null;
         } catch (error) {
             console.log(error);
-            Alert.alert('Erro ao ler mensagens a exibir: ' + error);
+            Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens a exibir: ' + error);
         }
     }
 
@@ -137,7 +136,7 @@ export default class Mensagem {
             return JSON.parse(promiseItensExibidas);
         } catch (error) {
             console.log(error);
-            Alert.alert('Erro ao ler mensagens a exibir: ' + error);
+            Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens a exibir: ' + error);
         }
     }
 }
