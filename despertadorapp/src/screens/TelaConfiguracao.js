@@ -48,7 +48,7 @@ export default class TelaConfiguracao extends Component {
         this.oMensagem = new Mensagem();
         this.oUtil = new Util();
 
-        this.oConfiguracao.configurarNotificacao(this.oNavegacao, this.oDadosControleApp);
+        // this.oConfiguracao.configurarNotificacao(this.oNavegacao, this.oDadosControleApp);
         this.atribuirListaIntervalosNoDispositivo();
         this.exibirEstatisticas();
     }
@@ -88,10 +88,12 @@ export default class TelaConfiguracao extends Component {
         oNovoIntervalo.qtd_mensagens = 1;
         
         this.oConfiguracao.adicionarIntervaloDiaSemana(1, oNovoIntervalo);
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
     salvarConfiguracoes() {
-        this.oConfiguracao.salvarIntervalosNoDispositivo();
+        this.oConfiguracao.salvarIntervalosNoDispositivo();        
+        this.oConfiguracao.agendarNotificacao();
         this.oNavegacao.goBack();
     }
 
@@ -109,6 +111,33 @@ export default class TelaConfiguracao extends Component {
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
+    listarHoras() {
+        let oDiaSemana = this.oConfiguracao.obterDiaSemana(1);
+        let oListaIntervalos;
+        
+        let oIntervalo;
+        let oHoras;
+        let oListaExibicao = [];
+        if(oDiaSemana) {
+            oListaIntervalos = oDiaSemana.intervalos;
+        
+            for(let i = 0; i < oListaIntervalos.length; i++) {
+                oIntervalo = oListaIntervalos[i];
+                if(oIntervalo) {
+                    oHoras = oIntervalo.horas_exibicao;
+                    if(oHoras) {
+                        
+                        for(let t = 0; t < oHoras.length; t++) {
+                            oListaExibicao.push(<Text>Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto} as : 
+                            {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto} = {oHoras[t]}</Text>);
+                        }
+                    }
+                }
+            }
+        }
+        return oListaExibicao;
+    }
+
     render() {
 
         return (
@@ -118,8 +147,8 @@ export default class TelaConfiguracao extends Component {
                         <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={this.salvarConfiguracoes} />
                     </View>
                 
-                    <View style={styles.areaConfiguracao}>
-                        <View style={styles.areaHorasOld}>
+                    {/* <View style={styles.areaConfiguracao}> */}
+                        <View style={styles.areaIntervaloDefinicao}>
                             <Text>Hora inicial</Text>
                             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                                 <Slider
@@ -163,17 +192,23 @@ export default class TelaConfiguracao extends Component {
                                     onValueChange={(valor) => { this.oDadosTela.m2 = valor.toString(); this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}
                                 />
                             </View>
+                        </View>
 
-                            <Text>Hora aletoria entre {this.oDadosTela.dh1} e {this.oDadosTela.dh2} => {this.oDadosTela.hora_notificacao}</Text>
+                        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                            {/* <Text>Hora aletoria entre {this.oDadosTela.dh1} e {this.oDadosTela.dh2} => {this.oDadosTela.hora_notificacao}</Text> */}
                             <Button title='Testar hora aleatória' onPress={this.oConfiguracao.agendarNotificacao} ></Button>
                             <Button title='Testar adicionar intervalo' onPress={this.adicionarIntervalo} ></Button>
                         </View>
-
-                        <View style={{ padding: 5 }}>
+                        <View >
                             <Text>Mensagens exibidas: {this.oDadosTela.qtd_mensagens_exibidas}</Text>
                             <Text>Mensagens a exibir: {this.oDadosTela.qtd_mensagens_exibir}</Text>
+                            {this.listarHoras()}
                         </View>
-
+                        <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
+                      
+                        </View>
+                        
+{/* 
                         <View style={{ padding: 5 }}>
                             <Button
                                 onPress={this.oMensagem.sincronizarMensagensComServidor}
@@ -196,9 +231,9 @@ export default class TelaConfiguracao extends Component {
                                 color="#ff00ff"
                             />
 
-                        </View>
-                    </View>
-
+                        </View> */}
+                    {/* </View> */}
+{/* 
                     <Text>horaGeral[0,1]:{this.oDadosTela.hora_geral[0]}:{this.oDadosTela.hora_geral[1]} | horaGeral[2,3]:{this.oDadosTela.hora_geral[2]}:{this.oDadosTela.hora_geral[3]}</Text>
 
                     <View style={styles.areaHoras} >
@@ -219,7 +254,7 @@ export default class TelaConfiguracao extends Component {
                             ></MasterSlider>
 
                         </ScrollView>
-                    </View>
+                    </View> */}
                 </ImageBackground>
             </View>
         );
@@ -241,15 +276,20 @@ const styles = StyleSheet.create({
         alignItems:'center',
         justifyContent:'space-between'
     },
-    areaConfiguracao: {
-        flex: .50,
-        alignSelf: 'stretch',
-        padding: 5
-    },
-    areaHorasOld: {
+    // areaConfiguracao: {
+    //     flex: .50,
+    //     flexDirection:'column', 
+    //     alignItems:'center', 
+    //     justifyContent:'center',
+    //     backgroundColor: 'blue'
+    // },
+    areaIntervaloDefinicao: {
+        flex: .3,
+        flexDirection:'column', 
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 5
+        padding: 5,
+        backgroundColor: 'yellow'
     },
     areaEstatisticas: {
 

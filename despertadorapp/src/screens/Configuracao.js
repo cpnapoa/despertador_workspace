@@ -10,7 +10,7 @@ import {
     Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import PushNotification from 'react-native-push-notification';
+import PushNotification, {PushNotificationAndroid } from 'react-native-push-notification';
 
 export default class Configuracao {
 
@@ -271,7 +271,7 @@ export default class Configuracao {
         return horaNotificacao;
     }
 
-    configurarNotificacao(oNavegacao, oDadosControleApp) {
+    configurarNotificacao(oTelaMensagem, oNavegacao, oDadosControleApp) {
         PushNotification.configure({
             // (optional) Called when Token is generated (iOS and Android)
             onRegister: function (token) {
@@ -283,7 +283,8 @@ export default class Configuracao {
                 console.log("NOTIFICATION:", notificacao);
                 
                 oDadosControleApp.exibir_mensagem = true;
-                oNavegacao.popToTop();
+                oNavegacao.navigate('Mensagem');
+                oTelaMensagem.exibirProximaMensagem();
     
                 // process the notification
     

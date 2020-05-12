@@ -30,7 +30,7 @@ export default class TelaMensagem extends Component {
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_mensagem;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
-            
+            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
 
@@ -44,12 +44,14 @@ export default class TelaMensagem extends Component {
         this.funcMaster = this.funcMaster.bind(this);
         this.configurarEventoMensagemFocoTela = this.configurarEventoMensagemFocoTela.bind(this);
         
-        this.configurarEventoMensagemFocoTela();
+        this.oConfiguracao.configurarNotificacao(this, this.oNavegacao, this.oDadosControleApp);
+        // this.configurarEventoMensagemFocoTela();
         this.oMensagem = new Mensagem();
         this.oMensagem.sincronizarMensagensComServidor();
     }
 
     componentDidMount() {
+        
         this.funcMaster();
     }
 
@@ -79,6 +81,18 @@ export default class TelaMensagem extends Component {
                 this.contaMsg(); //adicionei esse método para ser executado quando voltamos para a tela de mensagens
             }
         });
+        // this.oNavegacao.addListener('notificationActionReceived', function(action){
+            
+        //     console.log ('Notification action received: ' + action);
+            
+        //     //const info = JSON.parse(action.dataJSON);
+        //     if (info.action == 'Accept') {
+        //       console.log('Aceitou');
+        //     } else if (info.action == 'Reject') {
+        //         console.log('Ignorou');
+        //     }
+        //     // Add all the required actions handlers
+        //   });
     }
 
     //função contaMsg é async para poder usar o await e calcluar o length só depois de ter pego o array com as mensagens
