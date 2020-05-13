@@ -100,6 +100,11 @@ export default class TelaConfiguracao extends Component {
         this.oNavegacao.goBack();
     }
 
+    excluirIntervalo(diaSemana, indice) {
+        this.oConfiguracao.excluirIntervaloDiaSemana(diaSemana, indice);
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    }
+
     //esses métodos servem para fixar o scrollview enquanto selecionamos um valor no slider
     enableScroll = () => {this.oDadosTela.scroll_enabled = true;this.oGerenciadorContextoApp.atualizarEstadoTela(this);};
     disableScroll = () => {this.oDadosTela.scroll_enabled = false;this.oGerenciadorContextoApp.atualizarEstadoTela(this);};
@@ -127,7 +132,7 @@ export default class TelaConfiguracao extends Component {
         
             let dataHoraAtual;
             let chaveItem;
-            let chaveItemH;
+            ;
             for(let i = 0; i < oListaIntervalos.length; i++) {
                 oIntervalo = oListaIntervalos[i];
                 if(oIntervalo) {
@@ -136,16 +141,15 @@ export default class TelaConfiguracao extends Component {
                     if(oHoras) {
                         
                         for(let t = 0; t < oHoras.length; t++) {
-                            chaveItem = `1${i}`;
-                            chaveItemH = `1${i}${t}`;
+                            chaveItem = `1${i}${t}`;
 
                             dataHoraAtual = new Date(oHoras[t]);
                             
                             oListaExibicao.push(
-                            <View style={{flexDirection:'row', alignItems:'center'}}>
-                                <Text key={chaveItemH}>Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
+                            <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
+                                <Text >Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
                                 {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtual.toLocaleTimeString()}</Text>
-                                <Icon key={chaveItem} indice={i} name='trash' onPress={() => this.oConfiguracao.excluirIntervaloDiaSemana(1, this.indice)}></Icon>
+                                <Icon name='trash' onPress={() => this.excluirIntervalo(1, i)}></Icon>
                             </View>
                             )
                         }
@@ -302,12 +306,11 @@ const styles = StyleSheet.create({
     //     backgroundColor: 'blue'
     // },
     areaIntervaloDefinicao: {
-        flex: .3,
+        flex: .4,
         flexDirection:'column', 
         justifyContent: 'center',
         alignItems: 'center',
         padding: 5,
-        backgroundColor: 'yellow'
     },
     areaEstatisticas: {
 

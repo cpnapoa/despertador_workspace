@@ -248,6 +248,7 @@ export default class Configuracao {
             // Recalcula todas as horas do dia, pois não encontrou nenhuma.
             oHoraExibicaoAtual = oIntervaloDiaSemanaAtual.intervalos.forEach(oIntervaloItem => {
                 this.gerarHorasExibicaoIntervaloDia(oIntervaloItem);
+                this.salvarIntervalosNoDispositivo();
             });
         }
 
