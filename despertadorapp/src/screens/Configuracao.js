@@ -35,10 +35,11 @@ export default class Configuracao {
         this.agendarNotificacao = this.agendarNotificacao.bind(this);
         this.obterDiaSemana = this.obterDiaSemana.bind(this);
         this.obterHoraMaisRecenteDiaSemana = this.obterHoraMaisRecenteDiaSemana.bind(this);
-        this.obterProximaHoraMensagemDiaSemana = this.obterProximaHoraMensagemDiaSemana.bind(this);
+        this.retirarProximaHoraMensagemDiaSemana = this.retirarProximaHoraMensagemDiaSemana.bind(this);
         this.calcularHorasExibicaoDiaSemana = this.calcularHorasExibicaoDiaSemana.bind(this);
         this.validarIntervalo = this.validarIntervalo.bind(this);
         this.compararHora = this.compararHora.bind(this);
+        this.excluirIntervaloDiaSemana = this.excluirIntervaloDiaSemana.bind(this);
     }
     
     // Implementar a seguir as funcoes para configurar o aplicativo.
@@ -93,6 +94,31 @@ export default class Configuracao {
         }
     }
 
+    excluirIntervaloDiaSemana(diaSemana, indiceIntervalo) {
+        let oDiaSemana = this.obterDiaSemana(diaSemana);
+
+        if(oDiaSemana && oDiaSemana.intervalos && oDiaSemana.intervalos.length > indiceIntervalo) {
+            oDiaSemana.intervalos.splice(indiceIntervalo);
+            this.salvarIntervalosNoDispositivo();
+        }
+    }
+
+    ordenarIntervalosDiaSemana(diaSemana) {
+        let oDiaSemana = this.obterDiaSemana(diaSemana);
+        
+        oDiaSemana.intervalos.sort((oIntervalo1, oIntervalo2) => {
+            if(oIntervalo1 && oIntervalo2) {
+                let dh1 = new Date();
+                let dh2 = new Date();
+        
+                dh1.setHours(parseInt(oIntervalo1.hora_inicial.hora), parseInt(oIntervalo1.hora_inicial.minuto), 0, 0);
+                dh2.setHours(parseInt(oIntervalo2.hora_inicial.hora), parseInt(oIntervalo2.hora_inicial.minuto), 59, 999);
+        
+                return this.compararHora(dh1, dh2);
+            }
+        })
+    }
+
     adicionarIntervaloDiaSemana(diaSemana, oIntervaloDiaAdicionar) {
         let oIntervaloDiaAtual;
 
@@ -121,7 +147,9 @@ export default class Configuracao {
             oIntervaloDiaAtual.intervalos.push(oIntervaloDiaAdicionar);
 
             this.oDadosTelaConfiguracao.intervalos_dias_semana.push(oIntervaloDiaAtual);
-        }    
+        }
+        // Calcula as horas de exibicao da mensagem no dia, conforme os intervalos, se não existir nenhuma.
+        this.calcularHorasExibicaoDiaSemana(diaSemana);
     }
 
     validarIntervalo(diaSemana, oIntervaloValidar) {
@@ -174,7 +202,7 @@ export default class Configuracao {
         return intervaloOk;
     }
 
-    obterProximaHoraMensagemDiaSemana(diaSemana) {
+    retirarProximaHoraMensagemDiaSemana(diaSemana) {
         
         let oIntervaloDiaSemanaAtual = this.obterDiaSemana(diaSemana);
         
@@ -182,7 +210,7 @@ export default class Configuracao {
             // Calcula as horas de exibicao da mensagem no dia, conforme os intervalos, se não existir nenhuma.
             this.calcularHorasExibicaoDiaSemana(diaSemana);
             
-            return this.obterHoraMaisRecenteDiaSemana(diaSemana);
+            return this.retirarHoraMaisRecenteDiaSemana(diaSemana);
 
         } else {
             Alert.alert('Não foi encontrada configuração para o dia de hoje, da semana.');
@@ -196,7 +224,8 @@ export default class Configuracao {
             for(let i = 0; i < oIntervaloDia.qtd_mensagens; i++){
                 //TODO: Deve ser implementado calculo de intervalo minimo entre as mensagens (talvez utilizando uma porcentagem do tamanho do intervalo em minutos).
                 
-                oIntervaloDia.horas_exibicao.push(this.gerarHoraAleatoria(oIntervaloDia.hora_inicial, oIntervaloDia.hora_final));
+                oIntervaloDia.horas_exibicao.push(
+                    this.gerarHoraAleatoria(oIntervaloDia.hora_inicial, oIntervaloDia.hora_final).toJSON());
             }
         }
     }
@@ -225,6 +254,21 @@ export default class Configuracao {
     }
 
     obterHoraMaisRecenteDiaSemana(diaSemana) {
+        let oIntervaloDiaSemanaAtual = this.obterDiaSemana(diaSemana);
+        
+        let oIntervalosDia = oIntervaloDiaSemanaAtual.intervalos;
+        let oIntervaloItem;
+        for (let i = 0; i < oIntervalosDia.length; i++) {
+            
+            oIntervaloItem = oIntervalosDia[i];
+            if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
+                // Retorna a primeira hora previamente calculada do array e remove a mesma.
+                return oIntervaloItem.horas_exibicao[0];
+            }
+        }
+    }
+
+    retirarHoraMaisRecenteDiaSemana(diaSemana) {
         let oIntervaloDiaSemanaAtual = this.obterDiaSemana(diaSemana);
         
         let oIntervalosDia = oIntervaloDiaSemanaAtual.intervalos
@@ -272,6 +316,7 @@ export default class Configuracao {
     }
 
     configurarNotificacao(oTelaMensagem, oNavegacao, oDadosControleApp) {
+        var funcaoAgendarNotificacao = this.agendarNotificacao;
         PushNotification.configure({
             // (optional) Called when Token is generated (iOS and Android)
             onRegister: function (token) {
@@ -285,6 +330,7 @@ export default class Configuracao {
                 oDadosControleApp.exibir_mensagem = true;
                 oNavegacao.navigate('Mensagem');
                 oTelaMensagem.exibirProximaMensagem();
+                funcaoAgendarNotificacao();
     
                 // process the notification
     
@@ -316,24 +362,14 @@ export default class Configuracao {
     }
 
     agendarNotificacao() {
-        // let PushNotification = require("react-native-push-notification");
-        let oHoraInicial = clonarObjeto(HORA_MENSAGEM);
-        let oHoraFinal = clonarObjeto(HORA_MENSAGEM);
         
-        oHoraInicial.hora = this.oDadosTelaConfiguracao.h1;
-        oHoraInicial.minuto = this.oDadosTelaConfiguracao.m1;
-        oHoraFinal.hora = this.oDadosTelaConfiguracao.h2;
-        oHoraFinal.minuto = this.oDadosTelaConfiguracao.m2;
-
-        let dataHora = this.obterProximaHoraMensagemDiaSemana(1);
+        let dataHora = this.retirarProximaHoraMensagemDiaSemana(1);
         
-        // this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-
         PushNotification.localNotificationSchedule({
             //... You can use all the options from localNotifications
             message: 'Desperte sua consciência...',
             playSound: false,
-            date: dataHora
+            date: new Date(dataHora),
         });
     }
 }

@@ -87,12 +87,15 @@ export default class TelaConfiguracao extends Component {
         oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
         oNovoIntervalo.qtd_mensagens = 1;
         
+        this.oConfiguracao.gerarHorasExibicaoIntervaloDia(oNovoIntervalo);
         this.oConfiguracao.adicionarIntervaloDiaSemana(1, oNovoIntervalo);
+        this.oConfiguracao.ordenarIntervalosDiaSemana(1);
+        this.oConfiguracao.salvarIntervalosNoDispositivo();
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
     salvarConfiguracoes() {
-        this.oConfiguracao.salvarIntervalosNoDispositivo();        
+        this.oConfiguracao.salvarIntervalosNoDispositivo();
         this.oConfiguracao.agendarNotificacao();
         this.oNavegacao.goBack();
     }
@@ -118,18 +121,33 @@ export default class TelaConfiguracao extends Component {
         let oIntervalo;
         let oHoras;
         let oListaExibicao = [];
+        
         if(oDiaSemana) {
             oListaIntervalos = oDiaSemana.intervalos;
         
+            let dataHoraAtual;
+            let chaveItem;
+            let chaveItemH;
             for(let i = 0; i < oListaIntervalos.length; i++) {
                 oIntervalo = oListaIntervalos[i];
                 if(oIntervalo) {
                     oHoras = oIntervalo.horas_exibicao;
+                    
                     if(oHoras) {
                         
                         for(let t = 0; t < oHoras.length; t++) {
-                            oListaExibicao.push(<Text>Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto} as : 
-                            {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto} = {oHoras[t]}</Text>);
+                            chaveItem = `1${i}`;
+                            chaveItemH = `1${i}${t}`;
+
+                            dataHoraAtual = new Date(oHoras[t]);
+                            
+                            oListaExibicao.push(
+                            <View style={{flexDirection:'row', alignItems:'center'}}>
+                                <Text key={chaveItemH}>Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
+                                {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtual.toLocaleTimeString()}</Text>
+                                <Icon key={chaveItem} indice={i} name='trash' onPress={() => this.oConfiguracao.excluirIntervaloDiaSemana(1, this.indice)}></Icon>
+                            </View>
+                            )
                         }
                     }
                 }
