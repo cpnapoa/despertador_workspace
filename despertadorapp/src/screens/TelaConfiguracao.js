@@ -115,42 +115,52 @@ export default class TelaConfiguracao extends Component {
     }
 
     listarHoras() {
-        let oDiaSemana = this.oConfiguracao.obterDia(1);
-        let oListaIntervalos;
-        
+        let oIntervalosDiasSemana = this.oDadosTela.intervalos_dias_semana;
+        let oListaIntervalos;        
         let oIntervalo;
         let oHoras;
         let oListaExibicao = [];
-        
-        if(oDiaSemana) {
-            oListaIntervalos = oDiaSemana.intervalos;
-        
-            let dataHoraAtual;
-            let chaveItem;
-            ;
-            for(let i = 0; i < oListaIntervalos.length; i++) {
-                oIntervalo = oListaIntervalos[i];
-                if(oIntervalo) {
-                    oHoras = oIntervalo.horas_exibicao;
-                    
-                    if(oHoras) {
-                        
-                        for(let t = 0; t < oHoras.length; t++) {
-                            chaveItem = `1${i}${t}`;
+        let dataHoraAtualExibir;
+        let oDataHoraAtual;
+        let chaveItem;
 
-                            dataHoraAtual = new Date(oHoras[t]);
+        if(oIntervalosDiasSemana && oIntervalosDiasSemana.length > 0)
+        {
+            oIntervalosDiasSemana.forEach(oDiaSemana => {
+                
+                if(oDiaSemana) {
+                    oListaIntervalos = oDiaSemana.intervalos;
+                    
+                    for(let i = 0; i < oListaIntervalos.length; i++) {
+                        oIntervalo = oListaIntervalos[i];
+                        if(oIntervalo) {
+                            oHoras = oIntervalo.horas_exibicao;
                             
-                            oListaExibicao.push(
-                            <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
-                                <Text >Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
-                                {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtual.toLocaleTimeString()}</Text>
-                                <Icon name='trash' onPress={() => this.excluirIntervalo(7, i)}></Icon>
-                            </View>
-                            )
+                            if(!oHoras || oHoras.length === 0) {
+                                oHoras = [];
+                                oHoras[0] = null;
+                            }
+                                
+                            for(let t = 0; t < oHoras.length; t++) {
+                                chaveItem = `1${i}${t}`;
+                                dataHoraAtualExibir = '';
+                                
+                                if(oHoras[t]) {
+                                    oDataHoraAtual = new Date(oHoras[t]);
+                                    dataHoraAtualExibir = oDataHoraAtual.toLocaleTimeString();
+                                }
+                                oListaExibicao.push(
+                                    <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
+                                        <Text >Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
+                                        {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtualExibir}</Text>
+                                        <Icon name='trash' onPress={() => this.excluirIntervalo(7, i)}></Icon>
+                                    </View>
+                                )
+                            }
                         }
                     }
-                }
-            }
+                }                
+            });
         }
         return oListaExibicao;
     }
