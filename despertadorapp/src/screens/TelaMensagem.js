@@ -7,12 +7,62 @@ import {
     Text,
     ImageBackground,
     Alert,
-    TouchableOpacity
+    TouchableOpacity,
+    AppState
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Image } from 'react-native-elements';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
+
+// var PushNotification = require("react-native-push-notification");
+
+// function configurarNotificacao(oTelaMensagem, oNavegacao, oDadosControleApp, funcaoAgendarNotificacao) {
+
+//     PushNotification.configure({
+//         // (optional) Called when Token is generated (iOS and Android)
+//         onRegister: function (token) {
+//             console.log("TOKEN:", token);
+//         },
+
+//         // (required) Called when a remote or local notification is opened or received
+//         onNotification: async function (notificacao) {
+//             // console.log("NOTIFICATION:", notificacao);
+            
+//             oDadosControleApp.exibir_mensagem = true;
+//             oNavegacao.navigate('Mensagem');
+//             oTelaMensagem.exibirProximaMensagem();
+//             funcaoAgendarNotificacao();
+
+//             // process the notification
+
+//             // required on iOS only (see fetchCompletionHandler docs: https://github.com/react-native-community/react-native-push-notification-ios)
+//             //notification.finish(PushNotificationIOS.FetchResult.NoData);
+//         },
+
+//         // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
+//         // senderID: "456789",
+
+//         // IOS ONLY (optional): default: all - Permissions to register.
+//         permissions: {
+//             alert: true,
+//             badge: true,
+//             sound: false
+//         },
+
+//         // Should the initial notification be popped automatically
+//         // default: true
+//         popInitialNotification: false,
+
+//         /**
+//          * (optional) default: true
+//          * - Specified if permissions (ios) and token (android and ios) will requested or not,
+//          * - if not, you must call PushNotificationsHandler.requestPermissions() later
+//          */
+//         requestPermissions: true,
+//     });
+//     // PushNotification.requestPermissions();
+// }
 
 export default class TelaMensagem extends Component {
     
@@ -30,8 +80,12 @@ export default class TelaMensagem extends Component {
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_mensagem;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
+            this.oMensagem = new Mensagem();
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
+            
+            AppState.addEventListener('change', this.oConfiguracao.salvarConfiguracoes);
+            this.oMensagem.sincronizarMensagensComServidor();            
         }
 
         this.oDadosTela.texto_botao = <Text>P</Text>;
@@ -42,16 +96,13 @@ export default class TelaMensagem extends Component {
         this.contaMsg = this.contaMsg.bind(this);
         //funcMaster é uma função teste que criei para fazer as outras funções async serem executadas em ordem (usando await)
         this.funcMaster = this.funcMaster.bind(this);
-        this.configurarEventoMensagemFocoTela = this.configurarEventoMensagemFocoTela.bind(this);
         
-        this.oConfiguracao.configurarNotificacao(this, this.oNavegacao, this.oDadosControleApp);
-        // this.configurarEventoMensagemFocoTela();
-        this.oMensagem = new Mensagem();
-        this.oMensagem.sincronizarMensagensComServidor();
+        
     }
 
     componentDidMount() {
-        
+        this.oConfiguracao.configurarNotificacao(this, this.oNavegacao, this.oDadosControleApp);
+
         this.funcMaster();
     }
 
@@ -69,30 +120,6 @@ export default class TelaMensagem extends Component {
         this.oDadosApp.mensagem.texto = await this.oMensagem.obterProximaMensagem();
         
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-    }
-
-    configurarEventoMensagemFocoTela() {
-        this.oNavegacao.addListener('focus', () => {
-            
-            if(this.oDadosControleApp.exibir_mensagem) {
-                this.oDadosControleApp.exibir_mensagem = false;
-
-                this.exibirProximaMensagem();
-                this.contaMsg(); //adicionei esse método para ser executado quando voltamos para a tela de mensagens
-            }
-        });
-        // this.oNavegacao.addListener('notificationActionReceived', function(action){
-            
-        //     console.log ('Notification action received: ' + action);
-            
-        //     //const info = JSON.parse(action.dataJSON);
-        //     if (info.action == 'Accept') {
-        //       console.log('Aceitou');
-        //     } else if (info.action == 'Reject') {
-        //         console.log('Ignorou');
-        //     }
-        //     // Add all the required actions handlers
-        //   });
     }
 
     //função contaMsg é async para poder usar o await e calcluar o length só depois de ter pego o array com as mensagens
@@ -143,13 +170,9 @@ export default class TelaMensagem extends Component {
                         {this.oDadosTela.texto_botao}
                         {this.oDadosTela.elemento_botao}
                         
-                        {/*
-                        esse render de Text e Icon abaixo é somente para monitorar o que esta acontecendo no msgNum
-                        o botão azul serve para atualizar o msgNum para que o render do botão de mensagens funcione corretamente
-                        */}
                         <Text> Msgnum é: {this.oDadosTela.msg_num}</Text>
                         <Icon name="caret-right" size={50} color="blue" onPress={this.contaMsg} style={{margin: 10}}/>
-                    </View>                    
+                    </View>
                 </ImageBackground>
             </View>
         );

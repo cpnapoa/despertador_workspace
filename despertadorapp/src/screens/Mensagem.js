@@ -110,7 +110,7 @@ export default class Mensagem {
             await promiseItensExibir;
             await promiseItensExibidos;
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             Alert.alert('Despertador de Consciência', 'Erro ao salvar mensagens no dispositivo: ' + error);
         }
     }
@@ -124,7 +124,7 @@ export default class Mensagem {
             }
             return null;
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens a exibir: ' + error);
         }
     }
@@ -135,7 +135,7 @@ export default class Mensagem {
 
             return JSON.parse(promiseItensExibidas);
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens a exibir: ' + error);
         }
     }

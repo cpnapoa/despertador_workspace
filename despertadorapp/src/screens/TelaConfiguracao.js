@@ -42,7 +42,7 @@ export default class TelaConfiguracao extends Component {
         
         this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
-        this.salvarConfiguracoes = this.salvarConfiguracoes.bind(this);
+        this.voltar = this.voltar.bind(this);
         this.atribuirListaIntervalosNoDispositivo = this.atribuirListaIntervalosNoDispositivo.bind(this);
 
         this.oMensagem = new Mensagem();
@@ -86,18 +86,13 @@ export default class TelaConfiguracao extends Component {
         oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
         oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
         oNovoIntervalo.qtd_mensagens = 1;
-        
-        this.oConfiguracao.gerarHorasExibicaoIntervaloDia(oNovoIntervalo);
-        this.oConfiguracao.adicionarIntervaloDiaSemana(1, oNovoIntervalo);
-        this.oConfiguracao.ordenarIntervalosDiaSemana(1);
-        this.oConfiguracao.salvarIntervalosNoDispositivo();
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-    }
 
-    salvarConfiguracoes() {
-        this.oConfiguracao.salvarIntervalosNoDispositivo();
-        this.oConfiguracao.agendarNotificacao();
-        this.oNavegacao.goBack();
+        // Dia da semana = 7, indica que nao tem dia definido e todos os dias terão os mesmos intervalos.
+        let diaSemana = 7;
+        
+        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo);
+        
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
     excluirIntervalo(diaSemana, indice) {
@@ -120,7 +115,7 @@ export default class TelaConfiguracao extends Component {
     }
 
     listarHoras() {
-        let oDiaSemana = this.oConfiguracao.obterDiaSemana(1);
+        let oDiaSemana = this.oConfiguracao.obterDia(1);
         let oListaIntervalos;
         
         let oIntervalo;
@@ -149,7 +144,7 @@ export default class TelaConfiguracao extends Component {
                             <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
                                 <Text >Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
                                 {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtual.toLocaleTimeString()}</Text>
-                                <Icon name='trash' onPress={() => this.excluirIntervalo(1, i)}></Icon>
+                                <Icon name='trash' onPress={() => this.excluirIntervalo(7, i)}></Icon>
                             </View>
                             )
                         }
@@ -160,13 +155,18 @@ export default class TelaConfiguracao extends Component {
         return oListaExibicao;
     }
 
+    voltar() {
+        this.oConfiguracao.salvarConfiguracoes(true);
+        this.oNavegacao.goBack();
+    }
+
     render() {
 
         return (
             <View style={styles.areaTotal}>
                 <ImageBackground source={require('../images/parchment_back_edge.png')} style={styles.imgBG} resizeMode='stretch'>
                     <View style={{flex: 0.10, flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'flex-start'}} >
-                        <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={this.salvarConfiguracoes} />
+                        <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={this.voltar} />
                     </View>
                 
                     {/* <View style={styles.areaConfiguracao}> */}
