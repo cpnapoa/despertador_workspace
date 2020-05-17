@@ -88,10 +88,14 @@ export default class TelaConfiguracao extends Component {
         oNovoIntervalo.qtd_mensagens = 1;
 
         // Dia da semana = 7, indica que nao tem dia definido e todos os dias terão os mesmos intervalos.
-        let diaSemana = 7;
+        let diaSemana = 0;
         
         this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo);
+
+        diaSemana = 1;
         
+        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo);
+                
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
@@ -142,19 +146,19 @@ export default class TelaConfiguracao extends Component {
                             }
                                 
                             for(let t = 0; t < oHoras.length; t++) {
-                                chaveItem = `1${i}${t}`;
+                                chaveItem = `${oDiaSemana.dia_semana}${i}${t}`;
                                 dataHoraAtualExibir = '';
                                 
                                 if(oHoras[t]) {
                                     oDataHoraAtual = new Date(oHoras[t]);
                                     dataHoraAtualExibir = oDataHoraAtual.toLocaleTimeString();
                                 }
-                                oListaExibicao.push(
+                                oListaExibicao.push(                                    
                                     <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
                                         <Text >Intervalo {oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
                                         {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtualExibir}</Text>
-                                        <Icon name='trash' onPress={() => this.excluirIntervalo(7, i)}></Icon>
-                                    </View>
+                                        <Icon name='trash' onPress={() => this.excluirIntervalo(oDiaSemana.dia_semana, i)}></Icon>
+                                    </View>                                    
                                 )
                             }
                         }
@@ -224,17 +228,19 @@ export default class TelaConfiguracao extends Component {
                                     onValueChange={(valor) => { this.oDadosTela.m2 = valor.toString(); this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}
                                 />
                             </View>
-                        </View>
 
-                        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                            {/* <Text>Hora aletoria entre {this.oDadosTela.dh1} e {this.oDadosTela.dh2} => {this.oDadosTela.hora_notificacao}</Text> */}
-                            <Button title='Testar hora aleatória' onPress={this.oConfiguracao.agendarNotificacao} ></Button>
-                            <Button title='Testar adicionar intervalo' onPress={this.adicionarIntervalo} ></Button>
-                        </View>
-                        <View >
-                            <Text>Mensagens exibidas: {this.oDadosTela.qtd_mensagens_exibidas}</Text>
-                            <Text>Mensagens a exibir: {this.oDadosTela.qtd_mensagens_exibir}</Text>
-                            {this.listarHoras()}
+                            <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                                {/* <Text>Hora aletoria entre {this.oDadosTela.dh1} e {this.oDadosTela.dh2} => {this.oDadosTela.hora_notificacao}</Text> */}
+                                <Button title='Testar hora aleatória' onPress={this.oConfiguracao.agendarNotificacao} ></Button>
+                                <Button title='Testar adicionar intervalo' onPress={this.adicionarIntervalo} ></Button>
+                            </View>
+                            <View >
+                                <Text>Mensagens exibidas: {this.oDadosTela.qtd_mensagens_exibidas}</Text>
+                                <Text>Mensagens a exibir: {this.oDadosTela.qtd_mensagens_exibir}</Text>
+                            </View>
+                            <ScrollView size={50} style={{flex:.2}}>
+                                {this.listarHoras()}
+                            </ScrollView>
                         </View>
                         <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
                       
@@ -316,7 +322,7 @@ const styles = StyleSheet.create({
     //     backgroundColor: 'blue'
     // },
     areaIntervaloDefinicao: {
-        flex: .4,
+        flex: .75,
         flexDirection:'column', 
         justifyContent: 'center',
         alignItems: 'center',

@@ -34,9 +34,9 @@ export default class Configuracao {
         this.configurarNotificacao = this.configurarNotificacao.bind(this);
         this.agendarNotificacao = this.agendarNotificacao.bind(this);
         this.obterDia = this.obterDia.bind(this);
-        this.obterProximaHoraDia = this.obterProximaHoraDia.bind(this);
+        this.obterProximaDataHoraAgenda = this.obterProximaDataHoraAgenda.bind(this);
         this.obterProximoDiaSemana = this.obterProximoDiaSemana.bind(this);
-        this.obterProximaHoraExibicao = this.obterProximaHoraExibicao.bind(this);
+        this.obterProximaDataHoraExibicao = this.obterProximaDataHoraExibicao.bind(this);
         this.validarIntervalo = this.validarIntervalo.bind(this);
         this.compararHora = this.compararHora.bind(this);
         this.excluirIntervaloDiaSemana = this.excluirIntervaloDiaSemana.bind(this);
@@ -237,11 +237,11 @@ export default class Configuracao {
         }
     }
 
-    obterProximaHoraExibicao() {
+    obterProximaDataHoraExibicao() {
         let bGerouHorasDia = false;
 
         // Consulta a proxima hora existente do dia de hoje, para saber se existe.
-        let proximaHoraExibicao = this.obterProximaHoraDia();
+        let proximaHoraExibicao = this.obterProximaDataHoraAgenda();
         let oDataHoraExibicao;
         let oDataHoraAtual = new Date();
 
@@ -251,9 +251,9 @@ export default class Configuracao {
             
             if (oDataHoraExibicao < oDataHoraAtual) {
                 // Descarta a proxima hora obtida, pois já passou.
-                this.removerProximaHoraDia();
+                this.removerProximaDataHoraAgenda();
                 // Tenta obter a proxima hora novamente, se existir
-                proximaHoraExibicao = this.obterProximaHoraDia();
+                proximaHoraExibicao = this.obterProximaDataHoraAgenda();
             }
         } 
         
@@ -269,7 +269,7 @@ export default class Configuracao {
                 });
             }
 
-            if(!bGerouHorasDia) {
+            if(!bGerouHorasDia && !proximaHoraExibicao) {
                 // Se nao tem mais horas para o dia de hoje, calcula as do proximo dia da semana definido.
                 let oProximoDiaSemana = this.obterProximoDiaSemana();
              
@@ -286,7 +286,7 @@ export default class Configuracao {
                         if (oProximoDiaSemana.dia_semana < diaSemanaHoje) {
                             numDiasAcrescentar = (6 - diaSemanaHoje) + oProximoDiaSemana.dia_semana;
                         } else {
-                            numDiasAcrescentar = diaSemanaHoje - oProximoDiaSemana.dia_semana;
+                            numDiasAcrescentar = oProximoDiaSemana.dia_semana - diaSemanaHoje;
                         }
                     }
 
@@ -300,14 +300,14 @@ export default class Configuracao {
 
         if(bGerouHorasDia) {
             // Retira a proxima hora existente do dia de hoje e salva no dispositivo.
-            proximaHoraExibicao = this.obterProximaHoraDia();
+            proximaHoraExibicao = this.obterProximaDataHoraAgenda();
             this.salvarIntervalosNoDispositivo();
         }
 
         return proximaHoraExibicao;
     }
 
-    obterProximaHoraDia() {
+    obterProximaDataHoraAgenda() {
         let oIntervalosHoje = this.obterDia();
         let oIntervalosDia = [];
         let oIntervaloItem;
@@ -315,22 +315,42 @@ export default class Configuracao {
         
         if(oIntervalosHoje) {
             oIntervalosDia = oIntervalosHoje.intervalos;
-        }
-
-        for (let i = 0; i < oIntervalosDia.length; i++) {
             
-            oIntervaloItem = oIntervalosDia[i];
+            for (let i = 0; i < oIntervalosDia.length; i++) {
+                oIntervaloItem = oIntervalosDia[i];
 
-            if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
-                // Retorna a primeira hora previamente calculada do array, sem remove-la.
-                horaExibicaoString = oIntervaloItem.horas_exibicao[0];
+                if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
+                    // Retorna a primeira hora previamente calculada do array, sem remove-la.
+                    horaExibicaoString = oIntervaloItem.horas_exibicao[0];
+                    
+                    horaExibicaoString;
+                    break;
+                }
+            }
+            if(!horaExibicaoString) {
+                let oIntervaloProximoDia = this.obterProximoDiaSemana();
 
-                return horaExibicaoString;                
+                if(oIntervaloProximoDia) {
+                    oIntervalosDia = oIntervaloProximoDia.intervalos;
+
+                    for (let i = 0; i < oIntervalosDia.length; i++) {
+                        oIntervaloItem = oIntervalosDia[i];
+
+                        if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
+                            // Retorna a primeira hora previamente calculada do array, sem remove-la.
+                            horaExibicaoString = oIntervaloItem.horas_exibicao[0];
+                            
+                            horaExibicaoString;
+                            break;
+                        }
+                    }       
+                }
             }
         }
+        return horaExibicaoString;
     }
 
-    removerProximaHoraDia() {
+    removerProximaDataHoraAgenda() {
         let oIntervalosHoje = this.obterDia();
         let oIntervalosDia = [];
         let oIntervaloItem;
@@ -475,7 +495,7 @@ export default class Configuracao {
 
     agendarNotificacao() {
         
-        let dataHora = this.obterProximaHoraExibicao();
+        let dataHora = this.obterProximaDataHoraExibicao();
         
         if(dataHora) {
             let oDataHoraAgendar = new Date(dataHora);
