@@ -26,8 +26,8 @@ export default class Configuracao {
 
         this.chamarServico = this.chamarServico.bind(this);
         this.tratarRespostaHTTP = this.tratarRespostaHTTP.bind(this);
-        this.salvarIntervalosNoDispositivo = this.salvarIntervalosNoDispositivo.bind(this);
-        this.obterListaIntervalosNoDispositivo = this.obterListaIntervalosNoDispositivo.bind(this);
+        this.salvarAgendaNotificacoesNoDispositivo = this.salvarAgendaNotificacoesNoDispositivo.bind(this);
+        this.obterAgendaNotificacoesDoDispositivo = this.obterAgendaNotificacoesDoDispositivo.bind(this);
         this.adicionarIntervaloDiaSemana = this.adicionarIntervaloDiaSemana.bind(this);
         this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
         this.gerarHorasExibicaoIntervaloDia = this.gerarHorasExibicaoIntervaloDia.bind(this);
@@ -68,27 +68,27 @@ export default class Configuracao {
     salvarConfiguracoes(bSalvar) {
 
         if(!this.oGerenciadorContextoApp.appAtivo || bSalvar === true) {
-            this.salvarIntervalosNoDispositivo();
+            this.salvarAgendaNotificacoesNoDispositivo();
             this.agendarNotificacao();
         }
     }
 
-    async salvarIntervalosNoDispositivo () {
+    async salvarAgendaNotificacoesNoDispositivo () {
         try {                   
 
-            let promiseIntervalos = AsyncStorage.setItem('intervalos_mensagens', JSON.stringify(this.oDadosTelaConfiguracao.intervalos_dias_semana));
+            let promiseIntervalos = AsyncStorage.setItem('agenda_notificacoes', JSON.stringify(this.oDadosTelaConfiguracao.agenda_notificacoes));
 
             await promiseIntervalos;
         } catch (error) {
-            // console.log(error);
+            
             Alert.alert('Despertador de Consciência', 'Erro ao salvar intervalos no dispositivo: ' + error);
         }
     }
 
-    async obterListaIntervalosNoDispositivo () {
+    async obterAgendaNotificacoesDoDispositivo () {
         try {                   
             
-            let promiseIntervalos = await AsyncStorage.getItem('intervalos_mensagens');
+            let promiseIntervalos = await AsyncStorage.getItem('agenda_notificacoes');
             
             if(promiseIntervalos) {
                 
@@ -98,19 +98,21 @@ export default class Configuracao {
             return null;
 
         } catch (error) {
-            // console.log(error);
+            
             Alert.alert('Despertador de Consciência', 'Erro ao ler intervalos do dispositivo: ' + error);
         }
     }
 
     excluirIntervaloDiaSemana(diaSemana, indiceIntervalo) {
-        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.intervalos_dias_semana;
+        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos;
 
         if(oIntervalosDiasSemana && oIntervalosDiasSemana.length > diaSemana) {
             let oDiaSemana = oIntervalosDiasSemana[diaSemana];
 
             if(oDiaSemana && oDiaSemana.intervalos && oDiaSemana.intervalos.length > indiceIntervalo) {
                 oDiaSemana.intervalos.splice(indiceIntervalo, 1);
+          
+                this.salvarAgendaNotificacoesNoDispositivo();
             }
         }
     }
@@ -135,7 +137,7 @@ export default class Configuracao {
 
     adicionarIntervaloDiaSemana(diaSemana, oIntervaloDiaAdicionar) {
         
-        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.intervalos_dias_semana;
+        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos;
         let oIntervaloDiaAtual = oIntervalosDiasSemana[diaSemana];
         
         if(oIntervaloDiaAtual) {
@@ -149,7 +151,7 @@ export default class Configuracao {
             oIntervaloDiaAtual.dia_semana = diaSemana;
             oIntervaloDiaAtual.intervalos.push(oIntervaloDiaAdicionar);
 
-            this.oDadosTelaConfiguracao.intervalos_dias_semana[diaSemana] = oIntervaloDiaAtual;
+            this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos[diaSemana] = oIntervaloDiaAtual;
         }
 
         this.ordenarIntervalosDiaSemana(diaSemana);
@@ -176,8 +178,12 @@ export default class Configuracao {
 
         if(oDiaSemana) {
             let oIntervalosDia = oDiaSemana.intervalos;
+            let oAgora = new Date();
 
             if(oIntervalosDia) {
+                let hora_inicial_item;
+                let hora_final_item;
+                
                 
                 for(let i = 0; i < oIntervalosDia.length; i++) {
                     oIntervaloDiaItem = oIntervalosDia[i];
@@ -188,8 +194,8 @@ export default class Configuracao {
                     dh1.setHours(parseInt(oIntervaloDiaItem.hora_inicial.hora), parseInt(oIntervaloDiaItem.hora_inicial.minuto), 0, 0);
                     dh2.setHours(parseInt(oIntervaloDiaItem.hora_final.hora), parseInt(oIntervaloDiaItem.hora_final.minuto), 59, 999);
                     
-                    let hora_inicial_item = dh1;
-                    let hora_final_item = dh2;
+                    hora_inicial_item = dh1;
+                    hora_final_item = dh2;
 
                     if(!(hora_inicial_validar > hora_final_item && hora_final_validar > hora_final_item) &&
                        !(hora_inicial_validar < hora_inicial_item && hora_final_validar < hora_inicial_item)) {
@@ -197,6 +203,15 @@ export default class Configuracao {
                         Alert.alert('Despertador de Consciência', `A intervalo informado coincide com outro. \nInforme a hora inicial maior que ${hora_final_item.toLocaleTimeString()} ou a hora final menor que ${hora_inicial_item.toLocaleTimeString()}.`);
                         intervaloOk = false;
                         break;
+                    }
+                }
+            }
+            
+            if(intervaloOk) {
+                if(diaSemana === oAgora.getDay()) {
+                    if(oAgora <= hora_final_validar) {
+                        // Calcula a data/hora exibicao do novo intervalo adicionado, que está dentro da hora atual ou futura.
+                        this.gerarHorasExibicaoIntervaloDia(oIntervaloValidar, 0);
                     }
                 }
             }
@@ -238,10 +253,10 @@ export default class Configuracao {
     }
 
     obterProximaDataHoraExibicao() {
-        let bGerouHorasDia = false;
-
+        
         // Consulta a proxima hora existente do dia de hoje, para saber se existe.
         let proximaHoraExibicao = this.obterProximaDataHoraAgenda();
+        let bGerouHorasDia = false;
         let oDataHoraExibicao;
         let oDataHoraAtual = new Date();
 
@@ -284,7 +299,7 @@ export default class Configuracao {
                     
                         // Calcula o numero de dias para o proximo dia da semana.
                         if (oProximoDiaSemana.dia_semana < diaSemanaHoje) {
-                            numDiasAcrescentar = (6 - diaSemanaHoje) + oProximoDiaSemana.dia_semana;
+                            numDiasAcrescentar = (7 - diaSemanaHoje) + oProximoDiaSemana.dia_semana;
                         } else {
                             numDiasAcrescentar = oProximoDiaSemana.dia_semana - diaSemanaHoje;
                         }
@@ -299,9 +314,16 @@ export default class Configuracao {
         }
 
         if(bGerouHorasDia) {
-            // Retira a proxima hora existente do dia de hoje e salva no dispositivo.
-            proximaHoraExibicao = this.obterProximaDataHoraAgenda();
-            this.salvarIntervalosNoDispositivo();
+            // Retira a proxima hora gerada da agenda.
+            proximaHoraExibicao = this.obterProximaDataHoraAgenda();            
+        }
+
+        if(proximaHoraExibicao && 
+           proximaHoraExibicao === this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_hora_agendada) {
+                
+            proximaHoraExibicao = 'DATA_HORA_IGUAL';
+        } else {
+            this.salvarAgendaNotificacoesNoDispositivo();
         }
 
         return proximaHoraExibicao;
@@ -369,9 +391,6 @@ export default class Configuracao {
                 // Retorna a primeira hora previamente calculada do array, removendo-a.
                 horaExibicaoString = oIntervaloItem.horas_exibicao.shift();
                 
-                // Atualiza a lista no dispositivo.
-                this.salvarIntervalosNoDispositivo();
-                
                 return horaExibicaoString;
             }
         }
@@ -379,7 +398,7 @@ export default class Configuracao {
 
     obterDia (diaSemana) {
 
-        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.intervalos_dias_semana;
+        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos;
         let oDiaSemanaItem;
 
         if(oIntervalosDiasSemana) {
@@ -401,27 +420,30 @@ export default class Configuracao {
 
     obterProximoDiaSemana () {
 
-        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.intervalos_dias_semana;
+        let oIntervalosDiasSemana = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos;
         let oProximoDia;
         let oHoje = new Date();
-        let proximoDiaSemana = oHoje.getDay() + 1;
         
         oProximoDia = oIntervalosDiasSemana[7];
         
         if(oProximoDia) {
             return oProximoDia;
         }
-
-        for(let i = 0; i < 7; i++) {
-
-            if(proximoDiaSemana > 6) {
-                // Domingo.
-                proximoDiaSemana = 0;
-            }
+        
+        let diaHoje = oHoje.getDay();
+        
+        // Procura pelo proximo intervalo no maximo 7 vezes.
+        for(let cont = 0; cont < 7; cont++) {
             
-            if(proximoDiaSemana <= (oIntervalosDiasSemana.length - 1) ) {
-                oProximoDia = oIntervalosDiasSemana[proximoDiaSemana];
+            diaHoje++;
+            oProximoDia = oIntervalosDiasSemana[diaHoje];
+            
+            if(oProximoDia) {
                 break;
+            }
+
+            if(diaHoje === 6) {            
+                diaHoje = -1;
             }
         }
         
@@ -443,6 +465,12 @@ export default class Configuracao {
         this.oDadosTelaConfiguracao.hora_notificacao = horaNotificacao.toLocaleTimeString();
 
         return horaNotificacao;
+    }
+
+    registrarUltimaDataHoraAgendada(dataHora) {
+        this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_hora_agendada = dataHora;
+
+        this.salvarAgendaNotificacoesNoDispositivo();
     }
 
     configurarNotificacao(oTelaMensagem, oNavegacao, oDadosControleApp) {
@@ -498,43 +526,52 @@ export default class Configuracao {
         let dataHora = this.obterProximaDataHoraExibicao();
         
         if(dataHora) {
-            let oDataHoraAgendar = new Date(dataHora);
             
-            PushNotification.localNotificationSchedule({
-                //... You can use all the options from localNotifications
-                message: 'Desperte sua consciência...',
-                playSound: false,
-                date: oDataHoraAgendar,
+            try {
+                if(dataHora !== 'DATA_HORA_IGUAL') {
+                    let oDataHoraAgendar = new Date(dataHora);
 
-        //         autoCancel: false, // (optional) default: true
-        //         largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
-        //         smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
-        //    //     bigText: "My big text that will be shown when notification is expanded", // (optional) default: "message" prop
-        //      //   subText: "This is a subText", // (optional) default: none
-        //       //  color: "red", // (optional) default: system default
-        //         vibrate: true, // (optional) default: true
-        //         vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
-        //         //tag: "some_tag", // (optional) add tag to message
-        //         //group: "group", // (optional) add group to message
-        //         ongoing: false, // (optional) set whether this is an "ongoing" notification
-        //         priority: "high", // (optional) set notification priority, default: high
-        //         visibility: "private", // (optional) set notification visibility, default: private
-        //         importance: "high", // (optional) set notification importance, default: high
-        //         allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
-        //         ignoreInForeground: true, // (optional) if true, the notification will not be visible when the app is in the foreground (useful for parity with how iOS notifications appear)
-            
-        //         /* iOS only properties */
-        //         alertAction: "view", // (optional) default: view
-        //         category: "", // (optional) default: empty string
-        //         userInfo: {}, // (optional) default: {} (using null throws a JSON value '<null>' error)
-            
-        //         /* iOS and Android properties */
-        //      //   title: "My Notification Title", // (optional)
-        //      //   message: "My Notification Message", // (required)
-        //         playSound: false, // (optional) default: true
-        //         soundName: "default", // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
-        //         //number: 10, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
-            });
+                    PushNotification.localNotificationSchedule({
+                        //... You can use all the options from localNotifications
+                        message: 'Desperte sua consciência...',
+                        playSound: false,
+                        date: oDataHoraAgendar,
+
+                //         autoCancel: false, // (optional) default: true
+                //         largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
+                //         smallIcon: "ic_notification", // (optional) default: "ic_notification" with fallback for "ic_launcher"
+                //    //     bigText: "My big text that will be shown when notification is expanded", // (optional) default: "message" prop
+                //      //   subText: "This is a subText", // (optional) default: none
+                //       //  color: "red", // (optional) default: system default
+                //         vibrate: true, // (optional) default: true
+                //         vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
+                //         //tag: "some_tag", // (optional) add tag to message
+                //         //group: "group", // (optional) add group to message
+                //         ongoing: false, // (optional) set whether this is an "ongoing" notification
+                //         priority: "high", // (optional) set notification priority, default: high
+                //         visibility: "private", // (optional) set notification visibility, default: private
+                //         importance: "high", // (optional) set notification importance, default: high
+                //         allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
+                //         ignoreInForeground: true, // (optional) if true, the notification will not be visible when the app is in the foreground (useful for parity with how iOS notifications appear)
+                    
+                //         /* iOS only properties */
+                //         alertAction: "view", // (optional) default: view
+                //         category: "", // (optional) default: empty string
+                //         userInfo: {}, // (optional) default: {} (using null throws a JSON value '<null>' error)
+                    
+                //         /* iOS and Android properties */
+                //      //   title: "My Notification Title", // (optional)
+                //      //   message: "My Notification Message", // (required)
+                //         playSound: false, // (optional) default: true
+                //         soundName: "default", // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
+                //         //number: 10, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
+                    });
+                    
+                    this.registrarUltimaDataHoraAgendada(dataHora);
+                }
+            } catch (exc) {
+                Alert.alert(`Erro ao agendar hora no dispositivo: ${exc}`);
+            }
         } else {
             Alert.alert('Configure os intervalos de tempo para o despertar da sua consciência.');
         }

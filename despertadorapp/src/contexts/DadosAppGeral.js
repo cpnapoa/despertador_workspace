@@ -10,6 +10,11 @@ export const DADOS_TELA_MENSAGEM = {
     'msg_num': '',
 };
 
+export const AGENDA = {
+    agenda_intervalos: [],
+    ultima_hora_agendada: '',
+}
+
 export const DADOS_DIA_SEMANA = {
     dia_semana : 0,
     intervalos: [],
@@ -35,7 +40,7 @@ export const DADOS_TELA_CONFIGURACAO = {
     dh1: '',
     dh2: '',
     hora_notificacao: '',
-    intervalos_dias_semana: [],
+    agenda_notificacoes: clonarObjeto(AGENDA),
     qtd_mensagens_exibir: 0, 
     qtd_mensagens_exibidas: 0,
     scroll_enabled: true,
@@ -57,3 +62,13 @@ export const DADOS_APP_GERAL = {
     },
     'registros_log': null,
 };
+
+export const DIAS_SEMANA = [
+    'Dom',
+    'Seg',
+    'Ter',
+    'Qua',
+    'Qui',
+    'Sex',
+    'Sab'
+];

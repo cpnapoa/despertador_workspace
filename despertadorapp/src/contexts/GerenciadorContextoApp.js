@@ -18,7 +18,7 @@ export default class GerenciadorContextoApp {
         this._clonarObjeto = this._clonarObjeto.bind(this);
         this._transportarLogServidor = this._transportarLogServidor.bind(this);
         
-        AppState.addEventListener('change', this._transportarLogServidor);
+       // AppState.addEventListener('change', this._transportarLogServidor);
     };
 
     get dadosApp() {
