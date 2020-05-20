@@ -90,7 +90,7 @@ export default class TelaConfiguracao extends Component {
         
         this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo);
 
-        diaSemana = 1;
+        diaSemana = 3;
         
         this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo);
                 
@@ -103,7 +103,7 @@ export default class TelaConfiguracao extends Component {
     }
 
     listarHoras() {
-        let oIntervalosDiasSemana = this.oDadosTela.agenda_notificacoes.agenda_intervalos;
+        let oAgendaIntervalosDias = this.oDadosTela.agenda_notificacoes.agenda_intervalos_dias;
         let oListaIntervalos;        
         let oIntervalo;
         let oHoras;
@@ -112,9 +112,9 @@ export default class TelaConfiguracao extends Component {
         let oDataHoraAtual;
         let chaveItem;
 
-        if(oIntervalosDiasSemana && oIntervalosDiasSemana.length > 0)
+        if(oAgendaIntervalosDias && oAgendaIntervalosDias.length > 0)
         {
-            oIntervalosDiasSemana.forEach(oDiaSemana => {
+            oAgendaIntervalosDias.forEach(oDiaSemana => {
                 
                 if(oDiaSemana) {
                     oListaIntervalos = oDiaSemana.intervalos;
