@@ -17,6 +17,7 @@ export const AGENDA = {
 
 export const DADOS_DIA_SEMANA = {
     dia_semana: 0,
+    qtd_mensagens_dia: 0,
     intervalos: [],
 }
 
@@ -29,7 +30,7 @@ export const DADOS_INTERVALO = {
     dia_semana: 0,
     hora_inicial: clonarObjeto(HORA_MENSAGEM),
     hora_final: clonarObjeto(HORA_MENSAGEM),
-    qtd_mensagens: 0,
+    qtd_mensagens_intervalo: 0,
     horas_exibicao: [],
     novo: true,
 }

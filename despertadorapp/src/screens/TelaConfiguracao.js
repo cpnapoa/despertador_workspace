@@ -83,21 +83,22 @@ export default class TelaConfiguracao extends Component {
         oNovoIntervalo.hora_inicial.minuto = this.oDadosTela.m1;
         oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
         oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
-        oNovoIntervalo.qtd_mensagens = 1;
+        //oNovoIntervalo.qtd_mensagens_intervalo = 1;
 
         // Dia da semana = 7, indica que nao tem dia definido e todos os dias terão os mesmos intervalos.
         let diaSemana = 0;
         
-        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo);
+        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 3);
 
         diaSemana = 3;
         
-        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo);
+        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 2);
                 
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
     excluirIntervalo(diaSemana, indice) {
+
         this.oConfiguracao.excluirIntervaloDiaSemana(diaSemana, indice);
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
