@@ -12,7 +12,7 @@ export const DADOS_TELA_MENSAGEM = {
 
 export const AGENDA = {
     agenda_intervalos_dias: [],
-    ultima_hora_agendada: '',
+    ultima_data_hora_agendada: DADOS_DATA_HORA_AGENDAMENTO,
 }
 
 export const DADOS_DIA_SEMANA = {
@@ -33,6 +33,14 @@ export const DADOS_INTERVALO = {
     qtd_mensagens_intervalo: 0,
     horas_exibicao: [],
     novo: true,
+    indice_lista: -1,
+}
+
+export const DADOS_DATA_HORA_AGENDAMENTO = {
+    data_hora_agenda: '',
+    dia_semana: -1,
+    indice_intervalo: -1,
+    indice_hora: -1,
 }
 
 export const DADOS_TELA_CONFIGURACAO = {

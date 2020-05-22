@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { DADOS_INTERVALO, DIAS_SEMANA } from '../contexts/DadosAppGeral';
+import { Card } from 'react-native-elements';
 
 export default class TelaConfiguracao extends Component {
 
@@ -86,11 +87,11 @@ export default class TelaConfiguracao extends Component {
         //oNovoIntervalo.qtd_mensagens_intervalo = 1;
 
         // Dia da semana = 7, indica que nao tem dia definido e todos os dias terão os mesmos intervalos.
-        let diaSemana = 0;
+        let diaSemana = 4;
         
         this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 3);
 
-        diaSemana = 3;
+        diaSemana = 5;
         
         this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 2);
                 
@@ -138,14 +139,21 @@ export default class TelaConfiguracao extends Component {
                                     oDataHoraAtual = new Date(oHoras[t]);
                                     dataHoraAtualExibir = oDataHoraAtual.toLocaleTimeString();
                                 }
-                                oListaExibicao.push(                                    
+                                oListaExibicao.push(
+
                                     <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
-                                        <Text style={{marginRight:10}}>
+                                        <Text style={{marginRight:5}}>
                                             {DIAS_SEMANA[oDiaSemana.dia_semana]}
                                         </Text>
-                                        <Text >{oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às : 
+                                        <Text style={{marginRight:5}}>
+                                            {oDiaSemana.qtd_mensagens_dia}
+                                        </Text>
+                                        <Text style={{marginRight:10}}>
+                                            {oIntervalo.qtd_mensagens_intervalo}
+                                        </Text>
+                                        <Text >{oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às  
                                         {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtualExibir}</Text>
-                                        <Icon name='trash' style={{ marginLeft:10 }} onPress={() => this.excluirIntervalo(oDiaSemana.dia_semana, i)}></Icon>
+                                        <Icon name='trash' size={15} style={{ marginLeft:10 }} onPress={() => this.excluirIntervalo(oDiaSemana.dia_semana, i)}></Icon>
                                     </View>                                    
                                 )
                             }
@@ -163,6 +171,14 @@ export default class TelaConfiguracao extends Component {
     }
 
     render() {
+        let oProximaDataHora;
+        let proximaDataHora = 'indefinida.';
+        let oDadosUltimaDataHoraAgendada = this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada;
+
+        if(oDadosUltimaDataHoraAgendada && oDadosUltimaDataHoraAgendada.data_hora_agenda) {
+            oProximaDataHora = new Date(oDadosUltimaDataHoraAgendada.data_hora_agenda);
+            proximaDataHora = `${oProximaDataHora.toLocaleString()}`;
+        }
 
         return (
             <View style={styles.areaTotal}>
@@ -194,9 +210,14 @@ export default class TelaConfiguracao extends Component {
                             <Text>Mensagens exibidas: {this.oDadosTela.qtd_mensagens_exibidas}</Text>
                             <Text>Mensagens a exibir: {this.oDadosTela.qtd_mensagens_exibir}</Text>
                         </View>
-                        <ScrollView size={50} style={{flex:.2}}>
-                            {this.listarHoras()}
-                        </ScrollView>
+                        <View >
+                            <Text>Proxima data/ hora agendada: {proximaDataHora}</Text>
+                        </View>
+                        <Card style={{flex:.2}} title='Agenda de intervalos'>
+                            
+                                {this.listarHoras()}
+                            
+                        </Card>
                     </View>
                     <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
                     
