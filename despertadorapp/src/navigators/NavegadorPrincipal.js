@@ -3,17 +3,29 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import TelaMensagem from '../screens/TelaMensagem';
 import TelaConfiguracao from '../screens/TelaConfiguracao';
+import TelaConfiguracaoModal from '../screens/TelaConfiguracaoModal';
 import { ContextoAppProvider } from '../contexts/ContextoApp';
 
-const Stack = createStackNavigator();
+const StackPrincipal = createStackNavigator();
+const StackRaiz = createStackNavigator();
 
 function FluxoPrincipal() {
   
   return (
-    <Stack.Navigator headerMode='none'>
-        <Stack.Screen name="Mensagem" component={TelaMensagem} />
-        <Stack.Screen name="Configuracao" component={TelaConfiguracao} />
-    </Stack.Navigator>
+    <StackPrincipal.Navigator headerMode='none'>
+        <StackPrincipal.Screen name="Mensagem" component={TelaMensagem} />
+        <StackPrincipal.Screen name="Configuracao" component={TelaConfiguracao} />
+    </StackPrincipal.Navigator>
+  );
+}
+
+function FluxoRaiz() {
+  
+  return (
+    <StackRaiz.Navigator headerMode='none' mode='modal'>
+        <StackRaiz.Screen name="Mensagem" component={FluxoPrincipal} />
+        <StackRaiz.Screen name="Configuracao Intervalo" component={TelaConfiguracaoModal} />
+    </StackRaiz.Navigator>
   );
 }
 
@@ -21,7 +33,7 @@ export default function App() {
     return (
       <ContextoAppProvider>
         <NavigationContainer>
-          <FluxoPrincipal />
+          <FluxoRaiz />
         </NavigationContainer>
       </ContextoAppProvider>
     );

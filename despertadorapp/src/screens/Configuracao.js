@@ -547,30 +547,6 @@ export default class Configuracao {
         }
     }
 
-    // removerProximaDataHoraAgenda() {
-    //     let oIntervalosHoje = this.obterDia();
-    //     let oIntervalosDia = [];
-    //     let oIntervaloItem;
-    //     let horaExibicaoString;
-        
-    //     if(oIntervalosHoje) {
-    //         oIntervalosDia = oIntervalosHoje.intervalos;
-    //     }
-
-    //     for (let i = 0; i < oIntervalosDia.length; i++) {
-            
-    //         oIntervaloItem = oIntervalosDia[i];
-
-    //         if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
-                
-    //             // Retorna a primeira hora previamente calculada do array, removendo-a.
-    //             horaExibicaoString = oIntervaloItem.horas_exibicao.shift();
-                
-    //             return horaExibicaoString;
-    //         }
-    //     }
-    // }
-
     obterDia (diaSemana) {
 
         let oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
@@ -617,7 +593,7 @@ export default class Configuracao {
                 break;
             }
 
-            if(diaHoje === 6) {            
+            if(diaHoje > 6) {            
                 diaHoje = -1;
             }
         }

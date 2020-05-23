@@ -17,6 +17,7 @@ import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { DADOS_INTERVALO, DIAS_SEMANA } from '../contexts/DadosAppGeral';
 import { Card } from 'react-native-elements';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default class TelaConfiguracao extends Component {
 
@@ -78,24 +79,25 @@ export default class TelaConfiguracao extends Component {
     }
 
     adicionarIntervalo() {
-        let oNovoIntervalo = clonarObjeto(DADOS_INTERVALO);
+        this.oNavegacao.navigate('Configuracao Intervalo');
+        // let oNovoIntervalo = clonarObjeto(DADOS_INTERVALO);
         
-        oNovoIntervalo.hora_inicial.hora = this.oDadosTela.h1;
-        oNovoIntervalo.hora_inicial.minuto = this.oDadosTela.m1;
-        oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
-        oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
-        //oNovoIntervalo.qtd_mensagens_intervalo = 1;
+        // oNovoIntervalo.hora_inicial.hora = this.oDadosTela.h1;
+        // oNovoIntervalo.hora_inicial.minuto = this.oDadosTela.m1;
+        // oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
+        // oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
+        // //oNovoIntervalo.qtd_mensagens_intervalo = 1;
 
-        // Dia da semana = 7, indica que nao tem dia definido e todos os dias terão os mesmos intervalos.
-        let diaSemana = 4;
+        // // Dia da semana = 7, indica que nao tem dia definido e todos os dias terão os mesmos intervalos.
+        // let diaSemana = 6;
         
-        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 3);
+        // this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 3);
 
-        diaSemana = 5;
+        // diaSemana = 5;
         
-        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 2);
+        // this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 2);
                 
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+        // this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
     excluirIntervalo(diaSemana, indice) {
@@ -213,12 +215,17 @@ export default class TelaConfiguracao extends Component {
                         <View >
                             <Text>Proxima data/ hora agendada: {proximaDataHora}</Text>
                         </View>
-                        <Card style={{flex:.2}} title='Agenda de intervalos'>
-                            
-                                {this.listarHoras()}
-                            
-                        </Card>
+                        
                     </View>
+                    <SafeAreaView style={{flex: 0.4, backgroundColor:'red' }}>
+                        <ScrollView   >
+                            <Card containerStyle={{height:300, width:300}} title='Agenda de intervalos'>
+                                
+                                    {this.listarHoras()}
+                                
+                            </Card>
+                        </ScrollView>
+                    </SafeAreaView>
                     <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
                     
                     </View>
@@ -244,22 +251,10 @@ const styles = StyleSheet.create({
         justifyContent:'space-between'
     },
     areaIntervaloDefinicao: {
-        flex: .75,
+        flex: .35,
         flexDirection:'column', 
         justifyContent: 'center',
         alignItems: 'center',
         padding: 5,
     },
-    areaEstatisticas: {
-
-    },
-    areaBotao: {
-
-    },
-    areaHoras: {
-        flex: .38,
-        
-        padding: 5,
-        backgroundColor: 'black'
-    }
 });
