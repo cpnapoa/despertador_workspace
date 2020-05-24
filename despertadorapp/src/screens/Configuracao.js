@@ -46,6 +46,7 @@ export default class Configuracao {
         this.removerUltimaDataHoraAgendada = this.removerUltimaDataHoraAgendada.bind(this);
         this.excluirIntervaloDiaSemana = this.excluirIntervaloDiaSemana.bind(this);
         this.salvarConfiguracoes = this.salvarConfiguracoes.bind(this);
+        this.atribuirMensagensPorDia = this.atribuirMensagensPorDia.bind(this);
     }
     
     // Implementar a seguir as funcoes para configurar o aplicativo.
@@ -599,6 +600,17 @@ export default class Configuracao {
         }
         
         return oProximoDia;
+    }
+
+    atribuirMensagensPorDia(diaSemana, qtdMensagensDia) {
+        let oDiaSemana = this.obterDia(diaSemana);
+
+        if(oDiaSemana) {
+            oDiaSemana.qtd_mensagens_dia = qtdMensagensDia;
+            this.removerUltimaDataHoraAgendada();
+
+            this.definirDistribuicaoMensagensIntervalosDia(diaSemana);
+        }
     }
 
     gerarHoraAleatoria(hora_inicial, hora_final) {

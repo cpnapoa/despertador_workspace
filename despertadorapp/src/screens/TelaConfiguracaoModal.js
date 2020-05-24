@@ -5,16 +5,18 @@ import {
     View,
     Button,
     Text,
-    TextInput,
 } from 'react-native';
 import Util, { clonarObjeto } from '../common/Util';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { DADOS_INTERVALO, DIAS_SEMANA } from '../contexts/DadosAppGeral';
+import TextInputMask from 'react-native-text-input-mask';
+import { Divider, Card } from 'react-native-elements';
+import CheckBox from '@react-native-community/checkbox';
 
 export default class TelaConfiguracaoModal extends Component {
-
+    
     constructor(props, value) {
         super(props);
 
@@ -28,19 +30,26 @@ export default class TelaConfiguracaoModal extends Component {
             
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
-            this.oDadosTela = this.oDadosApp.tela_configuracao;
+            this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
             
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
         
+        this.atribuirDataHora = this.atribuirDataHora.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
+        this.montarDiasSemana = this.montarDiasSemana.bind(this);
         this.voltar = this.voltar.bind(this);
         this.obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo.bind(this);
 
         this.oMensagem = new Mensagem();
         this.oUtil = new Util();
+        
+        this.oDadosTela.h1 = 0;
+        this.oDadosTela.m1 = 0;
+        this.oDadosTela.h2 = 0;
+        this.oDadosTela.m2 = 0;        
     }
 
     async obterConfiguracoesNoDispositivo() {
@@ -58,18 +67,35 @@ export default class TelaConfiguracaoModal extends Component {
         oNovoIntervalo.hora_inicial.minuto = this.oDadosTela.m1;
         oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
         oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
-        //oNovoIntervalo.qtd_mensagens_intervalo = 1;
 
-        // Dia da semana = 7, indica que nao tem dia definido e todos os dias terão os mesmos intervalos.
-        let diaSemana = 6;
+        if(this.oDadosTela.dom) {
+            this.oConfiguracao.adicionarIntervaloDiaSemana(0, oNovoIntervalo, 1);
+        }
         
-        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 3);
+        if(this.oDadosTela.seg) {
+            this.oConfiguracao.adicionarIntervaloDiaSemana(1, oNovoIntervalo, 1);
+        }
 
-        diaSemana = 5;
-        
-        this.oConfiguracao.adicionarIntervaloDiaSemana(diaSemana, oNovoIntervalo, 2);
-                
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+        if(this.oDadosTela.ter) {
+            this.oConfiguracao.adicionarIntervaloDiaSemana(2, oNovoIntervalo, 1);
+        }
+
+        if(this.oDadosTela.qua) {
+            this.oConfiguracao.adicionarIntervaloDiaSemana(3, oNovoIntervalo, 1);
+        }
+        if(this.oDadosTela.qui) {
+            this.oConfiguracao.adicionarIntervaloDiaSemana(4, oNovoIntervalo, 1);
+        }
+
+        if(this.oDadosTela.sex) {
+            this.oConfiguracao.adicionarIntervaloDiaSemana(5, oNovoIntervalo, 1);
+        }
+
+        if(this.oDadosTela.sab) {
+            this.oConfiguracao.adicionarIntervaloDiaSemana(6, oNovoIntervalo, 1);
+        }
+
+        this.voltar();
     }
 
     excluirIntervalo(diaSemana, indice) {
@@ -81,44 +107,75 @@ export default class TelaConfiguracaoModal extends Component {
     voltar() {
         this.oConfiguracao.salvarConfiguracoes(true);
         this.oNavegacao.goBack();
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this.oDadosApp.tela_configuracao.objeto_tela);
+    }
+
+    atribuirDataHora(num, valor) {
+        let valores;
+
+        if(valor.length == 5) {
+            valores = valor.split(':');
+     
+            if(num == 1) {
+                this.oDadosTela.h1 = valores[0];
+                this.oDadosTela.m1 = valores[1];
+            } else if(num == 2) {
+                this.oDadosTela.h2 = valores[0];
+                this.oDadosTela.m2 = valores[1];
+            }
+
+            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+        }
+    }
+
+    montarDiasSemana() {
+            
+        return(
+        <Card title='Dias da semana'>
+            <View style={{ flexDirection:'column', alignItems:'flex-start'}}>
+                <View style={{ flexDirection:'row', alignItems:'center'}}>
+                    <CheckBox value={this.oDadosTela.seg} 
+                              onValueChange={value => {this.oDadosTela.seg = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Seg</Text>
+                    <CheckBox value={this.oDadosTela.ter} 
+                              onValueChange={value => {this.oDadosTela.ter = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Ter</Text>
+                    <CheckBox value={this.oDadosTela.qua} 
+                              onValueChange={value => {this.oDadosTela.qua = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qua</Text>
+                    <CheckBox value={this.oDadosTela.qui} 
+                              onValueChange={value => {this.oDadosTela.qui = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qui</Text>
+                    <CheckBox value={this.oDadosTela.sex} 
+                              onValueChange={value => {this.oDadosTela.sex = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sex</Text>
+                </View>
+                <View style={{ flexDirection:'row', alignItems:'center'}}>
+                    <CheckBox value={this.oDadosTela.sab} 
+                              onValueChange={value => {this.oDadosTela.sab = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sab</Text>
+                    <CheckBox value={this.oDadosTela.dom} 
+                              onValueChange={value => {this.oDadosTela.dom = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Dom</Text>
+                </View>
+            </View>
+        </Card>)
     }
 
     render() {
-       
+        
         return (
             <View style={styles.areaTotal}>
-                    <View style={{flex: 0.10, flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'flex-start'}} >
-                        <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={this.voltar} />
+                <View style={styles.areaIntervaloDefinicao}>
+                    <View style={{flexDirection:'row', alignItems:'center'}}>
+                        {this.montarDiasSemana()}
                     </View>
-                    <View style={styles.areaIntervaloDefinicao}>
+                    <View style={{flexDirection:'row', alignItems:'center'}}>
                         <Text>Hora inicial</Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={this.oDadosTela.h1} onChangeText={(valor) => { this.oDadosTela.h1 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={this.oDadosTela.m1} onChangeText={(valor) => { this.oDadosTela.m1 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>min</Text>                            
-                        </View>
+                        <TextInputMask mask={"[00]:[00]"} placeholder="HH:mm" 
+                        onChangeText={(valor) => { this.atribuirDataHora(1, valor); }}></TextInputMask>
 
                         <Text>Hora final: </Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>                            
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={this.oDadosTela.h2} onChangeText={(valor) => { this.oDadosTela.h2 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={this.oDadosTela.m2} onChangeText={(valor) => { this.oDadosTela.m2 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>min</Text>                            
-                        </View>
-
-                        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                            <Button title='Adicionar' onPress={this.adicionarIntervalo} ></Button>
-                        </View>
-                        <View >
-                            <Text>Mensagens exibidas: {this.oDadosTela.qtd_mensagens_exibidas}</Text>
-                            <Text>Mensagens a exibir: {this.oDadosTela.qtd_mensagens_exibir}</Text>
-                        </View>
-                        
+                        <TextInputMask mask={"[00]:[00]"} placeholder="HH:mm" 
+                        onChangeText={(valor) => { this.atribuirDataHora(2, valor); }}></TextInputMask>
                     </View>
-                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                    
-                    </View>
+                </View>
+                <View style={{ flex: .4, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <Button title='Adicionar' onPress={this.adicionarIntervalo} ></Button>
+                </View>                    
             </View>
         );
     }
@@ -131,19 +188,15 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection:'column',
         alignItems:'stretch',
-        justifyContent:'center',
+        justifyContent:'space-between',
         backgroundColor: '#F9F8E7'
     },
-    imgBG: {
-        flex: 1,
-        alignItems:'center',
-        justifyContent:'space-between'
-    },
     areaIntervaloDefinicao: {
-        flex: .35,
+        flex: .4,
         flexDirection:'column', 
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        padding: 5,
+        alignContent: 'stretch',
+        backgroundColor: 'red'
     },
 });

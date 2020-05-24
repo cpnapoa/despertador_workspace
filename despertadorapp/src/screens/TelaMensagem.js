@@ -50,11 +50,7 @@ export default class TelaMensagem extends Component {
             this.oConfiguracao.configurarNotificacao(this, this.oNavegacao, this.oDadosControleApp);
         }
     }
-
-    componenDidMount(a) {
-        console.log('a = ' + a);
-    }
-
+    
     async exibirProximaMensagem() {
         this.oDadosApp.mensagem.texto = await this.oMensagem.obterProximaMensagem();
         

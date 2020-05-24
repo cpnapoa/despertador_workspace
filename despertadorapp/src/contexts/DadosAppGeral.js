@@ -44,10 +44,7 @@ export const DADOS_DATA_HORA_AGENDAMENTO = {
 }
 
 export const DADOS_TELA_CONFIGURACAO = {
-    h1: '',
-    m1: '',
-    h2: '',
-    m2: '',
+    
     dh1: '',
     dh2: '',
     hora_notificacao: '',
@@ -60,26 +57,41 @@ export const DADOS_TELA_CONFIGURACAO = {
     hora_geral: [0, 0, 0, 0]
 };
 
+export const DADOS_TELA_CONFIGURACAO_MODAL = {
+    dom: false,
+    seg: false,
+    ter: false,
+    qua: false,
+    qui: false,
+    sex: false,
+    sab: false,
+    h1: '',
+    m1: '',
+    h2: '',
+    m2: '',
+};
+
 export const DADOS_CONTROLE_APP = {
     'exibir_mensagem': false,
 };
 
 export const DADOS_APP_GERAL = {
     'dados_app': {
-        'mensagem': DADOS_MENSAGEM,
-        'controle_app': DADOS_CONTROLE_APP,
-        'tela_mensagem': DADOS_TELA_MENSAGEM,
-        'tela_configuracao': DADOS_TELA_CONFIGURACAO,
+        mensagem: DADOS_MENSAGEM,
+        controle_app: DADOS_CONTROLE_APP,
+        tela_mensagem: DADOS_TELA_MENSAGEM,
+        tela_configuracao: DADOS_TELA_CONFIGURACAO,
+        tela_configuracao_modal: DADOS_TELA_CONFIGURACAO_MODAL,
     },
     'registros_log': null,
 };
 
 export const DIAS_SEMANA = [
-    'Dom',
-    'Seg',
-    'Ter',
-    'Qua',
-    'Qui',
-    'Sex',
-    'Sab'
+    'Domingo',
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira',
+    'Sábado'
 ];

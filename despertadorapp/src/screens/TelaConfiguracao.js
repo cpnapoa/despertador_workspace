@@ -16,8 +16,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { DADOS_INTERVALO, DIAS_SEMANA } from '../contexts/DadosAppGeral';
-import { Card } from 'react-native-elements';
+import { Card, Divider, Input } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import NumericInput from 'react-native-numeric-input';
 
 export default class TelaConfiguracao extends Component {
 
@@ -40,7 +41,7 @@ export default class TelaConfiguracao extends Component {
             
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
-        
+        this.oDadosTela.objeto_tela = this;
         this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
         this.voltar = this.voltar.bind(this);
@@ -106,6 +107,10 @@ export default class TelaConfiguracao extends Component {
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
+    atribuirMensagensPorDia(diaSemana, qtdMensagensDia) {
+        this.oConfiguracao.atribuirMensagensPorDia(diaSemana, qtdMensagensDia)
+    }
+
     listarHoras() {
         let oAgendaIntervalosDias = this.oDadosTela.agenda_notificacoes.agenda_intervalos_dias;
         let oListaIntervalos;        
@@ -144,12 +149,7 @@ export default class TelaConfiguracao extends Component {
                                 oListaExibicao.push(
 
                                     <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
-                                        <Text style={{marginRight:5}}>
-                                            {DIAS_SEMANA[oDiaSemana.dia_semana]}
-                                        </Text>
-                                        <Text style={{marginRight:5}}>
-                                            {oDiaSemana.qtd_mensagens_dia}
-                                        </Text>
+                                        
                                         <Text style={{marginRight:10}}>
                                             {oIntervalo.qtd_mensagens_intervalo}
                                         </Text>
@@ -164,6 +164,88 @@ export default class TelaConfiguracao extends Component {
                 }                
             });
         }
+        return oListaExibicao;
+    }
+
+    listarHorasDia(oDiaSemana) {
+        let oAgendaIntervalosDias = this.oDadosTela.agenda_notificacoes.agenda_intervalos_dias;
+        let oListaIntervalos;        
+        let oIntervalo;
+        let oHoras;
+        let oListaExibicao = [];
+        let dataHoraAtualExibir;
+        let oDataHoraAtual;
+        let chaveItem;
+
+        if(oDiaSemana) {
+            oListaIntervalos = oDiaSemana.intervalos;
+            
+            for(let i = 0; i < oListaIntervalos.length; i++) {
+                oIntervalo = oListaIntervalos[i];
+                if(oIntervalo) {
+                    oHoras = oIntervalo.horas_exibicao;
+                    
+                    if(!oHoras || oHoras.length === 0) {
+                        oHoras = [];
+                        oHoras[0] = null;
+                    }
+                        
+                    for(let t = 0; t < oHoras.length; t++) {
+                        chaveItem = `${oDiaSemana.dia_semana}${i}${t}`;
+                        dataHoraAtualExibir = '';
+                        
+                        if(oHoras[t]) {
+                            oDataHoraAtual = new Date(oHoras[t]);
+                            dataHoraAtualExibir = oDataHoraAtual.toLocaleTimeString();
+                        }
+                        oListaExibicao.push(
+
+                            <View key={chaveItem} style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between' }}>
+                                
+                                <Text style={{marginRight:10}}>
+                                    {oIntervalo.qtd_mensagens_intervalo}
+                                </Text>
+                                <Text >{oIntervalo.hora_inicial.hora}:{oIntervalo.hora_inicial.minuto}:00 às  
+                                {oIntervalo.hora_final.hora}:{oIntervalo.hora_final.minuto}:59 = {dataHoraAtualExibir}</Text>
+                                <Icon name='trash' size={15} style={{ marginLeft:10 }} onPress={() => this.excluirIntervalo(oDiaSemana.dia_semana, i)}></Icon>
+                            </View>                                    
+                        )
+                    }
+                }
+            }
+        }
+        return oListaExibicao;
+    }
+
+    listarDiasSemana() {
+        let oAgendaIntervalosDias = this.oDadosTela.agenda_notificacoes.agenda_intervalos_dias;
+        let oListaExibicao = [];
+        let tituloDia;
+
+        if(oAgendaIntervalosDias && oAgendaIntervalosDias.length > 0)
+        {
+            oAgendaIntervalosDias.forEach(oDiaSemana => {
+                
+                if(oDiaSemana) {
+                    tituloDia = `${DIAS_SEMANA[oDiaSemana.dia_semana]}`;
+
+                    oListaExibicao.push(
+                        <Card key={oDiaSemana.dia_semana} containerStyle={{width:300}} dividerStyle={{ width:0 }} title={tituloDia} >
+                            <View  style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'flex-start' }}>
+                                <Text>Mensagens por dia: </Text>
+                                <NumericInput type='up-down' minValue={1} maxValue={5} value={oDiaSemana.qtd_mensagens_dia} onChange={value => {this.atribuirMensagensPorDia(oDiaSemana.dia_semana, value); this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} ></NumericInput>                                            
+                            </View>
+                            <Divider></Divider>
+                            {this.listarHorasDia(oDiaSemana)}    
+                        </Card>
+                    )                            
+                }                
+            });
+        }
+        if(!oListaExibicao || oListaExibicao.length == 0) {
+            return <Text>Nenhum intervalo definido.</Text>
+        }
+
         return oListaExibicao;
     }
 
@@ -188,46 +270,13 @@ export default class TelaConfiguracao extends Component {
                     <View style={{flex: 0.10, flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'flex-start'}} >
                         <Icon name="caret-left" size={40} color="#022C18" style={{marginLeft: 55}}  onPress={this.voltar} />
                     </View>
-                    <View style={styles.areaIntervaloDefinicao}>
-                        <Text>Hora inicial</Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={this.oDadosTela.h1} onChangeText={(valor) => { this.oDadosTela.h1 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={this.oDadosTela.m1} onChangeText={(valor) => { this.oDadosTela.m1 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>min</Text>                            
-                        </View>
-
-                        <Text>Hora final: </Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>                            
-                            <TextInput textAlign='right' placeholder="HH" size={10} value={this.oDadosTela.h2} onChangeText={(valor) => { this.oDadosTela.h2 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>h </Text>
-                            <TextInput textAlign='right' placeholder="mm" size={10} value={this.oDadosTela.m2} onChangeText={(valor) => { this.oDadosTela.m2 = valor; this.oGerenciadorContextoApp.atualizarEstadoTela(this); }}></TextInput>
-                            <Text>min</Text>                            
-                        </View>
-
-                        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                            <Button title='Adicionar' onPress={this.adicionarIntervalo} ></Button>
-                        </View>
-                        <View >
-                            <Text>Mensagens exibidas: {this.oDadosTela.qtd_mensagens_exibidas}</Text>
-                            <Text>Mensagens a exibir: {this.oDadosTela.qtd_mensagens_exibir}</Text>
-                        </View>
-                        <View >
-                            <Text>Proxima data/ hora agendada: {proximaDataHora}</Text>
-                        </View>
-                        
-                    </View>
-                    <SafeAreaView style={{flex: 0.4, backgroundColor:'red' }}>
+                    <SafeAreaView style={{flex: 0.75}}>
                         <ScrollView   >
-                            <Card containerStyle={{height:300, width:300}} title='Agenda de intervalos'>
-                                
-                                    {this.listarHoras()}
-                                
-                            </Card>
+                            {this.listarDiasSemana()}
                         </ScrollView>
                     </SafeAreaView>
-                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                    
+                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'flex-end'}}>
+                        <Icon name="plus-circle" size={40} color="#022C18" style={{marginRight: 55}}  onPress={this.adicionarIntervalo} />
                     </View>
                 </ImageBackground>
             </View>
