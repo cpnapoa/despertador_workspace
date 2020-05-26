@@ -42,7 +42,8 @@ export default class TelaMensagem extends Component {
 
         if(this.oMensagem) {
 
-            this.oMensagem.sincronizarMensagensComServidor();
+             this.oMensagem.sincronizarMensagensComServidor();
+             this.exibirEstatisticas();
         }
 
         if(this.oConfiguracao) {
@@ -54,6 +55,24 @@ export default class TelaMensagem extends Component {
     async exibirProximaMensagem() {
         this.oDadosApp.mensagem.texto = await this.oMensagem.obterProximaMensagem();
         
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    }
+
+    async exibirEstatisticas() {
+        
+        let mensagensExibir = [];
+        let mensagensExibidas = [];
+
+        mensagensExibir = await this.oMensagem.lerMensagensExibir();
+        mensagensExibidas = await this.oMensagem.lerMensagensExibidas();
+
+        if (mensagensExibir instanceof Array) {
+            this.oDadosTela.qtd_mensagens_exibir = mensagensExibir.length;
+        }
+        if (mensagensExibidas instanceof Array) {
+            this.oDadosTela.qtd_mensagens_exibidas = mensagensExibidas.length;
+        }
+
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
     
@@ -75,8 +94,15 @@ export default class TelaMensagem extends Component {
                             {this.oDadosApp.mensagem.texto}
                         </Text>
                     </View>
-                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                      
+                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
+                        <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
+                            <Text style={{marginRight:5}}>Mensagens a ler:</Text> 
+                            <Text>{this.oDadosTela.qtd_mensagens_exibir}</Text>
+                        </View>
+                        <View style={{flexDirection:'row', justifyContent:'flex-start', marginBottom:5 }}>
+                            <Text style={{marginRight:5}}>Mensagens lidas:</Text> 
+                            <Text>{this.oDadosTela.qtd_mensagens_exibidas}</Text>
+                        </View>
                     </View>
                 </ImageBackground>
             </View>

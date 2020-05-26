@@ -69,6 +69,7 @@ export const DADOS_TELA_CONFIGURACAO_MODAL = {
     m1: '',
     h2: '',
     m2: '',
+    num_hora_escolher: 0,
 };
 
 export const DADOS_CONTROLE_APP = {

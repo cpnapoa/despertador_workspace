@@ -5,15 +5,17 @@ import {
     View,
     Button,
     Text,
+    Alert,
 } from 'react-native';
 import Util, { clonarObjeto } from '../common/Util';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { DADOS_INTERVALO, DIAS_SEMANA } from '../contexts/DadosAppGeral';
-import TextInputMask from 'react-native-text-input-mask';
 import { Divider, Card } from 'react-native-elements';
 import CheckBox from '@react-native-community/checkbox';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default class TelaConfiguracaoModal extends Component {
     
@@ -40,6 +42,8 @@ export default class TelaConfiguracaoModal extends Component {
         this.atribuirDataHora = this.atribuirDataHora.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
         this.montarDiasSemana = this.montarDiasSemana.bind(this);
+        this.exibirTimePicker = this.exibirTimePicker.bind(this);
+        this.montarTimePicker = this.montarTimePicker.bind(this);
         this.voltar = this.voltar.bind(this);
         this.obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo.bind(this);
 
@@ -67,6 +71,17 @@ export default class TelaConfiguracaoModal extends Component {
         oNovoIntervalo.hora_inicial.minuto = this.oDadosTela.m1;
         oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
         oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
+        
+        if(!this.oDadosTela.dom &&
+           !this.oDadosTela.seg &&
+           !this.oDadosTela.ter &&
+           !this.oDadosTela.qua &&
+           !this.oDadosTela.qui &&
+           !this.oDadosTela.sex) {
+        
+            Alert.alert('Despertador de Conscência', 'Selecione ao menos um dia da semana.');
+            return;
+        }
 
         if(this.oDadosTela.dom) {
             this.oConfiguracao.adicionarIntervaloDiaSemana(0, oNovoIntervalo, 1);
@@ -95,6 +110,8 @@ export default class TelaConfiguracaoModal extends Component {
             this.oConfiguracao.adicionarIntervaloDiaSemana(6, oNovoIntervalo, 1);
         }
 
+        this.oConfiguracao.salvarConfiguracoes(true);
+
         this.voltar();
     }
 
@@ -105,23 +122,22 @@ export default class TelaConfiguracaoModal extends Component {
     }
 
     voltar() {
-        this.oConfiguracao.salvarConfiguracoes(true);
+        
         this.oNavegacao.goBack();
         this.oGerenciadorContextoApp.atualizarEstadoTela(this.oDadosApp.tela_configuracao.objeto_tela);
     }
 
     atribuirDataHora(num, valor) {
-        let valores;
+        this.oDadosTela.num_hora_escolher = 0;
 
-        if(valor.length == 5) {
-            valores = valor.split(':');
-     
+        if(valor) {
+                 
             if(num == 1) {
-                this.oDadosTela.h1 = valores[0];
-                this.oDadosTela.m1 = valores[1];
+                this.oDadosTela.h1 = valor.getHours();
+                this.oDadosTela.m1 = valor.getMinutes();
             } else if(num == 2) {
-                this.oDadosTela.h2 = valores[0];
-                this.oDadosTela.m2 = valores[1];
+                this.oDadosTela.h2 = valor.getHours();
+                this.oDadosTela.m2 = valor.getMinutes();
             }
 
             this.oGerenciadorContextoApp.atualizarEstadoTela(this);
@@ -131,7 +147,7 @@ export default class TelaConfiguracaoModal extends Component {
     montarDiasSemana() {
             
         return(
-        <Card title='Dias da semana'>
+        <Card title='Dias da semana' containerStyle={{ width:300, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}}>
             <View style={{ flexDirection:'column', alignItems:'flex-start'}}>
                 <View style={{ flexDirection:'row', alignItems:'center'}}>
                     <CheckBox value={this.oDadosTela.seg} 
@@ -155,27 +171,61 @@ export default class TelaConfiguracaoModal extends Component {
         </Card>)
     }
 
+    exibirTimePicker(numHora) {
+        this.oDadosTela.num_hora_escolher = numHora;
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    }
+
+    montarTimePicker(numHora) {
+        if(numHora) {
+            return(
+            <DateTimePicker
+            testID="dateTimePicker"
+            timeZoneOffsetInMinutes={0}
+            value={new Date().getTime()}
+            mode='time'
+            is24Hour={true}
+            display="clock"
+            onChange={(event, valor) => { this.atribuirDataHora(numHora, valor);}}
+            />
+            )
+        }
+    }
+
     render() {
-        
+        let h1 = `${this.oDadosTela.h1}`.padStart(2, '0');
+        let m1 = `${this.oDadosTela.m1}`.padStart(2, '0');
+
+        let h2 = `${this.oDadosTela.h2}`.padStart(2, '0');
+        let m2 = `${this.oDadosTela.m2}`.padStart(2, '0');
+
         return (
             <View style={styles.areaTotal}>
+                <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
+                    <Icon name="caret-left" size={40} color="#009999" style={{marginLeft: 40}}  onPress={this.voltar} />
+                    <Text style={{marginRight: 50, fontSize: 24}}>Inclusão de Intervalo</Text>
+                </View>
                 <View style={styles.areaIntervaloDefinicao}>
-                    <View style={{flexDirection:'row', alignItems:'center'}}>
+                    <View style={{flexDirection:'row', alignItems:'center' }}>
                         {this.montarDiasSemana()}
                     </View>
-                    <View style={{flexDirection:'row', alignItems:'center'}}>
-                        <Text>Hora inicial</Text>
-                        <TextInputMask mask={"[00]:[00]"} placeholder="HH:mm" 
-                        onChangeText={(valor) => { this.atribuirDataHora(1, valor); }}></TextInputMask>
-
-                        <Text>Hora final: </Text>
-                        <TextInputMask mask={"[00]:[00]"} placeholder="HH:mm" 
-                        onChangeText={(valor) => { this.atribuirDataHora(2, valor); }}></TextInputMask>
-                    </View>
+                    <Card title='Novo Intervalo' containerStyle={{ alignItems:'center', width:300, marginTop:30, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}} >
+                        <TouchableOpacity onPress={() => this.exibirTimePicker(1)} 
+                                            style={{flexDirection:'column', width:300, alignItems:'center', marginTop: 0, borderRadius:5, borderWidth:1, borderColor:'#e0ebeb'}}>
+                            <Text style={{margin:10, marginTop: 5, fontSize:20}}>Hora inicial</Text>
+                            <Text style={{margin:10, marginTop: 0, fontSize:24, borderStyle:'solid', borderRadius:5, borderWidth: 1, padding:5, paddingLeft:10, paddingRight:10}}>{h1}:{m1}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => this.exibirTimePicker(2)} 
+                                            style={{flexDirection:'column', alignItems:'center', marginTop: 15, borderRadius:5, borderWidth:1, borderColor:'#e0ebeb'}}>
+                            <Text style={{margin:10, fontSize:20}}>Hora final</Text>
+                            <Text style={{margin:10, marginTop: 0, fontSize:24, borderStyle:'solid', borderRadius:5, borderWidth: 1, padding:5, paddingLeft:10, paddingRight:10}}>{h2}:{m2}</Text>
+                            </TouchableOpacity>
+                    </Card>
+                    {this.montarTimePicker(this.oDadosTela.num_hora_escolher)}
                 </View>
-                <View style={{ flex: .4, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                    <Button title='Adicionar' onPress={this.adicionarIntervalo} ></Button>
-                </View>                    
+                <View style={{ flex: .1, margin: 3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <Button title='Adicionar' onPress={this.adicionarIntervalo} color={'#009999'}></Button>
+                </View>
             </View>
         );
     }
@@ -189,14 +239,13 @@ const styles = StyleSheet.create({
         flexDirection:'column',
         alignItems:'stretch',
         justifyContent:'space-between',
-        backgroundColor: '#F9F8E7'
+        backgroundColor: '#faf9eb'
     },
     areaIntervaloDefinicao: {
-        flex: .4,
+        flex: .77,
         flexDirection:'column', 
         justifyContent: 'flex-start',
         alignItems: 'center',
         alignContent: 'stretch',
-        backgroundColor: 'red'
     },
 });

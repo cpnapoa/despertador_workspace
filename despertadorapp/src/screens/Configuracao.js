@@ -583,20 +583,30 @@ export default class Configuracao {
         }
         
         let diaHoje = oHoje.getDay();
+        let proximoDia = diaHoje + 1;
         
-        // Procura pelo proximo intervalo no maximo 7 vezes.
-        for(let cont = 0; cont < 7; cont++) {
+        // Procura pelo proximo intervalo a partir do dia de hoje ate o final da semana.
+        for(; proximoDia < oAgendaIntervalosDias.length; proximoDia++) {
             
-            diaHoje++;
-            oProximoDia = oAgendaIntervalosDias[diaHoje];
+            oProximoDia = oAgendaIntervalosDias[proximoDia];
             
             if(oProximoDia) {
                 break;
             }
+        }
 
-            if(diaHoje > 6) {            
-                diaHoje = -1;
-            }
+        // Se nao encontrou, procura do inicio ate o dia de hoje.
+        if(!oProximoDia) {
+            proximoDia = 0;
+
+            for(; proximoDia <= diaHoje; proximoDia++) {
+            
+                oProximoDia = oAgendaIntervalosDias[proximoDia];
+                
+                if(oProximoDia) {
+                    break;
+                }
+            }   
         }
         
         return oProximoDia;
