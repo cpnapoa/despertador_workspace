@@ -15,6 +15,7 @@ import { Image } from 'react-native-elements';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 
+
 export default class TelaMensagem extends Component {
     
     constructor(props, value) {
@@ -30,8 +31,9 @@ export default class TelaMensagem extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_mensagem;
+            this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
-            this.oMensagem = new Mensagem();
+            this.oMensagem = new Mensagem(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
             
@@ -39,43 +41,54 @@ export default class TelaMensagem extends Component {
         }
 
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
+        this.carregar = this.carregar.bind(this);
+    }
 
-        if(this.oMensagem) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        
+    }
 
-             this.oMensagem.sincronizarMensagensComServidor();
-             this.exibirEstatisticas();
-        }
-
+    async componentDidMount() {
+        
         if(this.oConfiguracao) {
 
-            this.oConfiguracao.configurarNotificacao(this, this.oNavegacao, this.oDadosControleApp);
+            this.oConfiguracao.configurarNotificacao(this, this.oNavegacao);
+            this.oConfiguracao.obterConfiguracoesNoDispositivo(this.carregar);
+        }        
+        
+    }
+
+    carregar() {
+        let oAgendaNotificacoes = this.oDadosTelaConfiguracao.agenda_notificacoes;
+
+        if(oAgendaNotificacoes && oAgendaNotificacoes.ultima_data_hora_agendada) {
+            let oUltimaDataHoraAgendada = oAgendaNotificacoes.ultima_data_hora_agendada;
+
+            if(oUltimaDataHoraAgendada.data_hora_agenda) {
+                let oDataHoraAgendada = new Date(oUltimaDataHoraAgendada.data_hora_agenda);
+                let oAgora = new Date();
+                if(oDataHoraAgendada <= oAgora) {
+                    this.oDadosControleApp.exibir_mensagem = true;
+                }
+            }
+        }
+
+        if (this.oDadosControleApp.exibir_mensagem) {
+
+            this.oDadosControleApp.exibir_mensagem = false;
+            this.oMensagem.lerMensagensExibir(this.exibirProximaMensagem);
         }
     }
     
-    async exibirProximaMensagem() {
-        this.oDadosApp.mensagem.texto = await this.oMensagem.obterProximaMensagem();
+    exibirProximaMensagem() {
+
+        this.oDadosApp.mensagem.texto = this.oMensagem.obterProximaMensagem();
         
+        this.oConfiguracao.agendarNotificacao();
+
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
     }
 
-    async exibirEstatisticas() {
-        
-        let mensagensExibir = [];
-        let mensagensExibidas = [];
-
-        mensagensExibir = await this.oMensagem.lerMensagensExibir();
-        mensagensExibidas = await this.oMensagem.lerMensagensExibidas();
-
-        if (mensagensExibir instanceof Array) {
-            this.oDadosTela.qtd_mensagens_exibir = mensagensExibir.length;
-        }
-        if (mensagensExibidas instanceof Array) {
-            this.oDadosTela.qtd_mensagens_exibidas = mensagensExibidas.length;
-        }
-
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-    }
-    
     render() {
         
         return (
@@ -97,11 +110,11 @@ export default class TelaMensagem extends Component {
                     <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
                         <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
                             <Text style={{marginRight:5}}>Mensagens a ler:</Text> 
-                            <Text>{this.oDadosTela.qtd_mensagens_exibir}</Text>
+                            <Text>{this.oDadosApp.mensagens_exibir.length}</Text>
                         </View>
                         <View style={{flexDirection:'row', justifyContent:'flex-start', marginBottom:5 }}>
                             <Text style={{marginRight:5}}>Mensagens lidas:</Text> 
-                            <Text>{this.oDadosTela.qtd_mensagens_exibidas}</Text>
+                            <Text>{this.oDadosApp.mensagens_exibidas.length}</Text>
                         </View>
                     </View>
                 </ImageBackground>

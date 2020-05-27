@@ -33,6 +33,7 @@ export default class TelaConfiguracaoModal extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
+            this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
             
@@ -50,27 +51,29 @@ export default class TelaConfiguracaoModal extends Component {
         this.oMensagem = new Mensagem();
         this.oUtil = new Util();
         
-        this.oDadosTela.h1 = 0;
-        this.oDadosTela.m1 = 0;
-        this.oDadosTela.h2 = 0;
-        this.oDadosTela.m2 = 0;        
+        this.oDadosTelaConfiguracao.h1 = 0;
+        this.oDadosTelaConfiguracao.m1 = 0;
+        this.oDadosTelaConfiguracao.h2 = 0;
+        this.oDadosTelaConfiguracao.m2 = 0;
+
+        // configurarNotificacao(this.oNavegacao, this.oDadosControleApp);
     }
 
     async obterConfiguracoesNoDispositivo() {
         let oListaIntervalos = await this.oConfiguracao.obterAgendaNotificacoesDoDispositivo();
         
         if(oListaIntervalos) {
-            this.oDadosTela.agenda_notificacoes = oListaIntervalos;
+            this.oDadosTelaConfiguracao.agenda_notificacoes = oListaIntervalos;
         }
     }
 
     adicionarIntervalo() {
         let oNovoIntervalo = clonarObjeto(DADOS_INTERVALO);
         
-        oNovoIntervalo.hora_inicial.hora = this.oDadosTela.h1;
-        oNovoIntervalo.hora_inicial.minuto = this.oDadosTela.m1;
-        oNovoIntervalo.hora_final.hora = this.oDadosTela.h2;
-        oNovoIntervalo.hora_final.minuto = this.oDadosTela.m2;
+        oNovoIntervalo.hora_inicial.hora = this.oDadosTelaConfiguracao.h1;
+        oNovoIntervalo.hora_inicial.minuto = this.oDadosTelaConfiguracao.m1;
+        oNovoIntervalo.hora_final.hora = this.oDadosTelaConfiguracao.h2;
+        oNovoIntervalo.hora_final.minuto = this.oDadosTelaConfiguracao.m2;
         
         if(!this.oDadosTela.dom &&
            !this.oDadosTela.seg &&
@@ -110,9 +113,7 @@ export default class TelaConfiguracaoModal extends Component {
             this.oConfiguracao.adicionarIntervaloDiaSemana(6, oNovoIntervalo, 1);
         }
 
-        this.oConfiguracao.salvarConfiguracoes(true);
-
-        this.voltar();
+        this.oConfiguracao.salvarConfiguracoes(true, this.voltar);
     }
 
     excluirIntervalo(diaSemana, indice) {
@@ -133,11 +134,11 @@ export default class TelaConfiguracaoModal extends Component {
         if(valor) {
                  
             if(num == 1) {
-                this.oDadosTela.h1 = valor.getHours();
-                this.oDadosTela.m1 = valor.getMinutes();
+                this.oDadosTelaConfiguracao.h1 = valor.getHours();
+                this.oDadosTelaConfiguracao.m1 = valor.getMinutes();
             } else if(num == 2) {
-                this.oDadosTela.h2 = valor.getHours();
-                this.oDadosTela.m2 = valor.getMinutes();
+                this.oDadosTelaConfiguracao.h2 = valor.getHours();
+                this.oDadosTelaConfiguracao.m2 = valor.getMinutes();
             }
 
             this.oGerenciadorContextoApp.atualizarEstadoTela(this);
@@ -193,11 +194,11 @@ export default class TelaConfiguracaoModal extends Component {
     }
 
     render() {
-        let h1 = `${this.oDadosTela.h1}`.padStart(2, '0');
-        let m1 = `${this.oDadosTela.m1}`.padStart(2, '0');
+        let h1 = `${this.oDadosTelaConfiguracao.h1}`.padStart(2, '0');
+        let m1 = `${this.oDadosTelaConfiguracao.m1}`.padStart(2, '0');
 
-        let h2 = `${this.oDadosTela.h2}`.padStart(2, '0');
-        let m2 = `${this.oDadosTela.m2}`.padStart(2, '0');
+        let h2 = `${this.oDadosTelaConfiguracao.h2}`.padStart(2, '0');
+        let m2 = `${this.oDadosTelaConfiguracao.m2}`.padStart(2, '0');
 
         return (
             <View style={styles.areaTotal}>

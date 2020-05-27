@@ -37,45 +37,20 @@ export default class TelaConfiguracao extends Component {
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
         this.oDadosTela.objeto_tela = this;
-        this.exibirEstatisticas = this.exibirEstatisticas.bind(this);
+        //this.atualizarEstatisticas = this.atualizarEstatisticas.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
         this.listarDiasSemana = this.listarDiasSemana.bind(this);
         this.listarHorasDia = this.listarHorasDia.bind(this);
         this.voltar = this.voltar.bind(this);
-        this.obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo.bind(this);
+        // this.obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo.bind(this);
 
         this.oMensagem = new Mensagem();
         this.oUtil = new Util();
 
-        this.obterConfiguracoesNoDispositivo();
-        this.exibirEstatisticas();
+        // this.oConfiguracao.obterConfiguracoesNoDispositivo();
+        // this.atualizarEstatisticas();
     }
-
-    async obterConfiguracoesNoDispositivo() {
-        let oListaIntervalos = await this.oConfiguracao.obterAgendaNotificacoesDoDispositivo();
-        
-        if(oListaIntervalos) {
-            this.oDadosTela.agenda_notificacoes = oListaIntervalos;
-        }
-    }
-    async exibirEstatisticas() {
-        
-        let mensagensExibir = [];
-        let mensagensExibidas = [];
-
-        mensagensExibir = await this.oMensagem.lerMensagensExibir();
-        mensagensExibidas = await this.oMensagem.lerMensagensExibidas();
-
-        if (mensagensExibir instanceof Array) {
-            this.oDadosTela.qtd_mensagens_exibir = mensagensExibir.length;
-        }
-        if (mensagensExibidas instanceof Array) {
-            this.oDadosTela.qtd_mensagens_exibidas = mensagensExibidas.length;
-        }
-
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-    }
-
+    
     adicionarIntervalo() {
         this.oNavegacao.navigate('Configuracao Intervalo');
     }

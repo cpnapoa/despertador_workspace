@@ -3,12 +3,20 @@ import {
     Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
+import { call, Value } from 'react-native-reanimated';
 
 export default class Mensagem {
 
-    constructor() {
+    constructor(gerenciadorContexto) {
         
-        this.sincronizarMensagensComServidor = this.sincronizarMensagensComServidor.bind(this);
+        if(gerenciadorContexto) {
+            this.oGerenciadorContextoApp = gerenciadorContexto;
+            this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
+            this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
+            this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
+        }
+
+        // this.sincronizarMensagensComServidor = this.sincronizarMensagensComServidor.bind(this);
         this.tratarBuscarMensagens = this.tratarBuscarMensagens.bind(this);
         this.listar = this.listar.bind(this);
         this.chamarServico = this.chamarServico.bind(this);
@@ -21,19 +29,22 @@ export default class Mensagem {
         this.oUtil = new Util();
     }
 
-    // Busca na base de dados as mensagens cadastradas e salva no dispositivo.
-    async sincronizarMensagensComServidor() {
-        let listaMensagensExibir = await this.lerMensagensExibir();
+    // // Busca na base de dados as mensagens cadastradas e salva no dispositivo.
+    // async sincronizarMensagensComServidor() {
+    //     // let listaMensagensExibir = await this.lerMensagensExibir();
         
-        if(!listaMensagensExibir || (listaMensagensExibir instanceof Array && listaMensagensExibir.length <= 0)) { 
-            this.listar(this.tratarBuscarMensagens);//como isso está funcionando? this.oMensagem não está definido..
-            //nao deveria ser this.listar(this.tratarBuscarMensagens) ? Porque estava declarado errado antes, onde era usado. Foi declardo de forma global.
-        }
-    }
+    //     // listaMensagensExibir;
+
+    //     // if(!listaMensagensExibir || (listaMensagensExibir instanceof Array && listaMensagensExibir.length <= 0)) { 
+            
+    //     // }
+    // }    
 
     tratarBuscarMensagens(oJsonMensagens) {
         if(oJsonMensagens && oJsonMensagens.length > 0) {
             
+            this.oDadosApp.mensagens_exibir = oJsonMensagens
+            this.oDadosApp.mensagens_exibidas = [];
             this.salvarMensagensNoDispositivo(oJsonMensagens, []);
 
             Alert.alert('Despertador de Consciência', oJsonMensagens.length + ' mensagens sincronizadas no seu dispositivo.');
@@ -42,22 +53,23 @@ export default class Mensagem {
         }
     }
 
-    listar(funcaoTratamentoRetono) {
+    listar(funcaoTratamentoRetono, callback) {
 
         try {
             let url = this.oUtil.getURL('/mensagens');
             
-            this.chamarServico(url, {method: 'GET'}, funcaoTratamentoRetono);
+            this.chamarServico(url, {method: 'GET'}, funcaoTratamentoRetono, callback);
         } catch (exc) {
             Alert.alert('Despertador de Consciência', exc);
         }
     }
     
-    chamarServico(url, parametrosHTTP, funcaoTratamentoRetono) {
+    chamarServico(url, parametrosHTTP, funcaoTratamentoRetono, callback) {
         fetch(url, parametrosHTTP)
         .then(this.tratarRespostaHTTP)
         .then((oJsonDadosRetorno) => {
             funcaoTratamentoRetono(oJsonDadosRetorno);
+            callback();
         })
         .catch(function (erro) {
             Alert.alert('Despertador de Consciência', erro.message);
@@ -74,9 +86,9 @@ export default class Mensagem {
     }
 
     //Faz o sorteio da mensagem a partir da lista salva no dispositivo.
-    async obterProximaMensagem() {
+    obterProximaMensagem() {
         let msg = '';
-        let listaMensagensExibir = await this.lerMensagensExibir();
+        let listaMensagensExibir = this.oDadosApp.mensagens_exibir;
 
         if (listaMensagensExibir instanceof Array && listaMensagensExibir.length > 0){
             let indiceMensagem = 0;
@@ -84,13 +96,15 @@ export default class Mensagem {
             if(listaMensagensExibir.length > 1) {
                 indiceMensagem = this.oUtil.getRand(listaMensagensExibir.length);
             }
+
             let oMensagem = listaMensagensExibir[indiceMensagem];
+
             msg = oMensagem.texto;
             oMensagem.indicadorExibida = true;
             
             listaMensagensExibir.splice(indiceMensagem, 1);
 
-            let listaMensagensExibidas = await this.lerMensagensExibidas();
+            let listaMensagensExibidas = this.oDadosApp.mensagens_exibidas;
             listaMensagensExibidas.push(oMensagem);            
 
             this.salvarMensagensNoDispositivo(listaMensagensExibir, listaMensagensExibidas);
@@ -98,42 +112,63 @@ export default class Mensagem {
         } else {
             Alert.alert('Despertador de Consciência', 'Você não tem novas mensagens. :(');
         }
-        return await msg;
+        return msg;
     }
 
     // create a function that saves your data asyncronously
     async salvarMensagensNoDispositivo (listaMensagensExibir, listaMensagensExibidas) {
         try {                   
-            let promiseItensExibir = AsyncStorage.setItem('msgExibir', JSON.stringify(listaMensagensExibir));
-            let promiseItensExibidos = AsyncStorage.setItem('msgExibidas', JSON.stringify(listaMensagensExibidas));
-
-            await promiseItensExibir;
-            await promiseItensExibidos;
+            await AsyncStorage.setItem('msgExibir', JSON.stringify(listaMensagensExibir));
+            await AsyncStorage.setItem('msgExibidas', JSON.stringify(listaMensagensExibidas));
         } catch (error) {
             
             Alert.alert('Despertador de Consciência', 'Erro ao salvar mensagens no dispositivo: ' + error);
         }
     }
 
-    async lerMensagensExibir () {
-        try {                   
-            let promiseItensExibir = await AsyncStorage.getItem('msgExibir');
+    lerMensagensExibir (callback) {
+        try {                
+            let dados;   
+            AsyncStorage.getItem('msgExibir').then((valor) => {
+                if(valor) {
+                    dados = JSON.parse(valor);
+                    
+                    if(dados && dados instanceof Array && dados.length <= 0) {
+                        this.listar(this.tratarBuscarMensagens, callback);
+                    } else {
+                        this.oDadosApp.mensagens_exibir = dados;   
+                    }
+                    
+                    if(callback) {
+                        
+                        this.lerMensagensExibidas(callback);
+                    }
+                }
+            });
             
-            if(promiseItensExibir) {
-                return JSON.parse(promiseItensExibir);
-            }
-            return null;
         } catch (error) {
             
             Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens a exibir: ' + error);
         }
     }
 
-    async lerMensagensExibidas () {
+    lerMensagensExibidas (callback) {
         try {
-            let promiseItensExibidas = await AsyncStorage.getItem('msgExibidas');
+            let dados;
 
-            return JSON.parse(promiseItensExibidas);
+            AsyncStorage.getItem('msgExibidas').then((valor) => {
+                if(valor) {
+                    dados = JSON.parse(valor);
+                    
+                    this.oDadosApp.mensagens_exibidas = dados;
+
+                    if(callback) {
+                        
+                        callback(dados);
+                    }
+                }
+            });
+
         } catch (error) {
             
             Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens a exibir: ' + error);

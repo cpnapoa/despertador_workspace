@@ -79,6 +79,8 @@ export const DADOS_CONTROLE_APP = {
 export const DADOS_APP_GERAL = {
     'dados_app': {
         mensagem: DADOS_MENSAGEM,
+        mensagens_exibir: [],
+        mensagens_exibidas: [],
         controle_app: DADOS_CONTROLE_APP,
         tela_mensagem: DADOS_TELA_MENSAGEM,
         tela_configuracao: DADOS_TELA_CONFIGURACAO,

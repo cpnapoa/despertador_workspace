@@ -23,7 +23,7 @@ function FluxoRaiz() {
   
   return (
     <StackRaiz.Navigator  headerMode='none' mode='modal'>
-        <StackRaiz.Screen name="Mensagem" component={FluxoPrincipal} />
+        <StackRaiz.Screen name="Principal" component={FluxoPrincipal} />
         <StackRaiz.Screen name="Configuracao Intervalo" component={TelaConfiguracaoModal} />
     </StackRaiz.Navigator>
   );

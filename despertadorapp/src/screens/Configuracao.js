@@ -24,14 +24,12 @@ export default class Configuracao {
         }
         this.oUtil = new Util();
 
-        this.chamarServico = this.chamarServico.bind(this);
-        this.tratarRespostaHTTP = this.tratarRespostaHTTP.bind(this);
         this.salvarAgendaNotificacoesNoDispositivo = this.salvarAgendaNotificacoesNoDispositivo.bind(this);
         this.obterAgendaNotificacoesDoDispositivo = this.obterAgendaNotificacoesDoDispositivo.bind(this);
+        this.obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo.bind(this);
         this.adicionarIntervaloDiaSemana = this.adicionarIntervaloDiaSemana.bind(this);
         this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
         this.gerarHorasExibicaoIntervaloDia = this.gerarHorasExibicaoIntervaloDia.bind(this);
-        this.configurarNotificacao = this.configurarNotificacao.bind(this);
         this.agendarNotificacao = this.agendarNotificacao.bind(this);
         this.obterDia = this.obterDia.bind(this);
         this.obterProximoDiaSemana = this.obterProximoDiaSemana.bind(this);
@@ -49,64 +47,60 @@ export default class Configuracao {
         this.atribuirMensagensPorDia = this.atribuirMensagensPorDia.bind(this);
     }
     
-    // Implementar a seguir as funcoes para configurar o aplicativo.
-
-    chamarServico(url, parametrosHTTP, funcaoTratamentoRetono) {
-        fetch(url, parametrosHTTP)
-        .then(this.tratarRespostaHTTP)
-        .then((oJsonDadosRetorno) => {
-            funcaoTratamentoRetono(oJsonDadosRetorno);
-        })
-        .catch(function (erro) {
-            Alert.alert('Despertador de Consciência', erro.message);
-            throw erro;
-        });
-    }
-    
-    tratarRespostaHTTP(oRespostaHTTP) {
-        if (oRespostaHTTP.ok) {
-            return oRespostaHTTP.json();
-        } else {
-            Alert.alert('Despertador de Consciência', "Erro: " + oRespostaHTTP.status);
-        }
-    }
-
-    salvarConfiguracoes(bSalvar) {
+    salvarConfiguracoes(bSalvar, callback) {
 
         if(!this.oGerenciadorContextoApp.appAtivo || bSalvar === true) {
-            this.salvarAgendaNotificacoesNoDispositivo();
-            this.agendarNotificacao();
+            this.salvarAgendaNotificacoesNoDispositivo(this.agendarNotificacao, callback);
         }
     }
 
-    async salvarAgendaNotificacoesNoDispositivo () {
-        try {                   
+    salvarAgendaNotificacoesNoDispositivo (callback, callback2) {
+        try {
+            AsyncStorage.setItem('agenda_notificacoes', JSON.stringify(this.oDadosTelaConfiguracao.agenda_notificacoes))
+            .then(() => {
+            
+                if(callback) {
+                    callback();
 
-            let promiseIntervalos = AsyncStorage.setItem('agenda_notificacoes', JSON.stringify(this.oDadosTelaConfiguracao.agenda_notificacoes));
+                    if(callback2) {
+                        callback2();
+                    }
+                };
+            })
 
-            await promiseIntervalos;
         } catch (error) {
             
             Alert.alert('Despertador de Consciência', 'Erro ao salvar intervalos no dispositivo: ' + error);
         }
     }
 
-    async obterAgendaNotificacoesDoDispositivo () {
+    obterAgendaNotificacoesDoDispositivo (callback) {
         try {                   
+            let dados;
+
+            AsyncStorage.getItem('agenda_notificacoes').then((valor) => {
             
-            let promiseIntervalos = await AsyncStorage.getItem('agenda_notificacoes');
-            
-            if(promiseIntervalos) {
-                
-                return JSON.parse(promiseIntervalos);
-            }
-            
-            return null;
+                if(valor) {
+
+                    dados = JSON.parse(valor);
+
+                    this.oDadosTelaConfiguracao.agenda_notificacoes = dados;
+                    
+                    if(callback) {
+                        callback();
+                    }
+                }
+            })
 
         } catch (error) {
-            
+
             Alert.alert('Despertador de Consciência', 'Erro ao ler intervalos do dispositivo: ' + error);
         }
+    }
+
+    obterConfiguracoesNoDispositivo(callback) {
+        
+         this.obterAgendaNotificacoesDoDispositivo(callback);
     }
 
     excluirIntervaloDiaSemana(diaSemana, indiceIntervalo) {
@@ -646,8 +640,7 @@ export default class Configuracao {
         this.salvarAgendaNotificacoesNoDispositivo();
     }
 
-    configurarNotificacao(oTelaMensagem, oNavegacao, oDadosControleApp) {
-        var funcaoAgendarNotificacao = this.agendarNotificacao;
+    configurarNotificacao(oTelaMensagem, oNavegacao) {
 
         PushNotification.configure({
             // (optional) Called when Token is generated (iOS and Android)
@@ -656,13 +649,11 @@ export default class Configuracao {
             },
     
             // (required) Called when a remote or local notification is opened or received
-            onNotification: async function (notificacao) {
+            onNotification: function (notificacao) {
                 // console.log("NOTIFICATION:", notificacao);
-                
-                oDadosControleApp.exibir_mensagem = true;
+
                 oNavegacao.navigate('Mensagem');
-                oTelaMensagem.exibirProximaMensagem();
-                funcaoAgendarNotificacao();
+                oTelaMensagem.carregar();
     
                 // process the notification
     
@@ -709,6 +700,7 @@ export default class Configuracao {
                         //... You can use all the options from localNotifications
                         message: 'Desperte sua consciência...',
                         playSound: false,
+                        //allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
                         date: oDataHoraAgendar,
 
                 //         autoCancel: false, // (optional) default: true
