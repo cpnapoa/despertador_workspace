@@ -37,18 +37,13 @@ export default class TelaConfiguracao extends Component {
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
         this.oDadosTela.objeto_tela = this;
-        //this.atualizarEstatisticas = this.atualizarEstatisticas.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
         this.listarDiasSemana = this.listarDiasSemana.bind(this);
         this.listarHorasDia = this.listarHorasDia.bind(this);
         this.voltar = this.voltar.bind(this);
-        // this.obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo.bind(this);
 
         this.oMensagem = new Mensagem();
         this.oUtil = new Util();
-
-        // this.oConfiguracao.obterConfiguracoesNoDispositivo();
-        // this.atualizarEstatisticas();
     }
     
     adicionarIntervalo() {
@@ -97,7 +92,7 @@ export default class TelaConfiguracao extends Component {
                         
                         if(oHoras[t]) {
                             oDataHoraAtual = new Date(oHoras[t]);
-                            dataHoraAtualExibir = `= ${oDataHoraAtual.toLocaleString()}`;
+                            dataHoraAtualExibir = `= ${oDataHoraAtual.getDate().toString().padStart(2,'0')}/${(oDataHoraAtual.getMonth() + 1).toString().padStart(2,'0')}/${oDataHoraAtual.getFullYear()} ${oDataHoraAtual.getHours().toString().padStart(2,'0')}:${oDataHoraAtual.getMinutes().toString().padStart(2,'0')}:${oDataHoraAtual.getSeconds().toString().padStart(2,'0')}`;
                         }
                         h1 = `${oIntervalo.hora_inicial.hora}`.padStart(2, '0');
                         m1 = `${oIntervalo.hora_inicial.minuto}`.padStart(2, '0');
@@ -146,15 +141,14 @@ export default class TelaConfiguracao extends Component {
                     
                     oListaExibicao.push(
                         <Card key={oDiaSemana.dia_semana} containerStyle={{backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5, flexDirection:'column', width:300}}  title={tituloDia} >
+                            
+                            {oListaIntervalos}
+                            
+                            <Divider style={{margin:10}}></Divider>
                             <View  style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'center' }}>
                                 <Text>Mensagens por dia</Text>
                                 <InputSpinner type='int' style={{width:80, height:25, alignItems:'center', marginLeft:10}} inputStyle={{fontSize:14}} buttonStyle={{height:25, width:25, padding:0, backgroundColor:'#009999'}} rounded={false} showBorder={true} step={1} min={1} max={5} value={oDiaSemana.qtd_mensagens_dia} onChange={value => {this.atribuirMensagensPorDia(oDiaSemana.dia_semana, value); this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} ></InputSpinner>
                             </View>
-                            <Divider style={{margin:10}}></Divider>
-                            <View style={{alignItems:'center', marginBottom:10}}>
-                                <Text>Intervalos</Text>
-                            </View>
-                            {oListaIntervalos}
                         </Card>
                     )                            
                 }                

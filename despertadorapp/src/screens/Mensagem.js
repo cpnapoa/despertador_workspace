@@ -143,6 +143,8 @@ export default class Mensagem {
                         
                         this.lerMensagensExibidas(callback);
                     }
+                } else {
+                    this.listar(this.tratarBuscarMensagens, callback);
                 }
             });
             

@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Image } from 'react-native-elements';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
+import AsyncStorage from '@react-native-community/async-storage';
 
 
 export default class TelaMensagem extends Component {
@@ -48,8 +49,10 @@ export default class TelaMensagem extends Component {
         
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         
+        AsyncStorage.flushGetRequests();
+
         if(this.oConfiguracao) {
 
             this.oConfiguracao.configurarNotificacao(this, this.oNavegacao);
@@ -60,11 +63,12 @@ export default class TelaMensagem extends Component {
 
     carregar() {
         let oAgendaNotificacoes = this.oDadosTelaConfiguracao.agenda_notificacoes;
+        let oUltimaDataHoraAgendada;
 
         if(oAgendaNotificacoes && oAgendaNotificacoes.ultima_data_hora_agendada) {
-            let oUltimaDataHoraAgendada = oAgendaNotificacoes.ultima_data_hora_agendada;
+            oUltimaDataHoraAgendada = oAgendaNotificacoes.ultima_data_hora_agendada;
 
-            if(oUltimaDataHoraAgendada.data_hora_agenda) {
+            if(oUltimaDataHoraAgendada && oUltimaDataHoraAgendada.data_hora_agenda) {
                 let oDataHoraAgendada = new Date(oUltimaDataHoraAgendada.data_hora_agenda);
                 let oAgora = new Date();
                 if(oDataHoraAgendada <= oAgora) {
@@ -77,6 +81,9 @@ export default class TelaMensagem extends Component {
 
             this.oDadosControleApp.exibir_mensagem = false;
             this.oMensagem.lerMensagensExibir(this.exibirProximaMensagem);
+        } else if (!oUltimaDataHoraAgendada || !oUltimaDataHoraAgendada.data_hora_agenda) {
+
+            this.oNavegacao.navigate('Configuracao');
         }
     }
     

@@ -77,7 +77,7 @@ export default class Configuracao {
     obterAgendaNotificacoesDoDispositivo (callback) {
         try {                   
             let dados;
-
+            
             AsyncStorage.getItem('agenda_notificacoes').then((valor) => {
             
                 if(valor) {
@@ -641,6 +641,7 @@ export default class Configuracao {
     }
 
     configurarNotificacao(oTelaMensagem, oNavegacao) {
+        var obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo;
 
         PushNotification.configure({
             // (optional) Called when Token is generated (iOS and Android)
@@ -653,7 +654,7 @@ export default class Configuracao {
                 // console.log("NOTIFICATION:", notificacao);
 
                 oNavegacao.navigate('Mensagem');
-                oTelaMensagem.carregar();
+                obterConfiguracoesNoDispositivo(oTelaMensagem.carregar);
     
                 // process the notification
     
