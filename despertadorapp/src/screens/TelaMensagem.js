@@ -57,8 +57,7 @@ export default class TelaMensagem extends Component {
 
             this.oConfiguracao.configurarNotificacao(this, this.oNavegacao);
             this.oConfiguracao.obterConfiguracoesNoDispositivo(this.carregar);
-        }        
-        
+        }
     }
 
     carregar() {
@@ -81,7 +80,11 @@ export default class TelaMensagem extends Component {
 
             this.oDadosControleApp.exibir_mensagem = false;
             this.oMensagem.lerMensagensExibir(this.exibirProximaMensagem);
-        } else if (!oUltimaDataHoraAgendada || !oUltimaDataHoraAgendada.data_hora_agenda) {
+        } else {
+            this.oMensagem.lerMensagensExibir(() => {this.oGerenciadorContextoApp.atualizarEstadoTela(this);});
+        }
+        
+        if (!oUltimaDataHoraAgendada || !oUltimaDataHoraAgendada.data_hora_agenda) {
 
             this.oNavegacao.navigate('Configuracao');
         }

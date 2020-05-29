@@ -80,7 +80,8 @@ export default class TelaConfiguracaoModal extends Component {
            !this.oDadosTela.ter &&
            !this.oDadosTela.qua &&
            !this.oDadosTela.qui &&
-           !this.oDadosTela.sex) {
+           !this.oDadosTela.sex &&
+           !this.oDadosTela.sab) {
         
             Alert.alert('Despertador de Conscência', 'Selecione ao menos um dia da semana.');
             return;

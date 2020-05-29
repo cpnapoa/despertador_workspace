@@ -141,14 +141,14 @@ export default class Configuracao {
             }
 
             for(let i = 0; i < oDiaSemana.qtd_mensagens_dia; i++) {
-                indiceAdicionar = 0;
+                indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
                 
                 if(oIntervalosAdicionados.length > 0) {
                     
                     // Determina aleatoriamente quais intervalos receberao horas de exibicao.
                     for(let t = 0; t < (qtdIntervalos * 2); t++) {
 
-                        indiceAdicionar = this.oUtil.getRand(qtdIntervalos);                        
+                        indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
                         adicionar = false;
                         
                         for(a = 0; a < oIntervalosAdicionados.length; a++) {
@@ -286,7 +286,7 @@ export default class Configuracao {
     }
 
     gerarHorasExibicaoIntervaloDia(oIntervaloDia, numDiasAcrescentar) {
-        bGerou = false;
+        let bGerou = false;
 
         if(oIntervaloDia && oIntervaloDia.hora_inicial && oIntervaloDia.hora_final) {
             oIntervaloDia.horas_exibicao = [];
@@ -344,6 +344,9 @@ export default class Configuracao {
 
             this.gerarHorasExibicaoProximoIntervalo(oProximoIntervalo);
             
+            // Obtem de novo, pois pode ter trocado de intervalo, se a data hora atual estah no proximo intervalo.
+            oProximoIntervalo = this.obterProximoIntervaloAgenda();
+
             oDadosProximaDataHoraAgendar = this.obterProximaDataHoraIntervalo(oProximoIntervalo);
         }
 
@@ -452,11 +455,14 @@ export default class Configuracao {
                     // Verifica se a data hora atual estah no intervalo.
                     if (oDataHoraAtual >= oDataHoraInicial && oDataHoraAtual <= oDataHoraFinal) {
                         
-                        if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0 || 
-                        oIntervaloItem.novo) {
-                        
-                            return oIntervaloItem;
+                        oIntervaloItem.novo = true;
+
+                        if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
+                        // oIntervaloItem.novo) {
+                            oIntervaloItem.novo = false;
                         }
+                            return oIntervaloItem;
+                        // }
                     } else if (oDataHoraAtual < oDataHoraInicial) {
 
                         oIntervaloItem.novo = true;
@@ -483,6 +489,7 @@ export default class Configuracao {
                 }
             }
         }
+        return null;
     }
 
     obterProximaDataHoraIntervalo(oIntervalo) {
@@ -532,6 +539,12 @@ export default class Configuracao {
 
                         // Remove a ultima hora agendada, pois foi notificada.
                         oIntervaloAgendado.horas_exibicao.splice(oDadosUltimaDataHoraAgendada.indice_hora, 1);
+                        
+                        if(oIntervaloAgendado.qtd_mensagens_intervalo > 0) {
+                            oIntervaloAgendado.qtd_mensagens_intervalo--;
+                        }
+                    } else {
+                        oIntervaloAgendado.qtd_mensagens_intervalo = 0;
                     }
                 }
                 // Limpa o objeto de controle da ultima data hora agendada.
@@ -606,7 +619,7 @@ export default class Configuracao {
         return oProximoDia;
     }
 
-    atribuirMensagensPorDia(diaSemana, qtdMensagensDia) {
+    atribuirMensagensPorDia(diaSemana, qtdMensagensDia, callback) {
         let oDiaSemana = this.obterDia(diaSemana);
 
         if(oDiaSemana) {
@@ -614,6 +627,12 @@ export default class Configuracao {
             this.removerUltimaDataHoraAgendada();
 
             this.definirDistribuicaoMensagensIntervalosDia(diaSemana);
+            
+            this.agendarNotificacao();
+
+            if(callback) {
+                callback();
+            }
         }
     }
 

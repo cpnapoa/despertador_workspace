@@ -52,9 +52,7 @@ export const DADOS_TELA_CONFIGURACAO = {
     qtd_mensagens_exibir: 0,
     qtd_mensagens_exibidas: 0,
     scroll_enabled: true,
-    var_teste: [0, 0],
-    var_teste2: ['', ''],
-    hora_geral: [0, 0, 0, 0]
+    ver_detalhes: false,
 };
 
 export const DADOS_TELA_CONFIGURACAO_MODAL = {
