@@ -237,7 +237,7 @@ export default class TelaConfiguracao extends Component {
     }
 
     verDataHoraAgendada() {
-        if(this.oDadosTela.ver_detalhes) {
+        if(this.oDadosTela.ver_detalhes && this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada) {
             let dataHora = this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada.data_hora_agenda;
             let oDataHora;
 

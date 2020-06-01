@@ -68,8 +68,10 @@ export default class TelaMensagem extends Component {
             oUltimaDataHoraAgendada = oAgendaNotificacoes.ultima_data_hora_agendada;
 
             if(oUltimaDataHoraAgendada && oUltimaDataHoraAgendada.data_hora_agenda) {
+                
                 let oDataHoraAgendada = new Date(oUltimaDataHoraAgendada.data_hora_agenda);
                 let oAgora = new Date();
+
                 if(oDataHoraAgendada <= oAgora) {
                     this.oDadosControleApp.exibir_mensagem = true;
                 }

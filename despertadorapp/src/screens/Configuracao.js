@@ -116,12 +116,9 @@ export default class Configuracao {
                 // Remove o dia da semana tambem.
                 this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias[diaSemana] = null;
             }
-            
-            this.removerUltimaDataHoraAgendada();
 
-            this.definirDistribuicaoMensagensIntervalosDia(diaSemana);
-            
-            this.agendarNotificacao();
+            this.definirDistribuicaoMensagensIntervalosDia(diaSemana);            
+            this.obterProximaDataHoraExibicao();
         }
     }
 
@@ -334,31 +331,19 @@ export default class Configuracao {
 
     obterProximaDataHoraExibicao() {
         
-        // Consulta o proximo intervalo da agenda.
-        let oProximoIntervalo = this.obterProximoIntervaloAgenda();
-        
-        let oDadosProximaDataHoraAgendar = this.obterProximaDataHoraIntervalo(oProximoIntervalo);
+        let oDadosProximaDataHoraAgendar = this.obterProximaDataHoraIntervalo();
 
-        if(!oDadosProximaDataHoraAgendar || !oDadosProximaDataHoraAgendar.data_hora_agenda) {
-            oProximoIntervalo = this.obterProximoIntervaloAgenda();
-
-            this.gerarHorasExibicaoProximoIntervalo(oProximoIntervalo);
+        if(oDadosProximaDataHoraAgendar && oDadosProximaDataHoraAgendar.data_hora_agenda) {
             
-            // Obtem de novo, pois pode ter trocado de intervalo, se a data hora atual estah no proximo intervalo.
-            oProximoIntervalo = this.obterProximoIntervaloAgenda();
+            let oDadosUltimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
 
-            oDadosProximaDataHoraAgendar = this.obterProximaDataHoraIntervalo(oProximoIntervalo);
-        }
-
-        let oDadosUltimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
-
-        if(oDadosProximaDataHoraAgendar && oDadosUltimaDataHoraAgendada &&
-           oDadosProximaDataHoraAgendar.data_hora_agenda === oDadosUltimaDataHoraAgendada.data_hora_agenda) {
+            if(oDadosUltimaDataHoraAgendada &&
+               oDadosUltimaDataHoraAgendada.data_hora_agenda === oDadosProximaDataHoraAgendar.data_hora_agenda) {
            
-            oDadosProximaDataHoraAgendar.data_hora_agenda = 'DATA_HORA_IGUAL';
+                oDadosProximaDataHoraAgendar.data_hora_agenda = 'DATA_HORA_IGUAL';
+            }
         } else {
-
-            this.salvarAgendaNotificacoesNoDispositivo();
+            Alert.alert('Configure os intervalos de tempo para o despertar da sua consciência.');
         }
 
         return oDadosProximaDataHoraAgendar;
@@ -366,7 +351,7 @@ export default class Configuracao {
 
     gerarHorasExibicaoProximoIntervalo(oProximoIntervalo) {
         
-        if(oProximoIntervalo && oProximoIntervalo.novo) {
+        if(oProximoIntervalo) {
         
             let diaSemanaProximoIntervalo = oProximoIntervalo.dia_semana;
             let numDiasAcrescentar = 0;
@@ -380,178 +365,179 @@ export default class Configuracao {
             } else {
 
                 // Calcula o numero de dias para o proximo dia da semana.
-                if (diaSemanaProximoIntervalo < diaSemanaHoje) {
+                if (diaSemanaProximoIntervalo <= diaSemanaHoje) {
                     numDiasAcrescentar = (7 - diaSemanaHoje) + diaSemanaProximoIntervalo;
                 } else {
                     numDiasAcrescentar = diaSemanaProximoIntervalo - diaSemanaHoje;
                 }
             }
 
-            let oDiaSemana = this.obterDia(oProximoIntervalo.dia_semana);
-            let proximoIndice = 0;
-            let bContinuar = false;
-
-            do {
-                // Tenta gerar as horas para o proximo intervalo.
-                bContinuar = !this.gerarHorasExibicaoIntervaloDia(oProximoIntervalo, numDiasAcrescentar);
-
-                if (bContinuar && numDiasAcrescentar === 0) {
-                    
-                    proximoIndice = oProximoIntervalo.indice_lista + 1;
-                    
-                    // Se for o dia de hoje, tenta obter o proximo intervalo do dia, a partir do atual.
-                    if(oDiaSemana.intervalos.length > proximoIndice) {
-
-                        oProximoIntervalo = oDiaSemana.intervalos[proximoIndice];
-
-                    } else {
-                        bContinuar = false;
-                        oProximoIntervalo = this.obterProximoIntervaloAgenda();
-
-                        if(oProximoIntervalo) {
-                            bContinuar = true;
-                            diaSemanaProximoIntervalo = oProximoIntervalo.dia_semana;
-
-                            // Calcula o numero de dias para o proximo dia da semana.
-                            if (diaSemanaProximoIntervalo < diaSemanaHoje) {
-                                numDiasAcrescentar = (7 - diaSemanaHoje) + diaSemanaProximoIntervalo;
-                            } else {
-                                numDiasAcrescentar = diaSemanaProximoIntervalo - diaSemanaHoje;
-                            }
-
-                            if(numDiasAcrescentar === 0) {
-                                numDiasAcrescentar = 7;
-                            }
-                        }
-                    }
-                } else {
-
-                    bContinuar = false;
-                }
-            } while (bContinuar);
+            this.gerarHorasExibicaoIntervaloDia(oProximoIntervalo, numDiasAcrescentar);
         }
     }
 
-    obterProximoIntervaloAgenda() {
-        let oIntervalosHoje = this.obterDia();
+    obterProximoIntervaloAgenda(diaInicial) {
+        let oHoje = this.obterDia();
         let oIntervalosDia = [];
         let oIntervaloItem;
         
-        if(oIntervalosHoje) {
+        if(oHoje && oHoje.dia_semana === diaInicial) {
             let oDataHoraAtual = new Date();
             let oDataHoraInicial = new Date();
             let oDataHoraFinal = new Date();
+            let oDataHoraExibicao;
+            let t;
             
-            oIntervalosDia = oIntervalosHoje.intervalos;
-            
+            oIntervalosDia = oHoje.intervalos;
+
             for (let i = 0; i < oIntervalosDia.length; i++) {
                 oIntervaloItem = oIntervalosDia[i];
 
                 if(oIntervaloItem.qtd_mensagens_intervalo > 0) {
-
+                            
                     oDataHoraInicial.setHours(parseInt(oIntervaloItem.hora_inicial.hora), parseInt(oIntervaloItem.hora_inicial.minuto), 0, 0);
                     oDataHoraFinal.setHours(parseInt(oIntervaloItem.hora_final.hora), parseInt(oIntervaloItem.hora_final.minuto), 59, 59);
-
-                    // Verifica se a data hora atual estah no intervalo.
-                    if (oDataHoraAtual >= oDataHoraInicial && oDataHoraAtual <= oDataHoraFinal) {
+                
+                    // Se o intervalo foi adicionado agora, verifica se a data hora atual estah dentro do novo intervalo.
+                    if ((oDataHoraAtual >= oDataHoraInicial && oDataHoraAtual <= oDataHoraFinal) ||
+                         oDataHoraAtual <= oDataHoraInicial) {  
                         
-                        oIntervaloItem.novo = true;
-
-                        if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
-                        // oIntervaloItem.novo) {
-                            oIntervaloItem.novo = false;
+                        if(!oIntervaloItem.horas_exibicao || oIntervaloItem.horas_exibicao.length <= 0) {
+                
+                            // Gera as horas para o novo intervalo.
+                            this.gerarHorasExibicaoIntervaloDia(oIntervaloItem, 0);
                         }
-                            return oIntervaloItem;
-                        // }
-                    } else if (oDataHoraAtual < oDataHoraInicial) {
+                    }
 
-                        oIntervaloItem.novo = true;
+                    if(oIntervaloItem.horas_exibicao && oIntervaloItem.horas_exibicao.length > 0) {
                         
-                        return oIntervaloItem;
+                        for(t = 0; t < oIntervaloItem.horas_exibicao.length; t++) {
+                            // Verifica se as horas disponiveis no intervalo são maiores que a data hora atual.
+                            oDataHoraExibicao = new Date(oIntervaloItem.horas_exibicao[t]);
+
+                            if(oDataHoraExibicao > oDataHoraAtual) {                                
+                                break;
+                            }
+                        }
+
+                        // Exclui os intervalos com as horas passadas, se houver.
+                        if(oIntervaloItem.horas_exibicao.length >= t) {
+                            oIntervaloItem.horas_exibicao.splice(0, t);
+                        }
+
+                        oIntervaloItem.qtd_mensagens_intervalo = oIntervaloItem.horas_exibicao.length;
+
+                        if(oIntervaloItem.qtd_mensagens_intervalo > 0) {                            
+                            return oIntervaloItem;
+                        }
                     }
                 }
             }
         }
 
-        let oIntervalosProximoDia = this.obterProximoDiaSemana();
+        // Se não encontrou no dia de hoje, procura o próximo dia.
+        let oProximoDia = this.obterProximoDiaSemana(diaInicial);
 
-        if(oIntervalosProximoDia && oIntervalosProximoDia.intervalos && oIntervalosProximoDia.intervalos.length > 0) {
+        if(oProximoDia) {
             
-            oIntervalosDia = oIntervalosProximoDia.intervalos;
+            oIntervalosDia = oProximoDia.intervalos;
         
+            let qtd_mensagens_dia_disponiveis = 0;
+
+            for (let i = 0; i < oIntervalosDia.length; i++) {
+                
+                oIntervaloItem = oIntervalosDia[i];
+                qtd_mensagens_dia_disponiveis += oIntervaloItem.qtd_mensagens_intervalo;
+            }
+
+            if(qtd_mensagens_dia_disponiveis < oProximoDia.qtd_mensagens_dia) {
+                this.definirDistribuicaoMensagensIntervalosDia(oProximoDia.dia_semana);
+            }
+
             for (let i = 0; i < oIntervalosDia.length; i++) {
                 oIntervaloItem = oIntervalosDia[i];
 
                 if(oIntervaloItem.qtd_mensagens_intervalo > 0) {
                     
-                    oIntervaloItem.novo = true;
                     return oIntervaloItem;
                 }
             }
+
+            // Retorna o dia de hoje para a funcao chamador saber onde continuar, se necessario.
+            oIntervaloItem = clonarObjeto(DADOS_INTERVALO);
+            oIntervaloItem.dia_semana = oProximoDia.dia_semana;
+
+            return oIntervaloItem;
         }
-        return null;
+        
+        return null;        
     }
 
-    obterProximaDataHoraIntervalo(oIntervalo) {
-        
-        if(oIntervalo && oIntervalo.horas_exibicao) {
-            
-            let oDataHoraAtual = new Date();
-            let oDataHoraExibicao;
-            let oDadosProximaDataHoraAgendar;
+    obterProximaDataHoraIntervalo() {
+        let oDataHoraAtual = new Date();
+        let oDataHoraExibicao;
+        let oDadosProximaDataHoraAgendar;
+        let oProximoIntervalo;
 
-            for(let i = 0; i < oIntervalo.horas_exibicao.length; i++) {
-                
-                oDataHoraExibicao = new Date(oIntervalo.horas_exibicao[i]);
+        // Dia de hoje como ponto de partida.
+        let diaHoje = oDataHoraAtual.getDay();
+        let diaInicial = diaHoje;
+        let numVezes = 0;
+        let i;
 
-                if(oDataHoraExibicao > oDataHoraAtual) {
+        do {
+            numVezes++;
+            oDadosProximaDataHoraAgendar = null;
 
-                    oDadosProximaDataHoraAgendar = clonarObjeto(DADOS_DATA_HORA_AGENDAMENTO);
+            // Consulta o proximo intervalo da agenda.
+            oProximoIntervalo = this.obterProximoIntervaloAgenda(diaInicial);
 
-                    oDadosProximaDataHoraAgendar.dia_semana = oIntervalo.dia_semana;
-                    oDadosProximaDataHoraAgendar.indice_intervalo = oIntervalo.indice_lista;
-                    oDadosProximaDataHoraAgendar.indice_hora = i;
-                    oDadosProximaDataHoraAgendar.data_hora_agenda = oIntervalo.horas_exibicao[i];
+            if(oProximoIntervalo) {
+                diaInicial = oProximoIntervalo.dia_semana;
 
-                    return oDadosProximaDataHoraAgendar;
-                } else {
+                if(!oProximoIntervalo.horas_exibicao || oProximoIntervalo.horas_exibicao.length <= 0) {
                     
-                    // Remove a data hora, pois ja passou.
-                    this.removerUltimaDataHoraAgendada();
+                    this.gerarHorasExibicaoProximoIntervalo(oProximoIntervalo);                
+                }
+                
+                for(i = 0; i < oProximoIntervalo.horas_exibicao.length; i++) {
+                    
+                    oDataHoraExibicao = new Date(oProximoIntervalo.horas_exibicao[i]);
+
+                    if(oDataHoraExibicao > oDataHoraAtual) {
+
+                        oDadosProximaDataHoraAgendar = clonarObjeto(DADOS_DATA_HORA_AGENDAMENTO);
+
+                        oDadosProximaDataHoraAgendar.dia_semana = oProximoIntervalo.dia_semana;
+                        oDadosProximaDataHoraAgendar.indice_hora = i;
+                        oDadosProximaDataHoraAgendar.indice_intervalo = oProximoIntervalo.indice_lista;
+                        oDadosProximaDataHoraAgendar.data_hora_agenda = oProximoIntervalo.horas_exibicao[i];
+                        numVezes = 8;                       
+                        break;
+                    }
+                }
+
+                if(oProximoIntervalo.horas_exibicao.length >= i) {
+                        
+                    oProximoIntervalo.horas_exibicao.splice(0, i);
+                    oProximoIntervalo.qtd_mensagens_intervalo = oProximoIntervalo.horas_exibicao.length;
                 }
             }
-        }
 
-        return null;
+        } while (numVezes < 8);
+
+        return oDadosProximaDataHoraAgendar;
     }
 
     removerUltimaDataHoraAgendada() {
         let oDadosUltimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
                 
         if(oDadosUltimaDataHoraAgendada && oDadosUltimaDataHoraAgendada.indice_hora >= 0) {
-                
-                let oDiaSemana = this.obterDia(oDadosUltimaDataHoraAgendada.dia_semana);
-                if(oDiaSemana) {
+            // Limpa o objeto de controle da ultima data hora agendada.
+            this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada = clonarObjeto(DADOS_DATA_HORA_AGENDAMENTO);
 
-                    let oIntervaloAgendado = oDiaSemana.intervalos[oDadosUltimaDataHoraAgendada.indice_intervalo];
-                    
-                    if(oIntervaloAgendado && oIntervaloAgendado.horas_exibicao.length > 0) {
-
-                        // Remove a ultima hora agendada, pois foi notificada.
-                        oIntervaloAgendado.horas_exibicao.splice(oDadosUltimaDataHoraAgendada.indice_hora, 1);
-                        
-                        if(oIntervaloAgendado.qtd_mensagens_intervalo > 0) {
-                            oIntervaloAgendado.qtd_mensagens_intervalo--;
-                        }
-                    } else {
-                        oIntervaloAgendado.qtd_mensagens_intervalo = 0;
-                    }
-                }
-                // Limpa o objeto de controle da ultima data hora agendada.
-                this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada = clonarObjeto(DADOS_DATA_HORA_AGENDAMENTO);
-
-                // Exclui o agendamento da ultima data hora.
-                PushNotification.cancelAllLocalNotifications();
+            // Exclui o agendamento da ultima data hora.
+            PushNotification.cancelAllLocalNotifications();
         }
     }
 
@@ -577,42 +563,44 @@ export default class Configuracao {
         return oDiaSemanaItem;
     }
 
-    obterProximoDiaSemana () {
+    obterProximoDiaSemana(diaInicial) {
 
         let oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
-        let oProximoDia;
+        let oProximoDia = null;
         let oHoje = new Date();
         
         oProximoDia = oAgendaIntervalosDias[7];
         
         if(oProximoDia) {
             return oProximoDia;
-        }
+        }        
         
-        let diaHoje = oHoje.getDay();
-        let proximoDia = diaHoje + 1;
+        let proximoDia = diaInicial + 1;
         
         // Procura pelo proximo intervalo a partir do dia de hoje ate o final da semana.
         for(; proximoDia < oAgendaIntervalosDias.length; proximoDia++) {
             
             oProximoDia = oAgendaIntervalosDias[proximoDia];
             
-            if(oProximoDia) {
+            if(oProximoDia && oProximoDia.qtd_mensagens_dia > 0) {
                 break;
             }
+            oProximoDia = null;
         }
 
         // Se nao encontrou, procura do inicio ate o dia de hoje.
         if(!oProximoDia) {
+            let diaHoje = oHoje.getDay();
             proximoDia = 0;
 
             for(; proximoDia <= diaHoje; proximoDia++) {
             
                 oProximoDia = oAgendaIntervalosDias[proximoDia];
                 
-                if(oProximoDia) {
+                if(oProximoDia && oProximoDia.qtd_mensagens_dia > 0) {
                     break;
                 }
+                oProximoDia = null;
             }   
         }
         
@@ -624,11 +612,9 @@ export default class Configuracao {
 
         if(oDiaSemana) {
             oDiaSemana.qtd_mensagens_dia = qtdMensagensDia;
-            this.removerUltimaDataHoraAgendada();
 
             this.definirDistribuicaoMensagensIntervalosDia(diaSemana);
-            
-            this.agendarNotificacao();
+            this.obterProximaDataHoraExibicao();
 
             if(callback) {
                 callback();
@@ -714,6 +700,9 @@ export default class Configuracao {
             try {
 
                 if(oDadosProximaDataHoraAgendar.data_hora_agenda !== 'DATA_HORA_IGUAL') {
+                    // Remove a ultima data hora agendada, pois sera fornecida nova data hora
+                    this.removerUltimaDataHoraAgendada();
+                    
                     let oDataHoraAgendar = new Date(oDadosProximaDataHoraAgendar.data_hora_agenda);
 
                     PushNotification.localNotificationSchedule({
@@ -758,8 +747,6 @@ export default class Configuracao {
             } catch (exc) {
                 Alert.alert(`Erro ao agendar hora no dispositivo: ${exc}`);
             }
-        } else {
-            Alert.alert('Configure os intervalos de tempo para o despertar da sua consciência.');
         }
     }
 }
