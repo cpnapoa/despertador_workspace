@@ -14,6 +14,7 @@ import { DIAS_SEMANA } from '../contexts/DadosAppGeral';
 import { Card, Divider, Input } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InputSpinner from "react-native-input-spinner";
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default class TelaConfiguracao extends Component {
 
@@ -277,13 +278,15 @@ export default class TelaConfiguracao extends Component {
             <View style={styles.areaTotal}>
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
                     <View style={{alignSelf:'center', width:100, alignItems:'center', justifyContent:'flex-end'}}>
-                        <Icon name="caret-left" size={40} color="#009999" onPress={this.voltar} />
+                        <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
+                            <Icon name="caret-left" size={40} color="#009999" />
+                        </TouchableOpacity>
                     </View>
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
                         <Text style={{fontSize: 24}}>Intervalos agendados</Text>
                     </View>
                     <View style={{alignSelf:'center', width:100, alignItems:'center', justifyContent:'flex-end'}}>
-                        <Icon name='eye' size={40} color='#faf9eb' 
+                        <Icon name='eye' size={40} color='#e0ebeb' 
                         onPress={() => this.verDetalhes()}></Icon>
                     </View>
                 </View>

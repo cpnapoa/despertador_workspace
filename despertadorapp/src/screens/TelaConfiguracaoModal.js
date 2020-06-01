@@ -149,8 +149,7 @@ export default class TelaConfiguracaoModal extends Component {
     montarDiasSemana() {
             
         return(
-        <Card title='Dias da semana' containerStyle={{ width:300, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}}>
-            <View style={{ flexDirection:'column', alignItems:'flex-start'}}>
+            <View style={{ flexDirection:'column', alignItems:'flex-start', margin:10}}>
                 <View style={{ flexDirection:'row', alignItems:'center'}}>
                     <CheckBox value={this.oDadosTela.seg} 
                               onValueChange={value => {this.oDadosTela.seg = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Seg</Text>
@@ -170,7 +169,7 @@ export default class TelaConfiguracaoModal extends Component {
                               onValueChange={value => {this.oDadosTela.dom = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Dom</Text>
                 </View>
             </View>
-        </Card>)
+        )
     }
 
     exibirTimePicker(numHora) {
@@ -204,14 +203,19 @@ export default class TelaConfiguracaoModal extends Component {
         return (
             <View style={styles.areaTotal}>
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
-                    <Icon name="caret-left" size={40} color="#009999" style={{marginLeft: 40}}  onPress={this.voltar} />
-                    <Text style={{marginRight: 50, fontSize: 24}}>Inclusão de Intervalo</Text>
+                    <View style={{alignSelf:'center', width:100, alignItems:'center', justifyContent:'flex-end'}}>
+                        <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
+                            <Icon name="caret-left" size={40} color="#009999" />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
+                        <Text style={{fontSize: 24}}>Inclusão de Intervalo</Text>
+                    </View>
+                    <View style={{alignSelf:'center', width:100, alignItems:'center', justifyContent:'flex-end'}}>                        
+                    </View>
                 </View>
                 <View style={styles.areaIntervaloDefinicao}>
-                    <View style={{flexDirection:'row', alignItems:'center' }}>
-                        {this.montarDiasSemana()}
-                    </View>
-                    <Card title='Novo Intervalo' containerStyle={{ alignItems:'center', width:300, marginTop:30, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}} >
+                    <Card title='Novo Intervalo' containerStyle={{ alignItems:'center', width:300, marginTop:10, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}} >                        
                         <TouchableOpacity onPress={() => this.exibirTimePicker(1)} 
                                             style={{flexDirection:'column', width:300, alignItems:'center', marginTop: 0, borderRadius:5, borderWidth:1, borderColor:'#e0ebeb'}}>
                             <Text style={{margin:10, marginTop: 5, fontSize:20}}>Hora inicial</Text>
@@ -222,6 +226,17 @@ export default class TelaConfiguracaoModal extends Component {
                             <Text style={{margin:10, fontSize:20}}>Hora final</Text>
                             <Text style={{margin:10, marginTop: 0, fontSize:24, borderStyle:'solid', borderRadius:5, borderWidth: 1, padding:5, paddingLeft:10, paddingRight:10}}>{h2}:{m2}</Text>
                             </TouchableOpacity>
+                        <Divider style={{margin:10}}></Divider>
+                        <View style={{flexDirection:'row', margin: 10, alignSelf:'stretch', justifyContent:'space-between'}}>
+                            <View style={{ alignSelf:'flex-start', width:80}}>
+                            </View>
+                            <View style={{flexDirection:'row', alignSelf:'center', justifyContent:'center'}}>
+                                <Text style={{fontSize:16}}>Dias da Semana</Text>
+                            </View>
+                            <View style={{flexDirection:'row', alignSelf:'flex-end', width:80, alignItems:'center', justifyContent:'flex-end'}}>
+                            </View>
+                        </View>
+                        {this.montarDiasSemana()}
                     </Card>
                     {this.montarTimePicker(this.oDadosTela.num_hora_escolher)}
                 </View>

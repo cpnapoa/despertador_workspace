@@ -47,9 +47,10 @@ export default class Mensagem {
             this.oDadosApp.mensagens_exibidas = [];
             this.salvarMensagensNoDispositivo(oJsonMensagens, []);
 
-            Alert.alert('Despertador de Consciência', oJsonMensagens.length + ' mensagens sincronizadas no seu dispositivo.');
+            //Alert.alert('Despertador de Consciência', oJsonMensagens.length + ' mensagens sincronizadas no seu dispositivo.');
         } else {
-            Alert.alert('Despertador de Consciência', 'Cadastrado de mensagens não localizado.');
+            this.oDadosTela.mensagens_exibir = null;
+            //Alert.alert('Despertador de Consciência', 'Cadastrado de mensagens não localizado.');
         }
     }
 
@@ -128,22 +129,23 @@ export default class Mensagem {
 
     lerMensagensExibir (callback) {
         try {                
-            let dados;   
+            let dados;
+
             AsyncStorage.getItem('msgExibir').then((valor) => {
+                
                 if(valor) {
                     dados = JSON.parse(valor);
                     
                     if(dados && dados instanceof Array && dados.length <= 0) {
+                        
                         this.listar(this.tratarBuscarMensagens, callback);
                     } else {
+
                         this.oDadosApp.mensagens_exibir = dados;   
-                    }
-                    
-                    if(callback) {
-                        
                         this.lerMensagensExibidas(callback);
-                    }
+                    }                    
                 } else {
+
                     this.listar(this.tratarBuscarMensagens, callback);
                 }
             });

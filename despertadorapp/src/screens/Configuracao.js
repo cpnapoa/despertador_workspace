@@ -746,7 +746,14 @@ export default class Configuracao {
                 }
             } catch (exc) {
                 Alert.alert(`Erro ao agendar hora no dispositivo: ${exc}`);
+
+                // Remove a ultima data hora agendada, pois sera fornecida nova data hora
+                this.removerUltimaDataHoraAgendada();
             }
+        } else {
+            
+            // Remove a ultima data hora agendada, pois sera fornecida nova data hora
+            this.removerUltimaDataHoraAgendada();
         }
     }
 }

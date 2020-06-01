@@ -42,11 +42,8 @@ export default class TelaMensagem extends Component {
         }
 
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
+        this.montarStausMensagens = this.montarStausMensagens.bind(this);
         this.carregar = this.carregar.bind(this);
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        
     }
 
     componentDidMount() {
@@ -95,10 +92,54 @@ export default class TelaMensagem extends Component {
     exibirProximaMensagem() {
 
         this.oDadosApp.mensagem.texto = this.oMensagem.obterProximaMensagem();
-        
+
         this.oConfiguracao.agendarNotificacao();
 
         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    }
+
+    montarStausMensagens() {
+        if(this.oDadosApp.mensagens_exibir) {
+
+            if(this.oDadosApp.mensagens_exibir.length > 0) {
+                
+                return (
+                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
+                        <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
+                                    <Text style={{marginRight:5}}>Mensagens a ler:</Text> 
+                            <Text>{this.oDadosApp.mensagens_exibir.length}</Text>
+                        </View>
+                        <View style={{flexDirection:'row', justifyContent:'flex-start', marginBottom:5 }}>
+                            <Text style={{marginRight:5}}>Mensagens lidas:</Text> 
+                            <Text>{this.oDadosApp.mensagens_exibidas.length}</Text>
+                        </View>
+                    </View>
+                );
+
+            } else {
+            
+                this.oMensagem.lerMensagensExibir(() => {this.oGerenciadorContextoApp.atualizarEstadoTela(this);});
+                
+                return(
+                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
+                        <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
+                            <Text style={{marginRight:5}}>Sincronizando mensagens...</Text>
+                        </View>
+                    </View>
+                );    
+            }
+
+        } else {
+            this.oDadosApp.mensagens_exibir = [];
+
+            return(
+                <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
+                    <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
+                        <Text style={{marginRight:5}}>Não há mensagens a exibir</Text>
+                    </View>
+                </View>
+            );
+        }
     }
 
     render() {
@@ -119,16 +160,7 @@ export default class TelaMensagem extends Component {
                             {this.oDadosApp.mensagem.texto}
                         </Text>
                     </View>
-                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
-                        <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
-                            <Text style={{marginRight:5}}>Mensagens a ler:</Text> 
-                            <Text>{this.oDadosApp.mensagens_exibir.length}</Text>
-                        </View>
-                        <View style={{flexDirection:'row', justifyContent:'flex-start', marginBottom:5 }}>
-                            <Text style={{marginRight:5}}>Mensagens lidas:</Text> 
-                            <Text>{this.oDadosApp.mensagens_exibidas.length}</Text>
-                        </View>
-                    </View>
+                    {this.montarStausMensagens()}
                 </ImageBackground>
             </View>
         );
