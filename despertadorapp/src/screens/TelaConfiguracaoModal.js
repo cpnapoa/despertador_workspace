@@ -203,7 +203,7 @@ export default class TelaConfiguracaoModal extends Component {
         return (
             <View style={styles.areaTotal}>
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
-                    <View style={{alignSelf:'center', width:100, alignItems:'center', justifyContent:'flex-end'}}>
+                    <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>
                         <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
                             <Icon name="caret-left" size={40} color="#009999" />
                         </TouchableOpacity>
@@ -211,7 +211,7 @@ export default class TelaConfiguracaoModal extends Component {
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
                         <Text style={{fontSize: 24}}>Inclusão de Intervalo</Text>
                     </View>
-                    <View style={{alignSelf:'center', width:100, alignItems:'center', justifyContent:'flex-end'}}>                        
+                    <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>                        
                     </View>
                 </View>
                 <View style={styles.areaIntervaloDefinicao}>
