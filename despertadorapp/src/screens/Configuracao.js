@@ -141,24 +141,29 @@ export default class Configuracao {
                 indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
                 
                 if(oIntervalosAdicionados.length > 0) {
+
+                    indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
+                    adicionar = true;
                     
-                    // Determina aleatoriamente quais intervalos receberao horas de exibicao.
-                    for(let t = 0; t < (qtdIntervalos * 2); t++) {
-
-                        indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
-                        adicionar = false;
+                    for(a = 0; a < oIntervalosAdicionados.length; a++) {
                         
-                        for(a = 0; a < oIntervalosAdicionados.length; a++) {
-                            
-                            // Procura o indice dentre os ja utilizados.
-                            if(oIntervalosAdicionados[a] !== indiceAdicionar) {
-                                adicionar = true;
-                                break;
-                            }   
-                        }                        
+                        // Procura o indice dentre os ja utilizados.
+                        if(oIntervalosAdicionados[a] === indiceAdicionar) {
 
-                        if(adicionar) {
+                            adicionar = false;
                             break;
+                        }
+                    }                        
+
+                    if(!adicionar) {
+                        // Procura o proximo intervalo ainda não usado, para garantir que não ficará sem nenhum mensagem.
+                        for(let y = 0; y < oDiaSemana.intervalos.length; y++) {
+
+                            if(!oDiaSemana.intervalos[y].qtd_mensagens_intervalo) {
+                                
+                                indiceAdicionar = y;
+                                break;
+                            }
                         }
                     }
                 }                
@@ -171,7 +176,7 @@ export default class Configuracao {
                 if((oIntervalosAdicionados.length) === qtdIntervalos) {
                     oIntervalosAdicionados = [];
                 }
-            }            
+            }
         }
     }
 
