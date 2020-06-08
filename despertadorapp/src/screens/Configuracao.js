@@ -293,6 +293,8 @@ export default class Configuracao {
             for(let i = 0; i < oIntervaloDia.qtd_mensagens_intervalo; i++){
                 //TODO: Deve ser implementado calculo de intervalo minimo entre as mensagens (talvez utilizando uma porcentagem do tamanho do intervalo em minutos).
                 oHoraCalculada = this.gerarHoraAleatoria(oIntervaloDia.hora_inicial, oIntervaloDia.hora_final);
+                //fazer ele calcular todas as horas e verificar se elas possuem o espaçamento adequado antes de dar o push
+                //falta limitar o numero de mensagens de acordo com o tamanho do período
                 oHoraCalculada.setDate(oHoraCalculada.getDate() + numDiasAcrescentar);
                 
                 if(oHoraCalculada > oHoraAtual) {
@@ -707,7 +709,7 @@ export default class Configuracao {
 
                     PushNotification.localNotificationSchedule({
                         //... You can use all the options from localNotifications
-                        message: 'Desperte sua consciência...',
+                        message: this.oDadosApp.mensagem_proxima.texto_proxima,
                         playSound: false,
                         //allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
                         date: oDataHoraAgendar,

@@ -4,6 +4,10 @@ export const DADOS_MENSAGEM = {
     'texto': ''
 };
 
+export const DADOS_MENSAGEM_PROXIMA = {
+    'texto_proxima': ''
+};
+
 export const DADOS_TELA_MENSAGEM = {
     'texto_botao': '',
     'elemento_botao': '',
@@ -77,6 +81,7 @@ export const DADOS_CONTROLE_APP = {
 export const DADOS_APP_GERAL = {
     'dados_app': {
         mensagem: DADOS_MENSAGEM,
+        mensagem_proxima: DADOS_MENSAGEM_PROXIMA,
         mensagens_exibir: [],
         mensagens_exibidas: [],
         controle_app: DADOS_CONTROLE_APP,
