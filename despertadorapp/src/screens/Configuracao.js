@@ -714,7 +714,9 @@ export default class Configuracao {
 
                     PushNotification.localNotificationSchedule({
                         //... You can use all the options from localNotifications
-                        message: this.oDadosApp.mensagem_proxima.texto_proxima,
+                        bigText: this.oDadosApp.mensagem_proxima.texto_proxima, //remover essa linha para remover mensagem na notificação
+                        message: this.oDadosApp.mensagem_proxima.texto_proxima, //remover essa linha para remover mensagem na notificação
+                        //message: 'Abra o app e desperte sua consciência...', //adicionar essa linha para remover mensagem na notificação
                         playSound: false,
                         //allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
                         date: oDataHoraAgendar,

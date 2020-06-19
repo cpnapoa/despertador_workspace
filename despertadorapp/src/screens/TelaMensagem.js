@@ -37,18 +37,27 @@ export default class TelaMensagem extends Component {
             this.oMensagem = new Mensagem(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
-
+            
             AppState.addEventListener('change', this.oConfiguracao.salvarConfiguracoes);
         }
 
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
         this.montarStausMensagens = this.montarStausMensagens.bind(this);
         this.carregar = this.carregar.bind(this);
+
+        this.obterMsgTextoDoDispositivo = this.obterMsgTextoDoDispositivo.bind(this);
+        this.salvarMsgTextoNoDispositivo = this.salvarMsgTextoNoDispositivo.bind(this);
     }
 
     componentDidMount() {
 
         AsyncStorage.flushGetRequests();
+        this.obterMsgTextoDoDispositivo();
+
+        if (this.oDadosApp.mensagem.texto == ''){ //inicialização de mensagens para quando o aplicativo é iniciado pela primeira vez
+            this.oDadosApp.mensagem.texto = 'Configure os intervalos e aguarde o despertador...';
+            this.oDadosApp.mensagem_proxima.texto_proxima = '"Honrai as verdades com a prática." - Helena Blavatsky' //essa vai ser a primeira mensagem a ser exibida
+        }
 
         if (this.oConfiguracao) {
 
@@ -97,11 +106,11 @@ export default class TelaMensagem extends Component {
         
         if (this.oDadosApp.mensagem_proxima.texto_proxima == '') {//esse if serve para o caso de ser a primeira vez que o usuario está abrindo o app (nenhuma mensagem sorteada)
             this.oDadosApp.mensagem_proxima.texto_proxima = this.oMensagem.obterProximaMensagem();
-            
-        } else
-
-        this.oDadosApp.mensagem.texto = this.oDadosApp.mensagem_proxima.texto_proxima;
-        this.oDadosApp.mensagem_proxima.texto_proxima = this.oMensagem.obterProximaMensagem();
+        } else {
+            this.oDadosApp.mensagem.texto = this.oDadosApp.mensagem_proxima.texto_proxima;
+            this.oDadosApp.mensagem_proxima.texto_proxima = this.oMensagem.obterProximaMensagem();
+        }
+        this.salvarMsgTextoNoDispositivo();
 
         this.oConfiguracao.agendarNotificacao();
 
@@ -145,6 +154,58 @@ export default class TelaMensagem extends Component {
                     </View>
                 </View>
             );
+        }
+    }
+
+    //para salvar no dispositivo as mensagens que já foram sorteadas e devem ser exibidas (oDadosApp -> mensagem.texto e mensagem_proxima.texto_proxima)
+    salvarMsgTextoNoDispositivo (callback, callback2) {
+        try {
+            AsyncStorage.setItem('mensagem_texto', this.oDadosApp.mensagem.texto)
+            AsyncStorage.setItem('mensagem_proxima', this.oDadosApp.mensagem_proxima.texto_proxima)
+            .then(() => {
+            
+                if(callback) {
+                    callback();
+
+                    if(callback2) {
+                        callback2();
+                    }
+                };
+            })
+
+        } catch (error) {
+            
+            Alert.alert('Despertador de Consciência', 'Erro ao salvar mensagens no dispositivo: ' + error);
+        }
+    }
+
+    //para carregar do dispositivo as mensagens que já foram sorteadas (oDadosApp -> mensagem.texto e mensagem_proxima.texto_proxima)
+    obterMsgTextoDoDispositivo (callback) {
+        try {                   
+            let dados;
+            
+            AsyncStorage.getItem('mensagem_texto').then((valor) => {            
+                if(valor) {
+                    dados = valor;
+                    this.oDadosApp.mensagem.texto = dados;                    
+                    if(callback) {
+                        callback();
+                    }
+                }
+            })
+            AsyncStorage.getItem('mensagem_proxima').then((valor) => {            
+                if(valor) {
+                    dados = valor;
+                    this.oDadosApp.mensagem_proxima.texto_proxima = dados;                    
+                    if(callback) {
+                        callback();
+                    }
+                }
+            })
+
+        } catch (error) {
+
+            Alert.alert('Despertador de Consciência', 'Erro ao ler mensagem texto do dispositivo: ' + error);
         }
     }
 
