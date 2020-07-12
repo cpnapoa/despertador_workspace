@@ -31,6 +31,8 @@ export default class Configuracao {
         this.gerarHoraAleatoria = this.gerarHoraAleatoria.bind(this);
         this.gerarHorasExibicaoIntervaloDia = this.gerarHorasExibicaoIntervaloDia.bind(this);
         this.agendarNotificacao = this.agendarNotificacao.bind(this);
+        this.verificarNotificacaoIgnorada = this.verificarNotificacaoIgnorada.bind(this);
+        this.reagendarNotificacaoIgnorada = this.reagendarNotificacaoIgnorada.bind(this);
         this.obterDia = this.obterDia.bind(this);
         this.obterProximoDiaSemana = this.obterProximoDiaSemana.bind(this);
         this.obterProximaDataHoraExibicao = this.obterProximaDataHoraExibicao.bind(this);
@@ -66,7 +68,7 @@ export default class Configuracao {
                         callback2();
                     }
                 };
-            })
+            });
 
         } catch (error) {
             
@@ -77,20 +79,24 @@ export default class Configuracao {
     obterAgendaNotificacoesDoDispositivo (callback) {
         try {                   
             let dados;
-            
+
+            console.log('Obtendo angeda_notificacoes...');
+
             AsyncStorage.getItem('agenda_notificacoes').then((valor) => {
-            
+                
                 if(valor) {
 
                     dados = JSON.parse(valor);
 
                     this.oDadosTelaConfiguracao.agenda_notificacoes = dados;
                     
+                    console.log('Valor this.oDadosTelaConfiguracao.agenda_notificacoes: ', this.oDadosTelaConfiguracao.agenda_notificacoes);
+                    
                     if(callback) {
-                        callback();
+                        callback(dados);
                     }
                 }
-            })
+            });
 
         } catch (error) {
 
@@ -540,7 +546,8 @@ export default class Configuracao {
         if(oDadosUltimaDataHoraAgendada && oDadosUltimaDataHoraAgendada.indice_hora >= 0) {
             // Limpa o objeto de controle da ultima data hora agendada.
             this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada = clonarObjeto(DADOS_DATA_HORA_AGENDAMENTO);
-
+            
+            console.log('Cancelando todas as notificacoes.');
             // Exclui o agendamento da ultima data hora.
             PushNotification.cancelAllLocalNotifications();
         }
@@ -672,8 +679,13 @@ export default class Configuracao {
                 //notification.finish(PushNotificationIOS.FetchResult.NoData);
             },
     
-            // ANDROID ONLY: GCM or FCM Sender ID (product_number) (optional - not required for local notifications, but is need to receive remote push notifications)
-            // senderID: "456789",
+            // (optional) Called when Registered Action is pressed and invokeApp is false, if true onNotification will be called (Android)
+            onAction: function (notification) {
+                console.log("ACTION:", notification.action);
+                console.log("NOTIFICATION:", notification);
+            
+                // process the action
+            },
     
             // IOS ONLY (optional): default: all - Permissions to register.
             permissions: {
@@ -691,7 +703,7 @@ export default class Configuracao {
              * - Specified if permissions (ios) and token (android and ios) will requested or not,
              * - if not, you must call PushNotificationsHandler.requestPermissions() later
              */
-            requestPermissions: false,
+            requestPermissions: Platform.OS === 'ios',
         });
         // PushNotification.requestPermissions();
     }
@@ -700,6 +712,8 @@ export default class Configuracao {
         
         let oDadosProximaDataHoraAgendar = this.obterProximaDataHoraExibicao();
         
+        console.log('Proxima data-hora: ', oDadosProximaDataHoraAgendar.data_hora_agenda);
+
         if(oDadosProximaDataHoraAgendar && oDadosProximaDataHoraAgendar.data_hora_agenda) {
             
             try {
@@ -745,6 +759,7 @@ export default class Configuracao {
                 //         playSound: false, // (optional) default: true
                 //         soundName: "default", // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
                 //         //number: 10, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
+                
                     });
                     
                     this.registrarUltimaDataHoraAgendada(oDadosProximaDataHoraAgendar);
@@ -761,4 +776,74 @@ export default class Configuracao {
             this.removerUltimaDataHoraAgendada();
         }
     }
+
+    verificarNotificacaoIgnorada() {
+        
+        console.log('Verificando notificacao ignorada...');
+
+        this.obterAgendaNotificacoesDoDispositivo(this.reagendarNotificacaoIgnorada);        
+    }
+
+    reagendarNotificacaoIgnorada(oDadosConfiguracao) {
+        try {
+            console.log('reagendarNotificacaoIgnorada() - oDadosConfiguracao:', oDadosConfiguracao);
+            console.log('reagendarNotificacaoIgnorada() - oDadosConfiguracao.ultima_data_hora_agendada:', oDadosConfiguracao.ultima_data_hora_agendada);
+
+            if(oDadosConfiguracao && oDadosConfiguracao.ultima_data_hora_agendada) {
+                let ultimaDataHoraAgendada = oDadosConfiguracao.ultima_data_hora_agendada;
+            
+                if(ultimaDataHoraAgendada) {
+                    console.log('reagendarNotificacaoIgnorada() - Dados ultima data-hora agenda: ', ultimaDataHoraAgendada);
+                    
+                    let oUltimaDataHoraAgendada = new Date(ultimaDataHoraAgendada.data_hora_agenda);
+                    let oDataHoraAtual = new Date();
+
+                    console.log('reagendarNotificacaoIgnorada() - Ultima data-hora agendada: ', oUltimaDataHoraAgendada.toLocaleString());
+                    console.log('reagendarNotificacaoIgnorada() - Data-hora atual: ', oDataHoraAtual.toLocaleString());
+
+                    if(oUltimaDataHoraAgendada < oDataHoraAtual) {
+                        console.log('Data-hora agendada foi ignorada. Serah reagendada...')
+                        this.agendarNotificacao();
+                    } else {
+                        console.log('Data-hora agendada eh maior. Nada a ser feito...')
+                    }
+                } else {
+                    console.log('Data-hora agendada nao encontrada. Serah agendada...')
+                    this.agendarNotificacao();
+                }
+            } else {
+                console.log('Nao encontrou a agenda de notificacoes salva no dispositivo.')
+            }
+        } catch(e) {
+            console.error('Erro ao reagendarNotificacaoIgnorada()... ', e)
+        }
+    }
+
+    // obterAgendaNotificacoesDoDispositivo (callback) {
+    //     try {                   
+    //         let dados;
+
+    //         console.log('Obtendo angeda_notificacoes...');
+
+    //         AsyncStorage.getItem('agenda_notificacoes').then((valor) => {
+                
+    //             if(valor) {
+
+    //                 dados = JSON.parse(valor);
+
+    //                 this.oDadosTelaConfiguracao.agenda_notificacoes = dados;
+                    
+    //                 console.log('Valor this.oDadosTelaConfiguracao.agenda_notificacoes: ', this.oDadosTelaConfiguracao.agenda_notificacoes);
+                    
+    //                 if(callback) {
+    //                     callback(dados);
+    //                 }
+    //             }
+    //         });
+
+    //     } catch (error) {
+
+    //         Alert.alert('Despertador de Consciência', 'Erro ao ler intervalos do dispositivo: ' + error);
+    //     }
+    // }
 }

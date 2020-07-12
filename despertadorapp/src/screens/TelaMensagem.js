@@ -15,7 +15,60 @@ import { Image } from 'react-native-elements';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import AsyncStorage from '@react-native-community/async-storage';
+import BackgroundFetch, { BackgroundFetchStatus } from 'react-native-background-fetch';
 
+/// Execute a BackgroundFetch.scheduleTask
+///
+export const scheduleTask = async (name) => {
+    try {
+      await BackgroundFetch.scheduleTask({
+        taskId: name,
+        stopOnTerminate: false,
+        enableHeadless: true,
+        delay: 5000,               // milliseconds (5s)
+        forceAlarmManager: true,   // more precise timing with AlarmManager vs default JobScheduler
+        periodic: false            // Fire once only.
+      });
+    } catch (e) {
+      console.warn('[BackgroundFetch] scheduleTask falhou.', e);
+    }
+  }
+
+/// BackgroundFetch event-handler.
+/// All events from the plugin arrive here, including #scheduleTask events.
+///
+const onBackgroundFetchEvent = async (taskId) => {
+    console.log('[BackgroundFetch] Event received com taskId = ', taskId);
+
+    if (taskId === 'react-native-background-fetch') {
+        // Test initiating a #scheduleTask when the periodic fetch event is received.
+        try {
+            await scheduleTask('com.transistorsoft.customtask');
+        } catch (e) {
+            console.warn('[BackgroundFetch] scheduleTask falied', e);
+        }
+    }
+    // Required: Signal completion of your task to native code
+    // If you fail to do this, the OS can terminate your app
+    // or assign battery-blame for consuming too much background-time
+    BackgroundFetch.finish(taskId);
+};
+
+/// Render BackgroundFetchStatus to text.
+export const statusToString = (status) => {
+    switch(status) {
+      case BackgroundFetch.STATUS_RESTRICTED:
+        console.info('[BackgroundFetch] status: restricted');
+        return 'restricted';
+      case BackgroundFetch.STATUS_DENIED:
+        console.info('[BackgroundFetch] status: denied');
+        return 'denied';
+      case BackgroundFetch.STATUS_AVAILABLE:
+        console.info('[BackgroundFetch] status: enabled');
+        return 'available';
+    }
+    return 'unknown';
+  };
 
 export default class TelaMensagem extends Component {
     
@@ -55,6 +108,24 @@ export default class TelaMensagem extends Component {
             this.oConfiguracao.configurarNotificacao(this, this.oNavegacao);
             this.oConfiguracao.obterConfiguracoesNoDispositivo(this.carregar);
         }
+
+        BackgroundFetch.configure({
+            minimumFetchInterval: 15,      // <-- minutes (15 is minimum allowed)
+            // Android options
+            forceAlarmManager: false,      // <-- Set true to bypass JobScheduler.
+            stopOnTerminate: false,
+            enableHeadless: true,
+            startOnBoot: true,
+            requiredNetworkType: BackgroundFetch.NETWORK_TYPE_NONE, // Default
+            requiresCharging: false,       // Default
+            requiresDeviceIdle: false,     // Default
+            requiresBatteryNotLow: false,  // Default
+            requiresStorageNotLow: false,  // Default
+        }, 
+        onBackgroundFetchEvent, 
+        (status) => {
+            console.log('[BackgroundFetch] status', statusToString(status), status);
+        });
     }
 
     carregar() {
