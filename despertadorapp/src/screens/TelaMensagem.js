@@ -16,6 +16,7 @@ import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import AsyncStorage from '@react-native-community/async-storage';
 import BackgroundFetch, { BackgroundFetchStatus } from 'react-native-background-fetch';
+import NotifService from './NotifService';
 
 /// Execute a BackgroundFetch.scheduleTask
 ///
@@ -104,13 +105,13 @@ export default class TelaMensagem extends Component {
         AsyncStorage.flushGetRequests();
 
         if(this.oConfiguracao) {
-
-            this.oConfiguracao.configurarNotificacao(this, this.oNavegacao);
+            
+            //this.oConfiguracao.configurarNotificacao(this, this.oNavegacao);
             this.oConfiguracao.obterConfiguracoesNoDispositivo(this.carregar);
         }
 
         BackgroundFetch.configure({
-            minimumFetchInterval: 15,      // <-- minutes (15 is minimum allowed)
+            minimumFetchInterval: 120,      // <-- minutes (15 is minimum allowed)
             // Android options
             forceAlarmManager: false,      // <-- Set true to bypass JobScheduler.
             stopOnTerminate: false,
@@ -127,7 +128,7 @@ export default class TelaMensagem extends Component {
             console.log('[BackgroundFetch] status', statusToString(status), status);
         });
     }
-
+    
     carregar() {
         let oAgendaNotificacoes = this.oDadosTelaConfiguracao.agenda_notificacoes;
         let oUltimaDataHoraAgendada;

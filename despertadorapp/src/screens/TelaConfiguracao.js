@@ -238,20 +238,25 @@ export default class TelaConfiguracao extends Component {
     }
 
     verDataHoraAgendada() {
+        
         if(this.oDadosTela.ver_detalhes && this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada) {
             let dataHora = this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada.data_hora_agenda;
             let oDataHora;
 
             if(dataHora) {
                 oDataHora = new Date(dataHora);
-                dataHora = ` ${oDataHora.getDate()}/${oDataHora.getMonth() + 1}/${oDataHora.getFullYear()} ${oDataHora.getHours().toString().padStart(2, '0')}:${oDataHora.getMinutes().toString().padStart(2, '0')}:${oDataHora.getSeconds().toString().padStart(2, '0')}`
+                dataHora = `Data/Hora agendada: ${oDataHora.getDate()}/${oDataHora.getMonth() + 1}/${oDataHora.getFullYear()} ${oDataHora.getHours().toString().padStart(2, '0')}:${oDataHora.getMinutes().toString().padStart(2, '0')}:${oDataHora.getSeconds().toString().padStart(2, '0')}`
             }
+            let emSegundoPlano = 'Nao';
+            
+            if(this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada.em_segundo_plano) {
+                emSegundoPlano = 'Sim';
+            }
+            let emSegundoPlanoTexto = `Em segundo plano: ${emSegundoPlano}`;
             return(
-                <View style={{flexDirection:'row'}}>
-                    <Text>Data/Hora agendada:</Text>
-                    <Text>
-                        {dataHora}
-                    </Text>
+                <View style={{flexDirection:'column'}}>
+                    <Text>{dataHora}</Text>
+                    <Text>{emSegundoPlanoTexto}</Text>
                 </View>
             );
         } else {

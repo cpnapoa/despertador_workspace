@@ -11,17 +11,10 @@ import GerenciadorContextoApp from './src/contexts/GerenciadorContextoApp';
 const headlessTask = async ({ taskId }) => {
   
     // Get task id from event {}:
-    console.log('[BackgroundFetch] HeadlessTask iniciou: ', taskId);
+    console.log('[despertadorapp] [BackgroundFetch] HeadlessTask iniciou.', taskId);
 
     let oConfiguracao = new Configuracao(new GerenciadorContextoApp());
-    oConfiguracao.verificarNotificacaoIgnorada();
-
-    console.log('[BackgroundFetch] HeadlessTask finalizando: ', taskId);
-
-    // Required:  Signal to native code that your task is complete.
-    // If you don't do this, your app could be terminated and/or assigned
-    // battery-blame for consuming too much time in background.
-    BackgroundFetch.finish(taskId);
+    oConfiguracao.verificarNotificacaoIgnorada(taskId);
 };
 
 // Register your BackgroundFetch HeadlessTask

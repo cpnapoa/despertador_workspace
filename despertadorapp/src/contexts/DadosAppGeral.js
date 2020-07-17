@@ -41,6 +41,7 @@ export const DADOS_DATA_HORA_AGENDAMENTO = {
     dia_semana: -1,
     indice_intervalo: -1,
     indice_hora: -1,
+    em_segundo_plano: false,
 }
 
 export const DADOS_TELA_CONFIGURACAO = {
@@ -72,6 +73,7 @@ export const DADOS_TELA_CONFIGURACAO_MODAL = {
 
 export const DADOS_CONTROLE_APP = {
     'exibir_mensagem': false,
+    'em_segundo_plano': false,
 };
 
 export const DADOS_APP_GERAL = {
