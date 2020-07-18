@@ -21,16 +21,15 @@ class NotificationHandler {
 
   onAction(notification) {
     console.log ('onAction() acionado: ', notification);
-    console.log ('Notification action received:', notification.action);
     
     if(notification.action === 'Abrir') {
+      console.log ('onAction() - Vai abrir o despertadorapp');
       PushNotification.invokeApp(notification);
-    } else if (notification.action === 'Ver depois') {
-      // Reagenda a mesma mensagem.
+    } else {
+      console.log ('onAction() - Var agendar novo horario.');
+      // Reagenda...
       let oConfiguracao = new Configuracao(new GerenciadorContextoApp());
       oConfiguracao.verificarNotificacaoIgnorada();
-    } else {
-      // ignorado. Serah reagendado em segundo plano.  
     }
   }
 
