@@ -3,6 +3,7 @@ import Mensagem from './Mensagem';
 import {
     StyleSheet,
     View,
+    ScrollView,
     Button,
     Text,
     Alert,
@@ -147,28 +148,30 @@ export default class TelaConfiguracaoModal extends Component {
     }
 
     montarDiasSemana() {
-            
+        {/*alterei para ScrollView porque fui testar o app com o celular de lado e nao conseguia acessar a parte de baixo*/}
         return(
-            <View style={{ flexDirection:'column', alignItems:'flex-start', margin:10}}>
-                <View style={{ flexDirection:'row', alignItems:'center'}}>
-                    <CheckBox value={this.oDadosTela.seg} 
-                              onValueChange={value => {this.oDadosTela.seg = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Seg</Text>
-                    <CheckBox value={this.oDadosTela.ter} 
-                              onValueChange={value => {this.oDadosTela.ter = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Ter</Text>
-                    <CheckBox value={this.oDadosTela.qua} 
-                              onValueChange={value => {this.oDadosTela.qua = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qua</Text>
-                    <CheckBox value={this.oDadosTela.qui} 
-                              onValueChange={value => {this.oDadosTela.qui = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qui</Text>
-                    <CheckBox value={this.oDadosTela.sex} 
-                              onValueChange={value => {this.oDadosTela.sex = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sex</Text>
+            <ScrollView>
+                <View style={{ flexDirection:'column', alignItems:'flex-start', margin:10}}>
+                    <View style={{ flexDirection:'row', alignItems:'center'}}>
+                        <CheckBox value={this.oDadosTela.seg} 
+                                onValueChange={value => {this.oDadosTela.seg = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Seg</Text>
+                        <CheckBox value={this.oDadosTela.ter} 
+                                onValueChange={value => {this.oDadosTela.ter = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Ter</Text>
+                        <CheckBox value={this.oDadosTela.qua} 
+                                onValueChange={value => {this.oDadosTela.qua = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qua</Text>
+                        <CheckBox value={this.oDadosTela.qui} 
+                                onValueChange={value => {this.oDadosTela.qui = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qui</Text>
+                        <CheckBox value={this.oDadosTela.sex} 
+                                onValueChange={value => {this.oDadosTela.sex = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sex</Text>
+                    </View>
+                    <View style={{ flexDirection:'row', alignItems:'center'}}>
+                        <CheckBox value={this.oDadosTela.sab} 
+                                onValueChange={value => {this.oDadosTela.sab = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sab</Text>
+                        <CheckBox value={this.oDadosTela.dom} 
+                                onValueChange={value => {this.oDadosTela.dom = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Dom</Text>
+                    </View>
                 </View>
-                <View style={{ flexDirection:'row', alignItems:'center'}}>
-                    <CheckBox value={this.oDadosTela.sab} 
-                              onValueChange={value => {this.oDadosTela.sab = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sab</Text>
-                    <CheckBox value={this.oDadosTela.dom} 
-                              onValueChange={value => {this.oDadosTela.dom = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Dom</Text>
-                </View>
-            </View>
+            </ScrollView>
         )
     }
 
@@ -183,7 +186,7 @@ export default class TelaConfiguracaoModal extends Component {
             <DateTimePicker
             testID="dateTimePicker"
             timeZoneOffsetInMinutes={0}
-            value={new Date().getTime()}
+            value={new Date().getTime() + 60*1000} //adicionei 1 minuto (+60000ms) para ficar mais facil de gerar intervalos para testar
             mode='time'
             is24Hour={true}
             display="clock"

@@ -10,7 +10,7 @@ import Util, { clonarObjeto } from '../common/Util';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
-import { DIAS_SEMANA } from '../contexts/DadosAppGeral';
+import { DIAS_SEMANA, DADOS_DIA_SEMANA } from '../contexts/DadosAppGeral';
 import { Card, Divider, Input } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InputSpinner from "react-native-input-spinner";
@@ -104,8 +104,6 @@ export default class TelaConfiguracao extends Component {
 
                             <Divider style={{ margin: 10 }}></Divider>
 
-                            <Text>teste valor do intervalo inicial: </Text>
-
                             <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', justifyContent: 'center' }}>
                                 <Text>Mensagens por dia</Text>
                                 <InputSpinner
@@ -116,7 +114,7 @@ export default class TelaConfiguracao extends Component {
                                     rounded={false}
                                     showBorder={true}
                                     step={1} min={1}
-                                    max={5}
+                                    max={oDiaSemana.qtd_mensagens_max_dia[oDiaSemana.dia_semana]}
                                     value={oDiaSemana.qtd_mensagens_dia}
                                     onChange={value => { this.atribuirMensagensPorDia(oDiaSemana.dia_semana, value); this.oGerenciadorContextoApp.atualizarEstadoTela(this); }} >
                                 </InputSpinner>

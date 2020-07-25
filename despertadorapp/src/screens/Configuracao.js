@@ -126,10 +126,10 @@ export default class Configuracao {
         let oDiaSemana = this.obterDia(diaSemana);
         
         if(oDiaSemana && oDiaSemana.intervalos && oDiaSemana.intervalos.length > 0) {
-            let oIntervalosAdicionados = [];
-            let qtdIntervalos = oDiaSemana.intervalos.length;
-            let indiceAdicionar;
-            let adicionar;
+            let oIntervalosAdicionados = []; //lista contendo os índices dos intervalos que já receberam mensagem
+            let qtdIntervalos = oDiaSemana.intervalos.length; //inicialização da quantidade total de intervalos
+            let indiceAdicionar; //é o índice do intervalo que terá o numero de mensagens alterado
+            let adicionar; //flag para identificar se um intervalo já tem mensagens ou não
 
             // Zera todos os intervalos.
             for(let i = 0; i < oDiaSemana.intervalos.length; i++) {
@@ -137,31 +137,31 @@ export default class Configuracao {
                 oDiaSemana.intervalos[i].horas_exibicao = [];
             }
 
-            for(let i = 0; i < oDiaSemana.qtd_mensagens_dia; i++) {
-                indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
+            for(let i = 0; i < oDiaSemana.qtd_mensagens_dia; i++) { //para cada mensagem
+                indiceAdicionar = this.oUtil.getRand(qtdIntervalos); //é sorteado um intervalo
                 
-                if(oIntervalosAdicionados.length > 0) {
+                if(oIntervalosAdicionados.length > 0) { //se algum intervalo já tiver sido adicionado
 
-                    indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
-                    adicionar = true;
+                    indiceAdicionar = this.oUtil.getRand(qtdIntervalos); //escolhe-se um intervalo aleatoriamente
+                    adicionar = true; //marca o intervalo como passivel de receber mensagem
                     
-                    for(a = 0; a < oIntervalosAdicionados.length; a++) {
+                    for(a = 0; a < oIntervalosAdicionados.length; a++) {//para cada intervalo já adicionado
                         
                         // Procura o indice dentre os ja utilizados.
                         if(oIntervalosAdicionados[a] === indiceAdicionar) {
 
-                            adicionar = false;
+                            adicionar = false;//marca o intervalo como já tendo uma mensagem
                             break;
                         }
-                    }                        
+                    } //ou seja, se o intervalo escolido estiver na lista de intervalos que já receberam mensagens, adicionar = false                        
 
-                    if(!adicionar) {
+                    if(!adicionar) {//'adicionar' será 'false' quando o intervalo escolhido já tiver uma mensagem
                         // Procura o proximo intervalo ainda não usado, para garantir que não ficará sem nenhum mensagem.
                         for(let y = 0; y < oDiaSemana.intervalos.length; y++) {
 
-                            if(!oDiaSemana.intervalos[y].qtd_mensagens_intervalo) {
+                            if(!oDiaSemana.intervalos[y].qtd_mensagens_intervalo) {//se o intervalo estiver vazio
                                 
-                                indiceAdicionar = y;
+                                indiceAdicionar = y;//define-se esse intervalo como o próximo a receber a mensagem
                                 break;
                             }
                         }
@@ -169,13 +169,13 @@ export default class Configuracao {
                 }                
             
                 // Incrementa o numero de mensagens a exibir do intervalo.
-                oDiaSemana.intervalos[indiceAdicionar].qtd_mensagens_intervalo++;
+                oDiaSemana.intervalos[indiceAdicionar].qtd_mensagens_intervalo++;//adiciona a mensagem no intervalo
                         
-                oIntervalosAdicionados.push(indiceAdicionar);
+                oIntervalosAdicionados.push(indiceAdicionar);//coloca-se o índice do intervalo adicionado na lista de intervalos que já receberam mensagem
                 
-                if((oIntervalosAdicionados.length) === qtdIntervalos) {
-                    oIntervalosAdicionados = [];
-                }
+                if((oIntervalosAdicionados.length) === qtdIntervalos) {//quando todos os intervalos já tiverem recebido uma mensagem
+                    oIntervalosAdicionados = [];//reseta a lista de intervalos que receberam mensagens para que eles possam receber outra mensagem
+                }//ou seja, um intervalo só vai receber a segunda mensagem se todos os interavalos já tiverem ao menos uma mensagem.
             }
         }
     }
@@ -243,7 +243,8 @@ export default class Configuracao {
 
         let hora_inicial_validar = dh1;
         let hora_final_validar = dh2;
-
+        
+        // Valida se a hor final é maior que a hora inicial
         if(hora_inicial_validar >= hora_final_validar) {
             Alert.alert('A hora inicial deve ser menor que a hora final do intervalo.');
             return false;
@@ -284,6 +285,11 @@ export default class Configuracao {
             }
         }
 
+        // Valida se o intervalo posui no mínimo 30 minutos
+
+
+        // Calcula quantas mensagens cabem no intervalo
+
         return intervaloOk;
     }
 
@@ -292,19 +298,52 @@ export default class Configuracao {
 
         if(oIntervaloDia && oIntervaloDia.hora_inicial && oIntervaloDia.hora_final) {
             oIntervaloDia.horas_exibicao = [];
-            let oHoraCalculada;
+            let oHoraCalculada = [];
             let oHoraAtual = new Date();
+            let intervalo = 0;
+            let k = 0;
 
+
+            //sorteio e validação do intervalo mínimo entre os horários sorteados
             for(let i = 0; i < oIntervaloDia.qtd_mensagens_intervalo; i++){
-                //TODO: Deve ser implementado calculo de intervalo minimo entre as mensagens (talvez utilizando uma porcentagem do tamanho do intervalo em minutos).
-                oHoraCalculada = this.gerarHoraAleatoria(oIntervaloDia.hora_inicial, oIntervaloDia.hora_final);
-                //fazer ele calcular todas as horas e verificar se elas possuem o espaçamento adequado antes de dar o push
-                //falta limitar o numero de mensagens de acordo com o tamanho do período
-                oHoraCalculada.setDate(oHoraCalculada.getDate() + numDiasAcrescentar);
+                oHoraCalculada[i] = this.gerarHoraAleatoria(oIntervaloDia.hora_inicial, oIntervaloDia.hora_final);//sorteia um horário
+
+                for (let j = 0; j < i; j++){//compara todos os valores sorteados para um intervalo
+                    if( i != j){
+                        intervalo = Math.abs((oHoraCalculada[i] - oHoraCalculada[j]) / (1000*60)); //calcula a diferença dos intervalos e transforma em minutos
+                        //Alert.alert('Despertador de Consciência', 'o intervalo é '+ intervalo);
+                        
+                        k = 0 //k é um contador no caso de o programa não conseguir sortear um horário válido
+                        while (intervalo < 15) {
+                            oHoraCalculada[j] = this.gerarHoraAleatoria(oIntervaloDia.hora_inicial, oIntervaloDia.hora_final);
+                            intervalo = oHoraCalculada[i] - oHoraCalculada[j];
+                            if (k > 30) { //se não conseguir sortear um horário válido em 30 tentativas...
+                                oHoraCalculada[j] = oHoraCalculada[j] + 16*60*1000; //...define para 16 minutos depois
+                                break;
+                            }
+                            k++
+                            //Alert.alert('Despertador de Consciência', 'o intervalo é '+ intervalo);
+                        }
+                       
+                    }
+                }
+
+            }
+
+            
+
+
+            for (i = 0; i < oIntervaloDia.qtd_mensagens_intervalo; i++){// faz o push das horas sorteadas
+
+                oHoraCalculada[i].setDate(oHoraCalculada[i].getDate() + numDiasAcrescentar);
                 
-                if(oHoraCalculada > oHoraAtual) {
+                
+                if(oHoraCalculada[i] > oHoraAtual) {
                     bGerou = true;
-                    oIntervaloDia.horas_exibicao.push(oHoraCalculada.toJSON());
+                    oIntervaloDia.horas_exibicao.push(oHoraCalculada[i].toJSON());
+                } else {
+                    bGerou = false;
+                    break;
                 }
             }
 

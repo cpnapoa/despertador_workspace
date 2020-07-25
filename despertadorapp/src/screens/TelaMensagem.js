@@ -56,7 +56,9 @@ export default class TelaMensagem extends Component {
 
         if (this.oDadosApp.mensagem.texto == ''){ //inicialização de mensagens para quando o aplicativo é iniciado pela primeira vez
             this.oDadosApp.mensagem.texto = 'Configure os intervalos e aguarde o despertador...';
-            this.oDadosApp.mensagem_proxima.texto_proxima = '"Honrai as verdades com a prática." - Helena Blavatsky' //essa vai ser a primeira mensagem a ser exibida
+            if (this.oDadosApp.mensagem_proxima.texto_proxima == '') {
+                this.oDadosApp.mensagem_proxima.texto_proxima = '"Honrai as verdades com a prática." - Helena Blavatsky' //essa vai ser a primeira mensagem a ser exibida
+            }
         }
 
         if (this.oConfiguracao) {
@@ -222,12 +224,17 @@ export default class TelaMensagem extends Component {
                             </Image>
                         </TouchableOpacity>
                     </View>
-                    <View style={{ flex: 0.70, margin: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ flex: 0.70, margin: 35, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={styles.formataFrase}>
                             {this.oDadosApp.mensagem.texto}
                         </Text>
                     </View>
-                    {this.montarStausMensagens()}
+                    <TouchableOpacity activeOpacity={100} 
+                        style={{ flex: 0.15, flexDirection: 'column-reverse', alignItems: 'center', justifyContent: 'center', marginBottom: 10,}} 
+                        onLongPress={ () => { this.exibirProximaMensagem() }}
+                    >
+                        {this.montarStausMensagens()}
+                    </TouchableOpacity>                    
                 </ImageBackground>
             </View>
         );
