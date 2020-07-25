@@ -9,12 +9,13 @@ import GerenciadorContextoApp from './src/contexts/GerenciadorContextoApp';
 /// NOTE:  This handler must be placed and registered here in index.js -- DO NOT place this in your App components.
 ///
 const headlessTask = async ({ taskId }) => {
-  
-    // Get task id from event {}:
-    console.log('[despertadorapp] [BackgroundFetch] HeadlessTask iniciou.', taskId);
+    console.log('[despertadorapp] headlessTask() ++++++++++++ iniciou ++++++++++++');
+    console.log('[despertadorapp] headlessTask() taskId =', taskId);
 
     let oConfiguracao = new Configuracao(new GerenciadorContextoApp());
-    oConfiguracao.verificarNotificacaoIgnorada(taskId);
+    oConfiguracao.verificarNotificacaoEmSegundoPlano(taskId);
+
+    console.log('[despertadorapp] headlessTask() ------------ terminou ------------');
 };
 
 // Register your BackgroundFetch HeadlessTask

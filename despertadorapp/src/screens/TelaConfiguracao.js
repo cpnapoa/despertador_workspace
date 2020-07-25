@@ -21,8 +21,10 @@ export default class TelaConfiguracao extends Component {
     constructor(props, value) {
         super(props);
 
-        if(props && props.navigation) {
-            this.oNavegacao = props.navigation;
+        if(props) {
+            if(props.navigation) {
+                this.oNavegacao = props.navigation;
+            }
         }
         
         if(value && value.gerenciador) {
@@ -33,7 +35,7 @@ export default class TelaConfiguracao extends Component {
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
-            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
+            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
@@ -113,10 +115,11 @@ export default class TelaConfiguracao extends Component {
                                     buttonStyle={{height:25, width:25, padding:0, backgroundColor:'#009999'}} 
                                     rounded={false} 
                                     showBorder={true} 
-                                    step={1} min={1} 
+                                    step={1} min={oDiaSemana.intervalos.length} 
                                     max={5} 
                                     value={oDiaSemana.qtd_mensagens_dia} 
-                                    onChange={value => {this.atribuirMensagensPorDia(oDiaSemana.dia_semana, value); this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} >
+                                    onChange={value => {this.atribuirMensagensPorDia(oDiaSemana.dia_semana, value); this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} 
+                                >
                                 </InputSpinner>
                             </View>
                         </Card>

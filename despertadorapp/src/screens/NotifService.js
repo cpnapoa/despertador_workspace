@@ -4,7 +4,7 @@ import NotificationHandler from './NotificationHandler';
 export default class NotifService {
   constructor(onRegister, onNotification) {
     this.lastId = 0;
-
+    
     NotificationHandler.attachRegister(onRegister);
     NotificationHandler.attachNotification(onNotification);
 
@@ -29,7 +29,7 @@ export default class NotifService {
       autoCancel: true, // (optional) default: true
       largeIcon: 'ic_launcher', // (optional) default: "ic_launcher"
       smallIcon: 'ic_notification', // (optional) default: "ic_notification" with fallback for "ic_launcher"
-      bigText: 'My big text that will be shown when notification is expanded', // (optional) default: "message" prop
+      //bigText: , // (optional) default: "message" prop
       subText: 'This is a subText', // (optional) default: none
       color: 'red', // (optional) default: system default
       vibrate: true, // (optional) default: true
@@ -47,15 +47,18 @@ export default class NotifService {
 
       /* iOS and Android properties */
       title: 'Local Notification', // (optional)
-      message: 'My Notification Message', // (required)
+      message: 'Desperte sua consciência - local...', // (required)
       playSound: !!soundName, // (optional) default: true
       soundName: soundName ? soundName : 'default', // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
       number: 10, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
     });
   }
 
-  scheduleNotif(oDataHoraAgendar) {
+  scheduleNotif(oDataHoraAgendar, oDadosMensagens) {
     this.lastId++;
+    console.log('[despertadorapp] scheduleNotif() ++++++++++++ iniciou ++++++++++++');
+    console.log('[despertadorapp] scheduleNotif() Vai agendar notificacao para data-hora = ', oDataHoraAgendar.toLocaleString());
+
     PushNotification.localNotificationSchedule({
       date: oDataHoraAgendar,//new Date(Date.now() + 30 * 1000), // in 30 secs
 
@@ -65,8 +68,8 @@ export default class NotifService {
       autoCancel: true, // (optional) default: true
       largeIcon: 'ic_stat_name', // (optional) default: "ic_launcher"
       smallIcon: 'ic_stat_name_small', // (optional) default: "ic_notification" with fallback for "ic_launcher"
-      bigText: 'My big text that will be shown when notification is expanded', // (optional) default: "message" prop
-      subText: 'This is a subText', // (optional) default: none
+      //bigText: this.oMensagem.texto, // (optional) default: "message" prop
+      subText: 'Nova Acrópole', // (optional) default: none
       color: 'blue', // (optional) default: system default
       vibrate: true, // (optional) default: true
       vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
@@ -82,12 +85,13 @@ export default class NotifService {
       userInfo: {}, // (optional) default: {} (using null throws a JSON value '<null>' error)
 
       /* iOS and Android properties */
-      title: 'Scheduled Notification', // (optional)
-      message: 'My Notification Message', // (required)
+      title: 'Mensagem', // (optional)
+      message: oDadosMensagens.mensagem_proxima, // (required)
       playSound: false, // (optional) default: true
       number: 10, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
       //soundName: soundName ? soundName : 'default', // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
     });
+    console.log('[despertadorapp] scheduleNotif() ------------ terminou ------------');
   }
 
   checkPermission(cbk) {

@@ -16,7 +16,6 @@ import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import AsyncStorage from '@react-native-community/async-storage';
 import BackgroundFetch, { BackgroundFetchStatus } from 'react-native-background-fetch';
-import NotifService from './NotifService';
 
 /// Execute a BackgroundFetch.scheduleTask
 ///
@@ -39,7 +38,8 @@ export const scheduleTask = async (name) => {
 /// All events from the plugin arrive here, including #scheduleTask events.
 ///
 const onBackgroundFetchEvent = async (taskId) => {
-    console.log('[BackgroundFetch] Event received com taskId = ', taskId);
+    console.log('[despertadorapp] onBackgroundFetchEvent() ++++++++++++ iniciou ++++++++++++');
+    console.log('[despertadorapp] onBackgroundFetchEvent() taskId = ', taskId);
 
     if (taskId === 'react-native-background-fetch') {
         // Test initiating a #scheduleTask when the periodic fetch event is received.
@@ -53,6 +53,7 @@ const onBackgroundFetchEvent = async (taskId) => {
     // If you fail to do this, the OS can terminate your app
     // or assign battery-blame for consuming too much background-time
     BackgroundFetch.finish(taskId);
+    console.log('[despertadorapp] onBackgroundFetchEvent() ------------ terminou ------------');
 };
 
 /// Render BackgroundFetchStatus to text.
@@ -89,26 +90,27 @@ export default class TelaMensagem extends Component {
             this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oMensagem = new Mensagem(this.oGerenciadorContextoApp);
-            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
+            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
-            
+            this.oDadosApp.tela_mensagem.objeto_tela = this;
             AppState.addEventListener('change', this.oConfiguracao.salvarConfiguracoes);
         }
 
-        this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
-        this.montarStausMensagens = this.montarStausMensagens.bind(this);
-        this.carregar = this.carregar.bind(this);
+        this.inicializar = this.inicializar.bind(this);
+        this.montarStatus = this.montarStatus.bind(this);
+        this.montarStatusConfig = this.montarStatusConfig.bind(this);
     }
 
     componentDidMount() {
+        console.log('[despertadorapp] componentDidMount() ++++++++++++ iniciou ++++++++++++');
         
         AsyncStorage.flushGetRequests();
 
-        if(this.oConfiguracao) {
-            
-            //this.oConfiguracao.configurarNotificacao(this, this.oNavegacao);
-            this.oConfiguracao.obterConfiguracoesNoDispositivo(this.carregar);
-        }
+        this.inicializar();
+        
+        this.oNavegacao.addListener('focus', () => {
+            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+        });
 
         BackgroundFetch.configure({
             minimumFetchInterval: 120,      // <-- minutes (15 is minimum allowed)
@@ -125,114 +127,109 @@ export default class TelaMensagem extends Component {
         }, 
         onBackgroundFetchEvent, 
         (status) => {
-            console.log('[BackgroundFetch] status', statusToString(status), status);
+            console.log('[despertadorapp] componentDidMount() [BackgroundFetch] status ', statusToString(status), status);
         });
+        console.log('[despertadorapp] componentDidMount() ------------ terminou ------------');
     }
     
-    carregar() {
-        let oAgendaNotificacoes = this.oDadosTelaConfiguracao.agenda_notificacoes;
-        let oUltimaDataHoraAgendada;
+    inicializar() {
+        console.log('[despertadorapp] inicializar() ++++++++++++ iniciou ++++++++++++');
 
-        if(oAgendaNotificacoes && oAgendaNotificacoes.ultima_data_hora_agendada) {
-            oUltimaDataHoraAgendada = oAgendaNotificacoes.ultima_data_hora_agendada;
+        if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
 
-            if(oUltimaDataHoraAgendada && oUltimaDataHoraAgendada.data_hora_agenda) {
-                
-                let oDataHoraAgendada = new Date(oUltimaDataHoraAgendada.data_hora_agenda);
-                let oAgora = new Date();
-
-                if(oDataHoraAgendada <= oAgora) {
-                    this.oDadosControleApp.exibir_mensagem = true;
-                }
-            }
+            console.log('[despertadorapp] inicializar() Vai atribuir mensagem padrão.');
+            this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
         }
+        this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
+            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+            this.oMensagem.obterDadosMensagens(() => {
+                this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+            });
+        });
 
-        if (this.oDadosControleApp.exibir_mensagem) {
+        console.log('[despertadorapp] inicializar() ------------ terminou ------------');
+    }1
 
-            this.oDadosControleApp.exibir_mensagem = false;
-            this.oMensagem.lerMensagensExibir(this.exibirProximaMensagem);
-        } else {
-            this.oMensagem.lerMensagensExibir(() => {this.oGerenciadorContextoApp.atualizarEstadoTela(this);});
-        }
-        
-        if (!oUltimaDataHoraAgendada || !oUltimaDataHoraAgendada.data_hora_agenda) {
+    montarStatusConfig() {
 
-            this.oNavegacao.navigate('Configuracao');
-        }
-    }
-    
-    exibirProximaMensagem() {
-
-        this.oDadosApp.mensagem.texto = this.oMensagem.obterProximaMensagem();
-
-        this.oConfiguracao.agendarNotificacao();
-
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-    }
-
-    montarStausMensagens() {
-        if(this.oDadosApp.mensagens_exibir) {
-
-            if(this.oDadosApp.mensagens_exibir.length > 0) {
-                
-                return (
-                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
-                        <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
-                                    <Text style={{marginRight:5}}>Mensagens a ler:</Text> 
-                            <Text>{this.oDadosApp.mensagens_exibir.length}</Text>
-                        </View>
-                        <View style={{flexDirection:'row', justifyContent:'flex-start', marginBottom:5 }}>
-                            <Text style={{marginRight:5}}>Mensagens lidas:</Text> 
-                            <Text>{this.oDadosApp.mensagens_exibidas.length}</Text>
-                        </View>
-                    </View>
-                );
-
-            } else {
-            
-                this.oMensagem.lerMensagensExibir(() => {this.oGerenciadorContextoApp.atualizarEstadoTela(this);});
-                
-                return(
-                    <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
-                        <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
-                            <Text style={{marginRight:5}}>Sincronizando mensagens...</Text>
-                        </View>
-                    </View>
-                );    
-            }
-
-        } else {
-            this.oDadosApp.mensagens_exibir = [];
-
+        if(this.oConfiguracao.temIntervaloDefinido()) {
             return(
-                <View style={{flex: 0.15, marginTop: 20, flexDirection:'column', alignItems:'center', justifyContent:'space-evenly'}}>
-                    <View style={{flexDirection:'row', justifyContent:'flex-start'}}>
-                        <Text style={{marginRight:5}}>Não há mensagens a exibir</Text>
-                    </View>
+                <View style={{marginTop:1}}>
+                    <Text>Aguarde a próxima notificação</Text>
+                </View>
+            );
+        } else {
+            return(
+                <View style={{marginTop:1}}>
+                    <Text>Configure os intervalos</Text>
                 </View>
             );
         }
     }
 
+    montarStatus() {
+        if(this.oDadosApp.dados_mensagens.lista_mensagens_exibir) {
+            let qtdTotal = 0;
+
+            if(this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length > 0) {
+                
+                qtdTotal = this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length + this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length;
+                if (this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length > 0) {
+                    // Soma um para a mensagem_atual, que ainda não foi adicionada ao array de lidas.
+                    qtdTotal += 1; 
+                }
+                return (
+                    <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                        <View style={{flexDirection:'row'}}>
+                            <Text>Mensagem </Text> 
+                            <Text>{this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length}</Text>
+                            <Text> de </Text>
+                            <Text>{qtdTotal}</Text>
+                        </View>
+                        {this.montarStatusConfig()}
+                    </View>
+                );
+
+            } else {
+            
+                return(
+                    <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                        <Text style={{marginRight:5}}>Sincronizando mensagens...</Text>
+                        {this.montarStatusConfig()}
+                    </View>
+                );    
+            }
+
+        } else {
+            this.oDadosApp.dados_mensagens.lista_mensagens_exibir = [];
+
+            return(
+                <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                    <Text style={{marginRight:5}}>Não há mensagens a exibir</Text>
+                    {this.montarStatusConfig()}
+                </View>
+            );
+        }
+    }
     render() {
         
         return (
             
             <View style={styles.areaTotal}>
                 <ImageBackground source={require('../images/parchment_back.png')} style={styles.imgBG} resizeMode='stretch'>
-                    <View style={{flex: 0.15, flexDirection:'row', alignSelf:'stretch', justifyContent:'flex-end'}} >
+                    <View style={{flex: 0.17, flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'flex-end'}} >
                         <TouchableOpacity onPress={() => this.oNavegacao.navigate('Configuracao')}>
                             <Image source={require('../images/botao_cera.png')} resizeMode='stretch' style={{width:85, height:95, marginRight:40, justifyContent:'center'}} >
                                 <Icon name="cog" size={25} color="#4d0000" style={{margin: 23}}/>
                             </Image>
                         </TouchableOpacity>
                     </View>
-                    <View style={{flex: 0.70, margin: 50, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+                    <View style={{flex: 0.67, margin: 50, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
                         <Text style={styles.formataFrase}>
-                            {this.oDadosApp.mensagem.texto}
+                            {this.oDadosApp.dados_mensagens.mensagem_atual}
                         </Text>
                     </View>
-                    {this.montarStausMensagens()}
+                    {this.montarStatus()}
                 </ImageBackground>
             </View>
         );
@@ -258,7 +255,7 @@ const styles = StyleSheet.create({
     },
 
     formataFrase: {
-        fontSize: 50,
+        fontSize: 45,
         textAlign: 'center',
         fontFamily: 'ErisblueScript'
     }

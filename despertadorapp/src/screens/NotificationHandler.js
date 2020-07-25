@@ -1,6 +1,8 @@
 import PushNotification from 'react-native-push-notification';
-import Configuracao from './Configuracao';
 import GerenciadorContextoApp from '../contexts/GerenciadorContextoApp';
+import Configuracao from './Configuracao';
+import Mensagem from './Mensagem';
+import { AppState, BackHandler } from 'react-native';
 
 class NotificationHandler {
   onNotification(notification) {
@@ -19,19 +21,30 @@ class NotificationHandler {
     }
   }
 
-  onAction(notification) {
-    console.log ('onAction() acionado: ', notification);
-    
-    if(notification.action === 'Abrir') {
-      console.log ('onAction() - Vai abrir o despertadorapp');
-      PushNotification.invokeApp(notification);
-    } else {
-      console.log ('onAction() - Var agendar novo horario.');
-      // Reagenda...
-      let oConfiguracao = new Configuracao(new GerenciadorContextoApp());
-      oConfiguracao.verificarNotificacaoIgnorada();
+onAction(notification) {
+    console.log('[despertadorapp] onAction() ++++++++++++ iniciou ++++++++++++');
+    console.log ('[despertadorapp] onAction() acionado: ', notification);
+
+    let oGerenciadorContexto = new GerenciadorContextoApp();
+    let oConfiguracao = new Configuracao(oGerenciadorContexto);
+
+    console.log ('[despertadorapp] onAction() - Estado do app: ', AppState.currentState);
+    if (AppState.currentState.match(/active/)) {
+        console.log ('[despertadorapp] onAction() - Saindo do app...');
+        BackHandler.exitApp();
     }
-  }
+    if(notification.action === 'Abrir') {
+        console.log ('[despertadorapp] onAction() - invocando o app');
+        PushNotification.invokeApp(notification);
+    } else {
+        console.log ('[despertadorapp] onAction() - Vai agendar novo horario.');
+        
+        // Reagenda...
+        oConfiguracao.verificarNotificacaoEmSegundoPlano(notification.action);
+    }
+
+    console.log('[despertadorapp] onAction() ------------ terminou ------------');
+}
 
   // (optional) Called when the user fails to register for remote notifications. Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
   onRegistrationError(err) {

@@ -1,13 +1,14 @@
 import { clonarObjeto } from "../common/Util";
 
-export const DADOS_MENSAGEM = {
-    'texto': ''
+export const DADOS_MENSAGENS = {
+    mensagem_atual: 'Iniciando, aguarde...',
+    mensagem_proxima: '',
+    lista_mensagens_exibir: [],
+    lista_mensagens_exibidas: [],
 };
 
 export const DADOS_TELA_MENSAGEM = {
-    'texto_botao': '',
-    'elemento_botao': '',
-    'msg_num': '',
+    objeto_tela: null
 };
 
 export const AGENDA = {
@@ -72,15 +73,14 @@ export const DADOS_TELA_CONFIGURACAO_MODAL = {
 };
 
 export const DADOS_CONTROLE_APP = {
-    'exibir_mensagem': false,
-    'em_segundo_plano': false,
+    exibir_mensagem: false,
+    em_segundo_plano: false,
+    alterou_agenda: false,
 };
 
 export const DADOS_APP_GERAL = {
-    'dados_app': {
-        mensagem: DADOS_MENSAGEM,
-        mensagens_exibir: [],
-        mensagens_exibidas: [],
+    dados_app: {
+        dados_mensagens: clonarObjeto(DADOS_MENSAGENS),
         controle_app: DADOS_CONTROLE_APP,
         tela_mensagem: DADOS_TELA_MENSAGEM,
         tela_configuracao: DADOS_TELA_CONFIGURACAO,

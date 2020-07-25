@@ -35,7 +35,7 @@ export default class TelaConfiguracaoModal extends Component {
             this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
             this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
-            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp);
+            this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
         }
@@ -114,13 +114,7 @@ export default class TelaConfiguracaoModal extends Component {
             this.oConfiguracao.adicionarIntervaloDiaSemana(6, oNovoIntervalo, 1);
         }
 
-        this.oConfiguracao.salvarConfiguracoes(true, this.voltar);
-    }
-
-    excluirIntervalo(diaSemana, indice) {
-
-        this.oConfiguracao.excluirIntervaloDiaSemana(diaSemana, indice);
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+        this.voltar();
     }
 
     voltar() {
@@ -209,13 +203,13 @@ export default class TelaConfiguracaoModal extends Component {
                         </TouchableOpacity>
                     </View>
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
-                        <Text style={{fontSize: 24}}>Inclusão de Intervalo</Text>
+                        <Text style={{fontSize: 24}}>Novo Intervalo</Text>
                     </View>
                     <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>                        
                     </View>
                 </View>
                 <View style={styles.areaIntervaloDefinicao}>
-                    <Card title='Novo Intervalo' containerStyle={{ alignItems:'center', width:300, marginTop:10, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}} >                        
+                    <Card containerStyle={{ alignItems:'center', width:300, marginTop:10, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}} >                        
                         <TouchableOpacity onPress={() => this.exibirTimePicker(1)} 
                                             style={{flexDirection:'column', width:300, alignItems:'center', marginTop: 0, borderRadius:5, borderWidth:1, borderColor:'#e0ebeb'}}>
                             <Text style={{margin:10, marginTop: 5, fontSize:20}}>Hora inicial</Text>
@@ -240,7 +234,7 @@ export default class TelaConfiguracaoModal extends Component {
                     </Card>
                     {this.montarTimePicker(this.oDadosTela.num_hora_escolher)}
                 </View>
-                <View style={{ flex: .1, margin: 3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flex: .17, margin: 3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     <Button title='Adicionar' onPress={this.adicionarIntervalo} color={'#009999'}></Button>
                 </View>
             </View>
@@ -259,7 +253,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#faf9eb'
     },
     areaIntervaloDefinicao: {
-        flex: .77,
+        flex: .70,
         flexDirection:'column', 
         justifyContent: 'flex-start',
         alignItems: 'center',
