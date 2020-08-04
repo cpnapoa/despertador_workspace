@@ -266,6 +266,6 @@ const styles = StyleSheet.create({
     formataFrase: {
         fontSize: 45,
         textAlign: 'center',
-        fontFamily: 'ErisblueScript'
+        fontFamily: 'ErisblueScript2'
     }
 });

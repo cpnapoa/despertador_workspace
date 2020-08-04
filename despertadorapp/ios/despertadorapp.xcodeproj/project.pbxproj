@@ -33,6 +33,7 @@
 		E3AA09FC3C2A49B8AD2E6A9A /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A19808F674F74E62A1EEF7E3 /* SimpleLineIcons.ttf */; };
 		2395E0F1683446EB8FFB6A89 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 68A616D869E44F309BFA1EB9 /* Zocial.ttf */; };
 		F63D3D66B7C743908C7061EE /* ErisblueScript.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 40F0E95C96C24E0BAE7624C0 /* ErisblueScript.ttf */; };
+		8C7C4C628B444556A8E0D04E /* ErisblueScript2.otf in Resources */ = {isa = PBXBuildFile; fileRef = 33CE0CCFB8884F13B58F644B /* ErisblueScript2.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 		A19808F674F74E62A1EEF7E3 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; name = "SimpleLineIcons.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		68A616D869E44F309BFA1EB9 /* Zocial.ttf */ = {isa = PBXFileReference; name = "Zocial.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		40F0E95C96C24E0BAE7624C0 /* ErisblueScript.ttf */ = {isa = PBXFileReference; name = "ErisblueScript.ttf"; path = "../assets/fonts/ErisblueScript.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		33CE0CCFB8884F13B58F644B /* ErisblueScript2.otf */ = {isa = PBXFileReference; name = "ErisblueScript2.otf"; path = "../assets/fonts/ErisblueScript2.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +214,7 @@
 				A19808F674F74E62A1EEF7E3 /* SimpleLineIcons.ttf */,
 				68A616D869E44F309BFA1EB9 /* Zocial.ttf */,
 				40F0E95C96C24E0BAE7624C0 /* ErisblueScript.ttf */,
+				33CE0CCFB8884F13B58F644B /* ErisblueScript2.otf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -370,6 +373,7 @@
 				E3AA09FC3C2A49B8AD2E6A9A /* SimpleLineIcons.ttf in Resources */,
 				2395E0F1683446EB8FFB6A89 /* Zocial.ttf in Resources */,
 				F63D3D66B7C743908C7061EE /* ErisblueScript.ttf in Resources */,
+				8C7C4C628B444556A8E0D04E /* ErisblueScript2.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
