@@ -115,7 +115,7 @@ export default class TelaConfiguracao extends Component {
                                     buttonStyle={{height:25, width:25, padding:0, backgroundColor:'#009999'}} 
                                     rounded={false} 
                                     showBorder={true} 
-                                    step={1} min={oDiaSemana.intervalos.length} 
+                                    step={1} min={1} 
                                     max={5} 
                                     value={oDiaSemana.qtd_mensagens_dia} 
                                     onChange={value => {this.atribuirMensagensPorDia(oDiaSemana.dia_semana, value); this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} 
@@ -293,8 +293,8 @@ export default class TelaConfiguracao extends Component {
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
                         <Text style={{fontSize: 24}}>Intervalos agendados</Text>
                     </View>
-                    <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>
-                        <Icon name='eye' size={40} color='#e0ebeb' 
+                    <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end', marginRight:10}}>
+                        <Icon name= "info-circle" size={40} color='#e0ebeb'
                         delayLongPress = '4000'
                         onLongPress={() => this.verDetalhes()}
                         onPress={() => this.oNavegacao.navigate('Instrucoes')}></Icon>
