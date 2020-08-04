@@ -39,6 +39,7 @@ export const DADOS_INTERVALO = {
 
 export const DADOS_DATA_HORA_AGENDAMENTO = {
     data_hora_agenda: '',
+    data_hora_mensagem: '',
     dia_semana: -1,
     indice_intervalo: -1,
     indice_hora: -1,

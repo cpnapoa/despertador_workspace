@@ -295,7 +295,9 @@ export default class TelaConfiguracao extends Component {
                     </View>
                     <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>
                         <Icon name='eye' size={40} color='#e0ebeb' 
-                        onPress={() => this.verDetalhes()}></Icon>
+                        delayLongPress = '4000'
+                        onLongPress={() => this.verDetalhes()}
+                        onPress={() => this.oNavegacao.navigate('Instrucoes')}></Icon>
                     </View>
                 </View>
                 <SafeAreaView style={{flex: 0.77}}>

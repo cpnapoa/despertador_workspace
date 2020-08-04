@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import TelaMensagem from '../screens/TelaMensagem';
 import TelaConfiguracao from '../screens/TelaConfiguracao';
 import TelaConfiguracaoModal from '../screens/TelaConfiguracaoModal';
+import TelaInstrucoesModal from '../screens/TelaInstrucoesModal';
 import { ContextoAppProvider } from '../contexts/ContextoApp';
 
 const StackPrincipal = createStackNavigator();
@@ -25,9 +26,11 @@ function FluxoRaiz() {
     <StackRaiz.Navigator  headerMode='none' mode='modal'>
         <StackRaiz.Screen name="Principal" component={FluxoPrincipal} />
         <StackRaiz.Screen name="Configuracao Intervalo" component={TelaConfiguracaoModal} />
+        <StackRaiz.Screen name="Instrucoes" component={TelaInstrucoesModal} />
     </StackRaiz.Navigator>
   );
 }
+
 
 export default function App() {
     return (
