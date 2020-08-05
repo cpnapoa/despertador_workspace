@@ -217,23 +217,23 @@ export default class TelaMensagem extends Component {
 
             <View style={styles.areaTotal}>
                 <ImageBackground source={require('../images/parchment_back.png')} style={styles.imgBG} resizeMode='stretch'>
-                    <View style={{ flex: 0.17, flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', justifyContent: 'flex-end'}} >
+                    <View style={{ flex: 0.17, flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', justifyContent: 'flex-end' }} >
                         <TouchableOpacity onPress={() => this.oNavegacao.navigate('Configuracao')}>
                             <Image source={require('../images/botao_cera.png')} resizeMode='stretch' style={{ width: 85, height: 95, marginRight: 40, justifyContent: 'center' }} >
                                 <Icon name="cog" size={25} color="#4d0000" style={{ margin: 23 }} />
                             </Image>
                         </TouchableOpacity>
                     </View>
-                    <View style={{ flex: 0.67, margin: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                    <View style={{ flex: 0.67, margin: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={styles.formataFrase}>
                             {this.oDadosApp.dados_mensagens.mensagem_atual}
                         </Text>
                     </View>
 
                     <View style={{ flex: 0.17, alignItems: 'center', alignSelf: 'center', justifyContent: 'center' }}>
-                        <TouchableOpacity style={{ height: '50%', alignItems: 'center', justifyContent: 'center'}}
-                            delayLongPress = '4000'
-                            onLongPress = { () => {
+                        <TouchableOpacity style={{ height: '50%', alignItems: 'center', justifyContent: 'center' }}
+                            delayLongPress='4000'
+                            onLongPress={() => {
                                 console.log('apertou')
                             }}>
                             {this.montarStatus()}
