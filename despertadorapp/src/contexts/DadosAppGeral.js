@@ -47,7 +47,7 @@ export const DADOS_DATA_HORA_AGENDAMENTO = {
 }
 
 export const DADOS_TELA_CONFIGURACAO = {
-    
+
     dh1: '',
     dh2: '',
     hora_notificacao: '',
@@ -99,3 +99,86 @@ export const DIAS_SEMANA = [
     'Sexta-feira',
     'Sábado'
 ];
+
+/*
+agenda_notificacoes = {
+    "agenda_intervalos_dias":
+    */
+    let intervalos_iniciais = [
+        {
+            "dia_semana": 0, "qtd_mensagens_dia": 3, "intervalos": [
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 8, "minuto": 0 }, "hora_final": { "hora": 11, "minuto": 30 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 0
+                },
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 13, "minuto": 0 }, "hora_final": { "hora": 21, "minuto": 0 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 1
+                }]
+        },
+        {
+            "dia_semana": 1, "qtd_mensagens_dia": 3, "intervalos": [
+                {
+                    "dia_semana": 1, "hora_inicial": { "hora": 8, "minuto": 0 }, "hora_final": { "hora": 11, "minuto": 30 },
+                    "qtd_mensagens_intervalo": 2, "horas_exibicao": [], "novo": false, "indice_lista": 0
+                },
+                {
+                    "dia_semana": 1, "hora_inicial": { "hora": 13, "minuto": 0 }, "hora_final": { "hora": 21, "minuto": 0 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 1
+                }]
+        },
+        {
+            "dia_semana": 2, "qtd_mensagens_dia": 3, "intervalos": [
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 8, "minuto": 0 }, "hora_final": { "hora": 11, "minuto": 30 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 0
+                },
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 13, "minuto": 0 }, "hora_final": { "hora": 21, "minuto": 0 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 1
+                }]
+        },
+        {
+            "dia_semana": 3, "qtd_mensagens_dia": 3, "intervalos": [
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 8, "minuto": 0 }, "hora_final": { "hora": 11, "minuto": 30 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 0
+                },
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 13, "minuto": 0 }, "hora_final": { "hora": 21, "minuto": 0 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 1
+                }]
+        },
+        {
+            "dia_semana": 4, "qtd_mensagens_dia": 3, "intervalos": [
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 8, "minuto": 0 }, "hora_final": { "hora": 11, "minuto": 30 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 0
+                },
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 13, "minuto": 0 }, "hora_final": { "hora": 21, "minuto": 0 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 1
+                }]
+        }, 
+        {
+            "dia_semana": 5, "qtd_mensagens_dia": 3, "intervalos": [
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 8, "minuto": 0 }, "hora_final": { "hora": 11, "minuto": 30 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 0
+                },
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 13, "minuto": 0 }, "hora_final": { "hora": 21, "minuto": 0 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 1
+                }]
+        },
+        {
+            "dia_semana": 6, "qtd_mensagens_dia": 3, "intervalos": [
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 8, "minuto": 0 }, "hora_final": { "hora": 11, "minuto": 30 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 0
+                },
+                {
+                    "dia_semana": 2, "hora_inicial": { "hora": 13, "minuto": 0 }, "hora_final": { "hora": 21, "minuto": 0 },
+                    "qtd_mensagens_intervalo": 1, "horas_exibicao": [], "novo": true, "indice_lista": 1
+                }]
+        }]

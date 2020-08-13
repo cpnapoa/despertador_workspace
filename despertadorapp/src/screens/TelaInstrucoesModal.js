@@ -173,6 +173,11 @@ export default class TelaInstrucoesModal extends Component {
                                 acesso à internet estiver disponível.
                             </Text>
                             <Text style={styles.textos}>
+                                {'\t\t'}As configurações de energia de alguns celualres podem afetar o agendamento de notificações caso
+                                as notificações sejam canceladas (arrastadas para o lado). Caso não queria abrir o aplicativo, prefira
+                                sempre apertar o botão 'ok' presente junto da notificação para o bom funcionamento do aplicativo.
+                            </Text>
+                            <Text style={styles.textos}>
                                 {'\t\t'}Qualquer dúvida ou sugestão, basta entrar em contato com Vladimir ou Gustavo ;)
                             </Text>
                         </View>
