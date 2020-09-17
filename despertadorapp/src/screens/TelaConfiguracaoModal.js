@@ -7,11 +7,10 @@ import {
     Text,
     Alert,
 } from 'react-native';
-import Util, { clonarObjeto } from '../common/Util';
+import Util from '../common/Util';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
-import { DADOS_INTERVALO, DIAS_SEMANA } from '../contexts/DadosAppGeral';
 import { Divider, Card } from 'react-native-elements';
 import CheckBox from '@react-native-community/checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -33,7 +32,7 @@ export default class TelaConfiguracaoModal extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
-            this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
+            // this.oDadosTela = this.oDadosApp.tela_configuracao;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
@@ -41,80 +40,19 @@ export default class TelaConfiguracaoModal extends Component {
         }
         
         this.atribuirDataHora = this.atribuirDataHora.bind(this);
-        this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
         this.montarDiasSemana = this.montarDiasSemana.bind(this);
         this.exibirTimePicker = this.exibirTimePicker.bind(this);
         this.montarTimePicker = this.montarTimePicker.bind(this);
+        this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
         this.voltar = this.voltar.bind(this);
-        this.obterConfiguracoesNoDispositivo = this.obterConfiguracoesNoDispositivo.bind(this);
 
         this.oMensagem = new Mensagem();
         this.oUtil = new Util();
         
-        this.oDadosTelaConfiguracao.h1 = 0;
-        this.oDadosTelaConfiguracao.m1 = 0;
-        this.oDadosTelaConfiguracao.h2 = 0;
-        this.oDadosTelaConfiguracao.m2 = 0;
-
-        // configurarNotificacao(this.oNavegacao, this.oDadosControleApp);
-    }
-
-    async obterConfiguracoesNoDispositivo() {
-        let oListaIntervalos = await this.oConfiguracao.obterAgendaNotificacoesDoDispositivo();
-        
-        if(oListaIntervalos) {
-            this.oDadosTelaConfiguracao.agenda_notificacoes = oListaIntervalos;
-        }
-    }
-
-    adicionarIntervalo() {
-        let oNovoIntervalo = clonarObjeto(DADOS_INTERVALO);
-        
-        oNovoIntervalo.hora_inicial.hora = this.oDadosTelaConfiguracao.h1;
-        oNovoIntervalo.hora_inicial.minuto = this.oDadosTelaConfiguracao.m1;
-        oNovoIntervalo.hora_final.hora = this.oDadosTelaConfiguracao.h2;
-        oNovoIntervalo.hora_final.minuto = this.oDadosTelaConfiguracao.m2;
-        
-        if(!this.oDadosTela.dom &&
-           !this.oDadosTela.seg &&
-           !this.oDadosTela.ter &&
-           !this.oDadosTela.qua &&
-           !this.oDadosTela.qui &&
-           !this.oDadosTela.sex &&
-           !this.oDadosTela.sab) {
-        
-            Alert.alert('Despertador de Conscência', 'Selecione ao menos um dia da semana.');
-            return;
-        }
-
-        if(this.oDadosTela.dom) {
-            this.oConfiguracao.adicionarIntervaloDiaSemana(0, oNovoIntervalo, 1);
-        }
-        
-        if(this.oDadosTela.seg) {
-            this.oConfiguracao.adicionarIntervaloDiaSemana(1, oNovoIntervalo, 1);
-        }
-
-        if(this.oDadosTela.ter) {
-            this.oConfiguracao.adicionarIntervaloDiaSemana(2, oNovoIntervalo, 1);
-        }
-
-        if(this.oDadosTela.qua) {
-            this.oConfiguracao.adicionarIntervaloDiaSemana(3, oNovoIntervalo, 1);
-        }
-        if(this.oDadosTela.qui) {
-            this.oConfiguracao.adicionarIntervaloDiaSemana(4, oNovoIntervalo, 1);
-        }
-
-        if(this.oDadosTela.sex) {
-            this.oConfiguracao.adicionarIntervaloDiaSemana(5, oNovoIntervalo, 1);
-        }
-
-        if(this.oDadosTela.sab) {
-            this.oConfiguracao.adicionarIntervaloDiaSemana(6, oNovoIntervalo, 1);
-        }
-
-        this.voltar();
+        this.oDadosTela.h1 = 0;
+        this.oDadosTela.m1 = 0;
+        this.oDadosTela.h2 = 0;
+        this.oDadosTela.m2 = 0;
     }
 
     voltar() {
@@ -123,17 +61,22 @@ export default class TelaConfiguracaoModal extends Component {
         this.oGerenciadorContextoApp.atualizarEstadoTela(this.oDadosApp.tela_configuracao.objeto_tela);
     }
 
+    adicionarIntervalo() {
+        this.oConfiguracao.adicionarIntervalo();
+        this.voltar();
+    }
+
     atribuirDataHora(num, valor) {
         this.oDadosTela.num_hora_escolher = 0;
 
         if(valor) {
                  
             if(num == 1) {
-                this.oDadosTelaConfiguracao.h1 = valor.getHours();
-                this.oDadosTelaConfiguracao.m1 = valor.getMinutes();
+                this.oDadosTela.h1 = valor.getHours();
+                this.oDadosTela.m1 = valor.getMinutes();
             } else if(num == 2) {
-                this.oDadosTelaConfiguracao.h2 = valor.getHours();
-                this.oDadosTelaConfiguracao.m2 = valor.getMinutes();
+                this.oDadosTela.h2 = valor.getHours();
+                this.oDadosTela.m2 = valor.getMinutes();
             }
 
             this.oGerenciadorContextoApp.atualizarEstadoTela(this);
@@ -188,18 +131,28 @@ export default class TelaConfiguracaoModal extends Component {
     }
 
     render() {
-        let h1 = `${this.oDadosTelaConfiguracao.h1}`.padStart(2, '0');
-        let m1 = `${this.oDadosTelaConfiguracao.m1}`.padStart(2, '0');
+        if(__DEV__) {
+            let oTime = new Date();
+            
+            this.oDadosTela.h1 = oTime.getHours();
+            this.oDadosTela.m1 = oTime.getMinutes();
+    
+            this.oDadosTela.h2 = oTime.getHours();
+            this.oDadosTela.m2 = oTime.getMinutes();
+        }
 
-        let h2 = `${this.oDadosTelaConfiguracao.h2}`.padStart(2, '0');
-        let m2 = `${this.oDadosTelaConfiguracao.m2}`.padStart(2, '0');
+        let h1 = `${this.oDadosTela.h1}`.padStart(2, '0');
+        let m1 = `${this.oDadosTela.m1}`.padStart(2, '0');
+
+        let h2 = `${this.oDadosTela.h2}`.padStart(2, '0');
+        let m2 = `${this.oDadosTela.m2}`.padStart(2, '0');
 
         return (
             <View style={styles.areaTotal}>
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
                     <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>
                         <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
-                            <Icon name="caret-left" size={40} color="#009999" />
+                            <Icon name="arrow-left" size={40} color="#009999" />
                         </TouchableOpacity>
                     </View>
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>

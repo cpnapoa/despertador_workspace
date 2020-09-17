@@ -1,13 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import Mensagem from './Mensagem';
 import {
     StyleSheet,
     View,
     ScrollView,
     Text,
+    Alert
 } from 'react-native';
 import Util, { clonarObjeto } from '../common/Util';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { DIAS_SEMANA } from '../contexts/DadosAppGeral';
@@ -15,12 +16,13 @@ import { Card, Divider, Input } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InputSpinner from "react-native-input-spinner";
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import CheckBox from '@react-native-community/checkbox';
 
 export default class TelaConfiguracao extends Component {
 
     constructor(props, value) {
         super(props);
-
+        
         if(props) {
             if(props.navigation) {
                 this.oNavegacao = props.navigation;
@@ -41,9 +43,10 @@ export default class TelaConfiguracao extends Component {
         }
         this.oDadosTela.objeto_tela = this;
         this.oDadosTela.ver_detalhes = false;
-        this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
+        this.irParaConfiguracaoIntervalo = this.irParaConfiguracaoIntervalo.bind(this);
         this.listarDiasSemana = this.listarDiasSemana.bind(this);
         this.listarHorasDia = this.listarHorasDia.bind(this);
+        this.excluirIntervalosSelecionados = this.excluirIntervalosSelecionados.bind(this);
         this.voltar = this.voltar.bind(this);
         this.verDetalhes = this.verDetalhes.bind(this);
         this.verDataHoraAgendada = this.verDataHoraAgendada.bind(this);
@@ -52,14 +55,88 @@ export default class TelaConfiguracao extends Component {
         this.oUtil = new Util();
     }
     
-    adicionarIntervalo() {
+    irParaConfiguracaoIntervalo() {
         this.oNavegacao.navigate('Configuracao Intervalo');
     }
 
-    excluirIntervalo(diaSemana, indice) {
+    // excluirIntervalo(diaSemana, indice) {
 
-        this.oConfiguracao.excluirIntervaloDiaSemana(diaSemana, indice);
-        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    //     this.oConfiguracao.excluirIntervaloDiaSemana(diaSemana, indice);
+    //     if(!this.oConfiguracao.temIntervaloDefinido()) {
+            
+    //         this.oDadosApp.dados_mensagens.mensagem_atual = this.oDadosApp.dados_mensagens.mensagem_proxima;
+    //         this.oDadosApp.dados_mensagens.mensagem_proxima = '';
+            
+    //         this.oConfiguracao.excluirAgendaNotificacoesNoDispositivo(() => {
+    //             this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    //         });
+    //     } else {
+    //         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    //     }
+    // }
+
+    excluirIntervalosSelecionados() {
+        let quantidade = this.oConfiguracao.excluirIntervalosSelecionados(false);
+
+        if(quantidade > 0) {
+            Alert.alert(
+                'Despertador de Consciência', 
+                `Quer excluir os ${quantidade} intervalos selecionados?`, 
+                [
+                    { 
+                        text: "Sim", 
+                        style: 'default', 
+                        onPress: () => {
+                            quantidade = this.oConfiguracao.excluirIntervalosSelecionados(true);
+                        } 
+                    },
+                    {
+                        text: 'Não',
+                        style: 'cancel'      
+                    }
+                ])
+        } else {
+            quantidade = this.oConfiguracao.inverterSelecaoTodosIntervalos(false);
+            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+
+            Alert.alert(
+                'Despertador de Consciência', 
+                `Quer excluir todos os intervalos da agenda (${quantidade})?`, 
+                [
+                    { 
+                        text: "Sim", 
+                        style: 'default', 
+                        onPress: () => {
+                            quantidade = this.oConfiguracao.excluirIntervalosSelecionados(true);
+                        } 
+                    },
+                    {
+                        text: 'Não',
+                        style: 'cancel',
+                        onPress: () => {
+                            this.oConfiguracao.inverterSelecaoTodosIntervalos(true);
+                            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                        } 
+                    }
+                ])
+        }
+
+        if(!this.oConfiguracao.temIntervaloDefinido()) {
+            
+            this.oDadosApp.dados_mensagens.mensagem_atual = this.oDadosApp.dados_mensagens.mensagem_proxima;
+            this.oDadosApp.dados_mensagens.mensagem_proxima = '';
+            
+            this.oConfiguracao.excluirAgendaNotificacoesNoDispositivo(() => {
+                this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+            });
+        } else {
+            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+        }
+    }
+
+    voltar() {
+        this.oConfiguracao.salvarConfiguracoes(true);
+        this.oNavegacao.goBack();
     }
 
     atribuirMensagensPorDia(diaSemana, qtdMensagensDia) {
@@ -140,7 +217,7 @@ export default class TelaConfiguracao extends Component {
     }
 
     listarHorasDia(oDiaSemana) {
-        let oListaIntervalos;        
+        
         let oIntervalo;
         let oListaExibicao = [];
         let chaveItem;
@@ -152,12 +229,13 @@ export default class TelaConfiguracao extends Component {
 
         if(oDiaSemana) {
 
-            oListaIntervalos = oDiaSemana.intervalos;
+            let oListaIntervalos = oDiaSemana.intervalos;
 
             if(oListaIntervalos) {
 
                 for(let i = 0; i < oListaIntervalos.length; i++) {
                     oIntervalo = oListaIntervalos[i];
+                    
                     if(oIntervalo) {
                         chaveItem = `${oDiaSemana.dia_semana}${i}`;
                         h1 = `${oIntervalo.hora_inicial.hora}`.padStart(2, '0');
@@ -191,8 +269,16 @@ export default class TelaConfiguracao extends Component {
                                     </Text>
                                 </View>
                                 <View style={{ alignSelf:'flex-end', marginLeft:10 }}>
-                                    <Icon name='trash' size={22} style={{ color:'#009999' } } 
-                                    onPress={() => this.excluirIntervalo(oDiaSemana.dia_semana, i)}></Icon>
+                                    
+                                    <CheckBox  
+                                        value={oIntervalo.selecionado}
+                                        onValueChange={(novoValor) => {
+                                           
+                                            let diaSemana = oDiaSemana;
+                                            diaSemana.intervalos[i].selecionado = novoValor;
+                                            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                                        }} 
+                                    />
                                 </View>                                    
                             </View>
                             {this.listarHorasExibicao(oIntervalo)}
@@ -202,7 +288,12 @@ export default class TelaConfiguracao extends Component {
                 }
             }
         }
-        return oListaExibicao;
+
+        return (
+            <View>
+                {oListaExibicao}
+            </View>
+        );
     }
 
     listarHorasExibicao(oIntervalo) {
@@ -267,35 +358,21 @@ export default class TelaConfiguracao extends Component {
         }
     }
 
-    voltar() {
-        this.oConfiguracao.salvarConfiguracoes(true);
-        this.oNavegacao.goBack();
-    }
-
     render() {
-        let oProximaDataHora;
-        let proximaDataHora = 'indefinida.';
-        let oDadosUltimaDataHoraAgendada = this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada;
-
-        if(oDadosUltimaDataHoraAgendada && oDadosUltimaDataHoraAgendada.data_hora_agenda) {
-            oProximaDataHora = new Date(oDadosUltimaDataHoraAgendada.data_hora_agenda);
-            proximaDataHora = `${oProximaDataHora.toLocaleString()}`;
-        }
 
         return (
             <View style={styles.areaTotal}>
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
-                    <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>
+                    <View style={{alignSelf:'center', width:50, alignItems:'center', marginLeft:10, justifyContent:'flex-end'}}>
                         <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
-                            <Icon name="caret-left" size={40} color="#009999" />
+                            <Icon name="arrow-left" size={40} color="#009999" />
                         </TouchableOpacity>
                     </View>
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
-                        <Text style={{fontSize: 24}}>Intervalos agendados</Text>
+                        <Text style={{fontSize: 24}}>Intervalos</Text>
                     </View>
-                    <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>
-                        <Icon name='eye' size={40} color='#e0ebeb' 
-                        onPress={() => this.verDetalhes()}></Icon>
+                    <View style={{alignSelf:'center', width:50, flexDirection:'row', marginRight:20, alignItems:'center', justifyContent:'flex-start'}}>
+                        <Icon name="account-clock" size={45} color="#009999"  onPress={this.irParaConfiguracaoIntervalo} />
                     </View>
                 </View>
                 <SafeAreaView style={{flex: 0.77}}>
@@ -304,8 +381,11 @@ export default class TelaConfiguracao extends Component {
                         {this.listarDiasSemana()}
                     </ScrollView>
                 </SafeAreaView>
-                <View style={{flex: 0.1, margin: 3, flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'flex-end'}}>                
-                    <Icon name="calendar" size={30} color="#009999" style={{marginRight: 55}}  onPress={this.adicionarIntervalo} />
+                
+                <View style={{flex: 0.1, margin: 3, flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-between'}}>
+                    <Icon name='eye' size={40} style={{marginLeft: 70}} color='#e0ebeb' 
+                        onPress={() => this.verDetalhes()} />
+                    <Icon name="calendar-remove" size={35} color="#009999" style={{marginRight: 70}} onPress={this.excluirIntervalosSelecionados}/>
                 </View>
             </View>
         );

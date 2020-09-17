@@ -11,7 +11,7 @@ const StackRaiz = createStackNavigator();
 
 function FluxoPrincipal() {
   
-  return (
+return (
     <StackPrincipal.Navigator headerMode='none'>
         <StackPrincipal.Screen name="Mensagem" component={TelaMensagem} />
         <StackPrincipal.Screen name="Configuracao" component={TelaConfiguracao} />
@@ -37,4 +37,4 @@ export default function App() {
         </NavigationContainer>
       </ContextoAppProvider>
     );
-  }
+}

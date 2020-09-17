@@ -134,22 +134,33 @@ export default class TelaMensagem extends Component {
     
     inicializar() {
         console.log('[despertadorapp] inicializar() ++++++++++++ iniciou ++++++++++++');
-
-        if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
+        console.log(this.oDadosApp.dados_mensagens.mensagem_proxima);
+        
+        if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
 
             console.log('[despertadorapp] inicializar() Vai atribuir mensagem padrão.');
             this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
         }
         this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
+
             this.oGerenciadorContextoApp.atualizarEstadoTela(this);
             this.oMensagem.obterDadosMensagens(() => {
+             
+                if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
+             
+                    this.oMensagem.definirMensagemExibir(() => {
+
+                        this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
+                            this.oConfiguracao.agendarNotificacao();
+                        });
+                    });
+                }
                 this.oGerenciadorContextoApp.atualizarEstadoTela(this);
             });
         });
 
         console.log('[despertadorapp] inicializar() ------------ terminou ------------');
-    }1
-
+    }
     montarStatusConfig() {
 
         if(this.oConfiguracao.temIntervaloDefinido()) {

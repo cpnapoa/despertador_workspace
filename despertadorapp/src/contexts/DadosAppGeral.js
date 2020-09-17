@@ -1,7 +1,7 @@
 import { clonarObjeto } from "../common/Util";
 
 export const DADOS_MENSAGENS = {
-    mensagem_atual: 'Iniciando, aguarde...',
+    mensagem_atual: '',
     mensagem_proxima: '',
     lista_mensagens_exibir: [],
     lista_mensagens_exibidas: [],
@@ -35,6 +35,8 @@ export const DADOS_INTERVALO = {
     horas_exibicao: [],
     novo: true,
     indice_lista: -1,
+    selecionado: false,
+    ativado: true
 }
 
 export const DADOS_DATA_HORA_AGENDAMENTO = {
