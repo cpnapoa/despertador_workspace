@@ -67,6 +67,9 @@ export const DADOS_TELA_CONFIGURACAO_MODAL = {
     qui: false,
     sex: false,
     sab: false,
+    todos_dias_semana: false,
+    todos_dias_fim_semana: false,
+    atribuir_padrao: true,
     h1: '',
     m1: '',
     h2: '',
@@ -78,6 +81,8 @@ export const DADOS_CONTROLE_APP = {
     exibir_mensagem: false,
     em_segundo_plano: false,
     alterou_agenda: false,
+    em_edicao_agenda: false,
+    todos_intervalos_selecionados: false
 };
 
 export const DADOS_APP_GERAL = {

@@ -61,6 +61,9 @@ export default class Configuracao {
         this.atribuirMensagensPorDia = this.atribuirMensagensPorDia.bind(this);
         this.temIntervaloDefinido = this.temIntervaloDefinido.bind(this);
         this.inverterSelecaoTodosIntervalos = this.inverterSelecaoTodosIntervalos.bind(this);
+        this.ativarIntervalosSelecionados = this.ativarIntervalosSelecionados.bind(this);
+        this.ativarIntervaloDiaSemana = this.ativarIntervaloDiaSemana.bind(this);
+        this.temIntervaloSelecionado = this.temIntervaloSelecionado.bind(this);
     }
     
     salvarConfiguracoes(bAgendar) {
@@ -95,6 +98,8 @@ export default class Configuracao {
 
     salvarAgendaNotificacoesNoDispositivo(callback) {
         try {
+            console.log('[despertadorapp] salvarAgendaNotificacoesNoDispositivo() salvando a agenda: ', JSON.stringify(this.oDadosTelaConfiguracao.agenda_notificacoes));
+
             AsyncStorage.setItem('agenda_notificacoes', JSON.stringify(this.oDadosTelaConfiguracao.agenda_notificacoes))
             .then(() => {
             
@@ -156,9 +161,17 @@ export default class Configuracao {
 
                     this.oDadosTelaConfiguracao.agenda_notificacoes = JSON.parse(valor);
                 } 
-                if(!valor || !this.temIntervaloDefinido()) {
+                if(!valor) {
 
-                    this.configurarAgendaPadrao(callback);
+                    this.configurarAgendaPadrao(() => {
+                        if(callback) {
+                            callback();
+                        }
+                        console.log('É a primeira vez, então vai abrir a tela de instruções');
+                        // Vai para a tela de instrucoes.
+                        this.oNavegacao.navigate('Instrucao');
+                    });
+
                 } else if(callback) {
                     callback();
                 }
@@ -172,6 +185,7 @@ export default class Configuracao {
     }
 
     adicionarIntervalo() {
+        let adicionou = false;
         let oNovoIntervalo = clonarObjeto(DADOS_INTERVALO);
         
         oNovoIntervalo.hora_inicial.hora = this.oDadosTelaConfiguracaoModal.h1;
@@ -188,38 +202,71 @@ export default class Configuracao {
            !this.oDadosTelaConfiguracaoModal.sab) {
         
             Alert.alert('Despertador de Conscência', 'Selecione ao menos um dia da semana.');
-            return;
+            return false;
         }
 
         if(this.oDadosTelaConfiguracaoModal.dom) {
-            this.adicionarIntervaloDiaSemana(0, oNovoIntervalo, 1);
+            
+            if(this.adicionarIntervaloDiaSemana(0, oNovoIntervalo, 1)) {
+                if(!adicionou) {
+                    adicionou = true;
+                }
+            }
         }
         
         if(this.oDadosTelaConfiguracaoModal.seg) {
-            this.adicionarIntervaloDiaSemana(1, oNovoIntervalo, 1);
+            if (this.adicionarIntervaloDiaSemana(1, oNovoIntervalo, 1)) {
+                if(!adicionou) {
+                    adicionou = true;
+                }
+            }
         }
 
         if(this.oDadosTelaConfiguracaoModal.ter) {
-            this.adicionarIntervaloDiaSemana(2, oNovoIntervalo, 1);
+            if(this.adicionarIntervaloDiaSemana(2, oNovoIntervalo, 1)) {
+                if(!adicionou) {
+                    adicionou = true;
+                }
+            }
         }
 
         if(this.oDadosTelaConfiguracaoModal.qua) {
-            this.adicionarIntervaloDiaSemana(3, oNovoIntervalo, 1);
+            if (this.adicionarIntervaloDiaSemana(3, oNovoIntervalo, 1)) {
+                if(!adicionou) {
+                    adicionou = true;
+                }
+            }
         }
         if(this.oDadosTelaConfiguracaoModal.qui) {
-            this.adicionarIntervaloDiaSemana(4, oNovoIntervalo, 1);
+            if (this.adicionarIntervaloDiaSemana(4, oNovoIntervalo, 1)) {
+                if(!adicionou) {
+                    adicionou = true;
+                }
+            }
         }
 
         if(this.oDadosTelaConfiguracaoModal.sex) {
-            this.adicionarIntervaloDiaSemana(5, oNovoIntervalo, 1);
+            if (this.adicionarIntervaloDiaSemana(5, oNovoIntervalo, 1)) {
+                if(!adicionou) {
+                    adicionou = true;
+                }
+            }
         }
 
         if(this.oDadosTelaConfiguracaoModal.sab) {
-            this.adicionarIntervaloDiaSemana(6, oNovoIntervalo, 1);
+            if (this.adicionarIntervaloDiaSemana(6, oNovoIntervalo, 1)) {
+                if(!adicionou) {
+                    adicionou = true;
+                }
+            }
         }
+        return adicionou;
     }
 
     configurarAgendaPadrao(callback) {
+        this.oDadosApp.tela_configuracao_modal = clonarObjeto(DADOS_TELA_CONFIGURACAO_MODAL);
+        this.oDadosTelaConfiguracaoModal = this.oDadosApp.tela_configuracao_modal;
+
         this.oDadosTelaConfiguracaoModal.dom = true;
         this.oDadosTelaConfiguracaoModal.seg = true;
         this.oDadosTelaConfiguracaoModal.ter = true;
@@ -256,64 +303,86 @@ export default class Configuracao {
         
         this.adicionarIntervalo();
         
-        this.oDadosApp.tela_configuracao = clonarObjeto(DADOS_TELA_CONFIGURACAO_MODAL);
-
         this.salvarAgendaNotificacoesNoDispositivo(callback);
     }
+    
     definirDistribuicaoMensagensIntervalosDia(diaSemana) {
         let oDiaSemana = this.obterDia(diaSemana);
         
         if(oDiaSemana && oDiaSemana.intervalos && oDiaSemana.intervalos.length > 0) {
             let oIntervalosAdicionados = [];
             let qtdIntervalos = oDiaSemana.intervalos.length;
+            let qtdIntervalosAdicionados;
             let indiceAdicionar;
-            let adicionar;
+            let definir = false;
+            let adicionar = false;
 
             // Zera todos os intervalos.
             for(let i = 0; i < oDiaSemana.intervalos.length; i++) {
                 oDiaSemana.intervalos[i].qtd_mensagens_intervalo = 0;
                 oDiaSemana.intervalos[i].horas_exibicao = [];
-            }
-
-            for(let i = 0; i < oDiaSemana.qtd_mensagens_dia; i++) {
-                indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
                 
-                if(oIntervalosAdicionados.length > 0) {
+                if(oDiaSemana.intervalos[i].ativado) {
+                    definir = true;
+                }
+            }
+            if(definir) {
 
+                for(let i = 0; i < oDiaSemana.qtd_mensagens_dia; i++) {
+                    
                     indiceAdicionar = this.oUtil.getRand(qtdIntervalos);
                     adicionar = true;
                     
-                    for(let a = 0; a < oIntervalosAdicionados.length; a++) {
-                        
-                        // Procura o indice dentre os ja utilizados.
-                        if(oIntervalosAdicionados[a] === indiceAdicionar) {
+                    if(oIntervalosAdicionados.length > 0) {
+                        for(let a = 0; a < oIntervalosAdicionados.length; a++) {
+                            
+                            // Procura o indice dentre os ja utilizados.
+                            if(oIntervalosAdicionados[a] === indiceAdicionar) {
 
-                            adicionar = false;
-                            break;
-                        }
-                    }                        
+                                adicionar = false;
+                                break;
+                            }
+                        }                        
+                    }
+
+                    if(!oDiaSemana.intervalos[indiceAdicionar].ativado) {
+                        adicionar = false;
+                    }
 
                     if(!adicionar) {
                         // Procura o proximo intervalo ainda não usado, para garantir que não ficará sem nenhum mensagem.
                         for(let y = 0; y < oDiaSemana.intervalos.length; y++) {
 
-                            if(!oDiaSemana.intervalos[y].qtd_mensagens_intervalo) {
+                            if(oDiaSemana.intervalos[y].ativado && !oDiaSemana.intervalos[y].qtd_mensagens_intervalo) {
                                 
                                 indiceAdicionar = y;
+                                adicionar = true;
                                 break;
                             }
                         }
                     }
-                }                
-            
-                // Incrementa o numero de mensagens a exibir do intervalo.
-                oDiaSemana.intervalos[indiceAdicionar].qtd_mensagens_intervalo++;
+
+                    if(!adicionar && oIntervalosAdicionados.length > 0) {
+                        // Sorteia novamente, mas dentre os já adicionados.
+                        qtdIntervalosAdicionados = oIntervalosAdicionados.length;
+                        indiceAdicionar = this.oUtil.getRand(qtdIntervalosAdicionados);
+                        indiceAdicionar = oIntervalosAdicionados[indiceAdicionar];
+                        adicionar = true;
+                    }
+
+                    if(adicionar) {
+                        // Incrementa o numero de mensagens a exibir do intervalo.
+                        oDiaSemana.intervalos[indiceAdicionar].qtd_mensagens_intervalo++;
+
+                        oIntervalosAdicionados.push(indiceAdicionar);
                         
-                oIntervalosAdicionados.push(indiceAdicionar);
-                
-                if((oIntervalosAdicionados.length) === qtdIntervalos) {
-                    oIntervalosAdicionados = [];
+                        if((oIntervalosAdicionados.length) === qtdIntervalos) {
+                            oIntervalosAdicionados = [];
+                        }
+                    }
                 }
+            } else {
+                console.log(`definirDistribuicaoMensagensIntervalosDia() Nenhum intervalo ativo para o dia ${diaSemana} para definir distribuicao das mensagens`);
             }
         }
     }
@@ -346,6 +415,7 @@ export default class Configuracao {
     }
 
     adicionarIntervaloDiaSemana(diaSemana, oIntervaloDiaAdicionar, qtdIntervalosDia) {
+        let adicionou = false;
         let oDiaSemana = this.obterDia(diaSemana);
         
         let oIntervaloAdicionar = clonarObjeto(oIntervaloDiaAdicionar);        
@@ -358,9 +428,10 @@ export default class Configuracao {
                     oIntervaloDiaAdicionar.dia_semana = diaSemana;
                     oDiaSemana.intervalos.push(oIntervaloAdicionar);
                     this.oDadosControleApp.alterou_agenda = true;
+                    adicionou = true;
                 }
             } else {
-                Alert('Despertador de Consciência', 'É possível adicionar até cinco intervalos por dia.');
+                Alert.alert('Despertador de Consciência', 'É possível adicionar até cinco intervalos por dia.');
             }
         } else {
             
@@ -371,13 +442,16 @@ export default class Configuracao {
             
             this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias[diaSemana] = oDiaSemana;
             this.oDadosControleApp.alterou_agenda = true;
+            adicionou = true;
         }
         if(oDiaSemana.qtd_mensagens_dia < oDiaSemana.intervalos.length) {
             oDiaSemana.qtd_mensagens_dia = oDiaSemana.intervalos.length;
         }
-
-        this.ordenarIntervalosDiaSemana(diaSemana);
-        this.definirDistribuicaoMensagensIntervalosDia(diaSemana);
+        if(adicionou) {
+            this.ordenarIntervalosDiaSemana(diaSemana);
+            this.definirDistribuicaoMensagensIntervalosDia(diaSemana);
+        }
+        return adicionou;
     }
 
     inverterSelecaoTodosIntervalos(selecaoAtual) {
@@ -411,6 +485,102 @@ export default class Configuracao {
         return quantidade;
     }
 
+    temIntervaloSelecionado() {
+        let oAgendaIntervalosDias;
+        let oDiaSemana;
+        let oIntervalo;
+
+        if(this.oDadosTelaConfiguracao.agenda_notificacoes) {
+            oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
+        }
+
+        if(oAgendaIntervalosDias && oAgendaIntervalosDias.length > 0) {
+
+            for(let iDiaSemana = 0; iDiaSemana < oAgendaIntervalosDias.length; iDiaSemana++){
+                
+                oDiaSemana = oAgendaIntervalosDias[iDiaSemana];
+                
+                if(oDiaSemana && oDiaSemana.intervalos && oDiaSemana.intervalos.length > 0) {
+                    
+                    for(let t = 0; t < oDiaSemana.intervalos.length; t++) {
+                        
+                        oIntervalo = oDiaSemana.intervalos[t];
+
+                        if(oIntervalo.selecionado) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    ativarIntervalosSelecionados(indEfetivar, indAtivaDesativa) {
+        let oAgendaIntervalosDias;
+        let oDiaSemana;
+        let oIntervalo;
+        let quantidade = 0;
+
+        if(this.oDadosTelaConfiguracao.agenda_notificacoes) {
+            oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
+        }
+
+        if(oAgendaIntervalosDias && oAgendaIntervalosDias.length > 0) {
+
+            for(let iDiaSemana = 0; iDiaSemana < oAgendaIntervalosDias.length; iDiaSemana++){
+                
+                oDiaSemana = oAgendaIntervalosDias[iDiaSemana];
+                
+                if(oDiaSemana && oDiaSemana.intervalos && oDiaSemana.intervalos.length > 0) {
+                    
+                    for(let t = 0; t < oDiaSemana.intervalos.length; t++) {
+                        
+                        oIntervalo = oDiaSemana.intervalos[t];
+
+                        if(oIntervalo.selecionado) {
+                            
+                            if(indEfetivar) {
+                                oIntervalo.selecionado = false;
+
+                                if(this.ativarIntervaloDiaSemana(oDiaSemana.dia_semana, t, indAtivaDesativa)) {
+                                    t--;
+                                }
+                            }
+
+                            quantidade++;    
+                        }
+                    }
+                }
+            }
+        }
+        return quantidade;
+    }
+
+    ativarIntervaloDiaSemana(diaSemana, indiceIntervalo, indAtivaDesativa) {
+
+        let oDiaSemana = this.obterDia(diaSemana);
+        let oIntervalo;
+        let indAlterou = false;
+
+        if(oDiaSemana && oDiaSemana.intervalos && oDiaSemana.intervalos.length > indiceIntervalo) {
+            
+            oIntervalo = oDiaSemana.intervalos[indiceIntervalo];
+
+            if(oIntervalo.ativado !== indAtivaDesativa) {
+                console.log(`ativarIntervaloDiaSemana() Alterando o intervalo para ativado = ${indAtivaDesativa}...`);
+                oIntervalo.ativado = indAtivaDesativa;
+                
+                indAlterou = true;
+                this.definirDistribuicaoMensagensIntervalosDia(diaSemana);            
+                this.obterProximaDataHoraExibicao();
+                this.oDadosControleApp.alterou_agenda = true;
+            }
+        }
+
+        return indAlterou;
+    }
+    
     excluirIntervalosSelecionados(indEfetivarExclusao) {
         let oAgendaIntervalosDias;
         let oDiaSemana;
@@ -436,6 +606,7 @@ export default class Configuracao {
                         if(oIntervalo.selecionado) {
                             
                             if(indEfetivarExclusao) {
+                                oIntervalo.selecionado = false;
 
                                 if(this.excluirIntervaloDiaSemana(oDiaSemana.dia_semana, t)) {
                                     t--;
@@ -677,7 +848,7 @@ export default class Configuracao {
 
                         oIntervaloItem.qtd_mensagens_intervalo = oIntervaloItem.horas_exibicao.length;
 
-                        if(oIntervaloItem.qtd_mensagens_intervalo > 0) {                            
+                        if(oIntervaloItem.ativado && oIntervaloItem.qtd_mensagens_intervalo > 0) {                            
                             return oIntervaloItem;
                         }
                     }
@@ -697,7 +868,9 @@ export default class Configuracao {
             for (let i = 0; i < oIntervalosDia.length; i++) {
                 
                 oIntervaloItem = oIntervalosDia[i];
-                qtd_mensagens_dia_disponiveis += oIntervaloItem.qtd_mensagens_intervalo;
+                if(oIntervaloItem.ativado) {
+                    qtd_mensagens_dia_disponiveis += oIntervaloItem.qtd_mensagens_intervalo;
+                }
             }
 
             if(qtd_mensagens_dia_disponiveis < oProximoDia.qtd_mensagens_dia) {
@@ -707,7 +880,7 @@ export default class Configuracao {
             for (let i = 0; i < oIntervalosDia.length; i++) {
                 oIntervaloItem = oIntervalosDia[i];
 
-                if(oIntervaloItem.qtd_mensagens_intervalo > 0) {
+                if(oIntervaloItem.ativado && oIntervaloItem.qtd_mensagens_intervalo > 0) {
                     
                     return oIntervaloItem;
                 }
@@ -796,8 +969,12 @@ export default class Configuracao {
 
     obterDia (diaSemana) {
 
-        let oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
+        let oAgendaIntervalosDias;
         let oDiaSemanaItem;
+
+        if(this.oDadosTelaConfiguracao.agenda_notificacoes) {
+            oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
+        }
 
         if(oAgendaIntervalosDias) {
             oDiaSemanaItem = oAgendaIntervalosDias[7];
@@ -818,45 +995,49 @@ export default class Configuracao {
 
     obterProximoDiaSemana(diaInicial) {
 
-        let oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
+        let oAgendaIntervalosDias;
         let oProximoDia = null;
         let oHoje = new Date();
         
-        oProximoDia = oAgendaIntervalosDias[7];
-        
-        if(oProximoDia) {
-            return oProximoDia;
-        }        
-        
-        let proximoDia = diaInicial + 1;
-        
-        // Procura pelo proximo intervalo a partir do dia de hoje ate o final da semana.
-        for(; proximoDia < oAgendaIntervalosDias.length; proximoDia++) {
-            
-            oProximoDia = oAgendaIntervalosDias[proximoDia];
-            
-            if(oProximoDia && oProximoDia.qtd_mensagens_dia > 0) {
-                break;
-            }
-            oProximoDia = null;
+        if(this.oDadosTelaConfiguracao.agenda_notificacoes) {
+            oAgendaIntervalosDias = this.oDadosTelaConfiguracao.agenda_notificacoes.agenda_intervalos_dias;
         }
-
-        // Se nao encontrou, procura do inicio ate o dia de hoje.
-        if(!oProximoDia) {
-            let diaHoje = oHoje.getDay();
-            proximoDia = 0;
-
-            for(; proximoDia <= diaHoje; proximoDia++) {
+        if(oAgendaIntervalosDias) {
+            oProximoDia = oAgendaIntervalosDias[7];
             
+            if(oProximoDia) {
+                return oProximoDia;
+            }        
+            
+            let proximoDia = diaInicial + 1;
+            
+            // Procura pelo proximo intervalo a partir do dia de hoje ate o final da semana.
+            for(; proximoDia < oAgendaIntervalosDias.length; proximoDia++) {
+                
                 oProximoDia = oAgendaIntervalosDias[proximoDia];
                 
                 if(oProximoDia && oProximoDia.qtd_mensagens_dia > 0) {
                     break;
                 }
                 oProximoDia = null;
-            }   
+            }
+
+            // Se nao encontrou, procura do inicio ate o dia de hoje.
+            if(!oProximoDia) {
+                let diaHoje = oHoje.getDay();
+                proximoDia = 0;
+
+                for(; proximoDia <= diaHoje; proximoDia++) {
+                
+                    oProximoDia = oAgendaIntervalosDias[proximoDia];
+                    
+                    if(oProximoDia && oProximoDia.qtd_mensagens_dia > 0) {
+                        break;
+                    }
+                    oProximoDia = null;
+                }   
+            }
         }
-        
         return oProximoDia;
     }
 
@@ -945,7 +1126,7 @@ export default class Configuracao {
         console.log('[despertadorapp] verificarNotificacaoEmSegundoPlano() ++++++++++++ iniciou ++++++++++++');
 
         this.obterAgendaNotificacoesDoDispositivo(() => {
-            if(pTaskId === 'Ok') {
+            if(new String(pTaskId).toUpperCase() === 'Ok'.toUpperCase()) {
                 this.removerUltimaDataHoraAgendada();
             }
             this.oMensagem.obterDadosMensagens(() => {
@@ -978,7 +1159,7 @@ export default class Configuracao {
                         console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - Ultima data-hora agendada: ', ultimaDataHoraAgendada.data_hora_agenda);
                         console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - Data-hora atual: ', oDataHoraAtual.toLocaleString());
                         
-                        if(taskId && taskId !== 'Ok') {
+                        if(taskId && new String(taskId).toUpperCase() !== 'Ok'.toUpperCase()) {
                             let horaAtual = oUltimaDataHoraAgendada.getHours();
                             oUltimaDataHoraAgendada.setHours((horaAtual + 2));
                             
@@ -989,28 +1170,30 @@ export default class Configuracao {
                         }
                         
                         if(oUltimaDataHoraAgendada < oDataHoraAtual) {
-                            console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada foi ignorada. Serah reagendada...')
+                            console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada foi ignorada. Serah reagendada...');
                             
-                            this.agendarNotificacao(true);
+                            this.oMensagem.definirMensagemExibir(() => {    
+                                this.agendarNotificacao(true);
+                            });
                         } else {
-                            console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada eh maior. Nada a ser feito...')
+                            console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada eh maior. Nada a ser feito...');
                         }
                     } else {
-                        console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada nao encontrada. Serah agendada...')
+                        console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada nao encontrada. Serah agendada...');
                         
                         this.oMensagem.definirMensagemExibir(() => {
                             this.agendarNotificacao(true);
                         });
                     }
                 } else {
-                    console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Nao encontrou dados de configuracoes salvos no dispositivo.')
+                    console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Nao encontrou dados de configuracoes salvos no dispositivo.');
                 }
             } else {
-                console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Nao encontrou a agenda de notificacoes salva no dispositivo.')
+                console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Nao encontrou a agenda de notificacoes salva no dispositivo.');
             }
             
         } catch(e) {
-            console.error('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Erro ao reagendarNotificacaoEmSegundoPlano()... ', e)
+            console.error('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Erro ao reagendarNotificacaoEmSegundoPlano()... ', e);
         }
 
         if(taskId) {

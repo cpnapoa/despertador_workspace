@@ -7,8 +7,8 @@ import {
     Text,
     Alert,
 } from 'react-native';
-import Util from '../common/Util';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Util, { clonarObjeto } from '../common/Util';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { Divider, Card } from 'react-native-elements';
@@ -32,7 +32,6 @@ export default class TelaConfiguracaoModal extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
-            // this.oDadosTela = this.oDadosApp.tela_configuracao;
             this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
@@ -44,6 +43,7 @@ export default class TelaConfiguracaoModal extends Component {
         this.exibirTimePicker = this.exibirTimePicker.bind(this);
         this.montarTimePicker = this.montarTimePicker.bind(this);
         this.adicionarIntervalo = this.adicionarIntervalo.bind(this);
+        this.selecionarTodosDias = this.selecionarTodosDias.bind(this);
         this.voltar = this.voltar.bind(this);
 
         this.oMensagem = new Mensagem();
@@ -55,6 +55,10 @@ export default class TelaConfiguracaoModal extends Component {
         this.oDadosTela.m2 = 0;
     }
 
+    componentDidMount() {
+        this.oDadosTela.atribuir_padrao = true;
+    }
+
     voltar() {
         
         this.oNavegacao.goBack();
@@ -62,13 +66,13 @@ export default class TelaConfiguracaoModal extends Component {
     }
 
     adicionarIntervalo() {
-        this.oConfiguracao.adicionarIntervalo();
-        this.voltar();
+        if(this.oConfiguracao.adicionarIntervalo()) {
+            this.voltar();
+        }
     }
 
     atribuirDataHora(num, valor) {
-        this.oDadosTela.num_hora_escolher = 0;
-
+        
         if(valor) {
                  
             if(num == 1) {
@@ -78,35 +82,92 @@ export default class TelaConfiguracaoModal extends Component {
                 this.oDadosTela.h2 = valor.getHours();
                 this.oDadosTela.m2 = valor.getMinutes();
             }
-
-            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
         }
     }
 
-    montarDiasSemana() {
-            
-        return(
-            <View style={{ flexDirection:'column', alignItems:'flex-start', margin:10}}>
-                <View style={{ flexDirection:'row', alignItems:'center'}}>
-                    <CheckBox value={this.oDadosTela.seg} 
-                              onValueChange={value => {this.oDadosTela.seg = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Seg</Text>
-                    <CheckBox value={this.oDadosTela.ter} 
-                              onValueChange={value => {this.oDadosTela.ter = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} /><Text>Ter</Text>
-                    <CheckBox value={this.oDadosTela.qua} 
-                              onValueChange={value => {this.oDadosTela.qua = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qua</Text>
-                    <CheckBox value={this.oDadosTela.qui} 
-                              onValueChange={value => {this.oDadosTela.qui = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Qui</Text>
-                    <CheckBox value={this.oDadosTela.sex} 
-                              onValueChange={value => {this.oDadosTela.sex = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sex</Text>
+    selecionarTodosDias(indFimSemana) {
+        let indSelecionado = false;
+        
+        if(indFimSemana) {
+            indSelecionado = !this.oDadosTela.todos_dias_fim_semana;
+            this.oDadosTela.todos_dias_fim_semana = indSelecionado;
+            this.oDadosTela.sab = indSelecionado;
+            this.oDadosTela.dom = indSelecionado;
+        } else {
+            indSelecionado = !this.oDadosTela.todos_dias_semana
+            this.oDadosTela.todos_dias_semana = indSelecionado;
+            this.oDadosTela.seg = indSelecionado;
+            this.oDadosTela.ter = indSelecionado;
+            this.oDadosTela.qua = indSelecionado;
+            this.oDadosTela.qui = indSelecionado;
+            this.oDadosTela.sex = indSelecionado;
+        }
+        
+        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+    }
+
+    montarDiasSemana(indFimSemana) {
+        
+        if(indFimSemana) {
+            return(
+                <View style={{ flexDirection:'column', alignItems:'flex-start'}}>
+                    <TouchableOpacity onPress={() => {this.selecionarTodosDias(true);}}
+                        style={{flexDirection:'row', margin: 10, alignItems:'center', justifyContent:'flex-start'}}>
+                        <CheckBox value={this.oDadosTela.todos_dias_fim_semana} />
+                        <Text style={{fontSize:16}}>Fim de semana</Text>
+                    </TouchableOpacity>
+                    <View style={{ flexDirection:'row', alignItems:'center', marginHorizontal: 10}}>
+                        <TouchableOpacity style={{ flexDirection:'row', alignItems:'center'}}
+                            onPress = {() => {this.oDadosTela.sab = !this.oDadosTela.sab; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}>
+                            <CheckBox value={this.oDadosTela.sab} />
+                            <Text>Sab</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ flexDirection:'row', alignItems:'center'}}
+                            onPress = {() => {this.oDadosTela.dom = !this.oDadosTela.dom; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}>
+                            <CheckBox value={this.oDadosTela.dom}/>
+                            <Text>Dom</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <View style={{ flexDirection:'row', alignItems:'center'}}>
-                    <CheckBox value={this.oDadosTela.sab} 
-                              onValueChange={value => {this.oDadosTela.sab = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Sab</Text>
-                    <CheckBox value={this.oDadosTela.dom} 
-                              onValueChange={value => {this.oDadosTela.dom = value; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}/><Text>Dom</Text>
+            )
+        } else {
+            return(
+                <View style={{ flexDirection:'column', alignItems:'flex-start'}}>
+                    <TouchableOpacity onPress={() => {this.selecionarTodosDias(false);}}
+                        style={{flexDirection:'row', margin: 10, alignItems:'center', justifyContent:'flex-start'}}>
+                        <CheckBox value={this.oDadosTela.todos_dias_semana} />
+                        <Text style={{fontSize:16}}>Dias de semana</Text>
+                    </TouchableOpacity>
+                    <View style={{ flexDirection:'row', alignItems:'center', marginHorizontal: 10}}>
+                        <TouchableOpacity style={{ flexDirection:'row', alignItems:'center'}}
+                            onPress = {() => {this.oDadosTela.seg = !this.oDadosTela.seg; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}>
+                            <CheckBox value={this.oDadosTela.seg} />
+                            <Text>Seg</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ flexDirection:'row', alignItems:'center'}}
+                            onPress = {() => {this.oDadosTela.ter = !this.oDadosTela.ter; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}>
+                            <CheckBox value={this.oDadosTela.ter} />
+                            <Text>Ter</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ flexDirection:'row', alignItems:'center'}}
+                            onPress = {() => {this.oDadosTela.qua = !this.oDadosTela.qua; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}>
+                            <CheckBox value={this.oDadosTela.qua} />
+                            <Text>Qua</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ flexDirection:'row', alignItems:'center'}}
+                            onPress = {() => {this.oDadosTela.qui = !this.oDadosTela.qui; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}>
+                            <CheckBox value={this.oDadosTela.qui} />
+                            <Text>Qui</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ flexDirection:'row', alignItems:'center'}}
+                            onPress = {() => {this.oDadosTela.sex = !this.oDadosTela.sex; this.oGerenciadorContextoApp.atualizarEstadoTela(this);}}>
+                            <CheckBox value={this.oDadosTela.sex} />
+                            <Text>Sex</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-        )
+            )
+        }
     }
 
     exibirTimePicker(numHora) {
@@ -124,21 +185,23 @@ export default class TelaConfiguracaoModal extends Component {
             mode='time'
             is24Hour={true}
             display="clock"
-            onChange={(event, valor) => { this.atribuirDataHora(numHora, valor);}}
+            onChange={(event, valor) => {
+                this.atribuirDataHora(numHora, valor);
+                this.oDadosTela.num_hora_escolher = 0;
+                this.oDadosTela.atribuir_padrao = false
+                this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+            }}
             />
             )
         }
     }
 
     render() {
-        if(__DEV__) {
+        if(__DEV__ && this.oDadosTela.atribuir_padrao) {
             let oTime = new Date();
             
-            this.oDadosTela.h1 = oTime.getHours();
-            this.oDadosTela.m1 = oTime.getMinutes();
-    
-            this.oDadosTela.h2 = oTime.getHours();
-            this.oDadosTela.m2 = oTime.getMinutes();
+            this.atribuirDataHora(1, oTime);
+            this.atribuirDataHora(2, oTime);
         }
 
         let h1 = `${this.oDadosTela.h1}`.padStart(2, '0');
@@ -146,11 +209,11 @@ export default class TelaConfiguracaoModal extends Component {
 
         let h2 = `${this.oDadosTela.h2}`.padStart(2, '0');
         let m2 = `${this.oDadosTela.m2}`.padStart(2, '0');
-
+        
         return (
             <View style={styles.areaTotal}>
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
-                    <View style={{alignSelf:'center', width:50, alignItems:'center', justifyContent:'flex-end'}}>
+                    <View style={{alignSelf:'center', width:50, alignItems:'center', marginLeft:10,  justifyContent:'flex-end'}}>
                         <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
                             <Icon name="arrow-left" size={40} color="#009999" />
                         </TouchableOpacity>
@@ -162,28 +225,24 @@ export default class TelaConfiguracaoModal extends Component {
                     </View>
                 </View>
                 <View style={styles.areaIntervaloDefinicao}>
-                    <Card containerStyle={{ alignItems:'center', width:300, marginTop:10, backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5}} >                        
-                        <TouchableOpacity onPress={() => this.exibirTimePicker(1)} 
-                                            style={{flexDirection:'column', width:300, alignItems:'center', marginTop: 0, borderRadius:5, borderWidth:1, borderColor:'#e0ebeb'}}>
-                            <Text style={{margin:10, marginTop: 5, fontSize:20}}>Hora inicial</Text>
-                            <Text style={{margin:10, marginTop: 0, fontSize:24, borderStyle:'solid', borderRadius:5, borderWidth: 1, padding:5, paddingLeft:10, paddingRight:10}}>{h1}:{m1}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => this.exibirTimePicker(2)} 
-                                            style={{flexDirection:'column', alignItems:'center', marginTop: 15, borderRadius:5, borderWidth:1, borderColor:'#e0ebeb'}}>
-                            <Text style={{margin:10, fontSize:20}}>Hora final</Text>
-                            <Text style={{margin:10, marginTop: 0, fontSize:24, borderStyle:'solid', borderRadius:5, borderWidth: 1, padding:5, paddingLeft:10, paddingRight:10}}>{h2}:{m2}</Text>
+                    <Card containerStyle={{ alignItems:'center', marginTop:10, backgroundColor: '#f0f5f5', borderWidth: 1, borderRadius:5}} >
+                        <View style={{ flexDirection: 'row', margin: 20, justifyContent: 'space-evenly', alignItems:'flex-end' }}>
+                            <TouchableOpacity onPress={() => this.exibirTimePicker(1)} 
+                                                style={{flexDirection:'column', alignItems:'center' }}>
+                                <Text style={{marginBottom:5, fontSize:20}}>Hora inicial</Text>
+                                <Text style={{fontSize:24, borderStyle:'solid', borderRadius:5, borderWidth: 1, padding:5, paddingLeft:10, paddingRight:10}}>{h1}:{m1}</Text>
                             </TouchableOpacity>
-                        <Divider style={{margin:10}}></Divider>
-                        <View style={{flexDirection:'row', margin: 10, alignSelf:'stretch', justifyContent:'space-between'}}>
-                            <View style={{ alignSelf:'flex-start', width:80}}>
-                            </View>
-                            <View style={{flexDirection:'row', alignSelf:'center', justifyContent:'center'}}>
-                                <Text style={{fontSize:16}}>Dias da Semana</Text>
-                            </View>
-                            <View style={{flexDirection:'row', alignSelf:'flex-end', width:80, alignItems:'center', justifyContent:'flex-end'}}>
-                            </View>
+                            <Text style={{margin:10, fontSize:20}}>às</Text>
+                            <TouchableOpacity onPress={() => this.exibirTimePicker(2)} 
+                                                style={{flexDirection:'column', alignItems:'center'}}>
+                                <Text style={{marginBottom:5, fontSize:20}}>Hora final</Text>
+                                <Text style={{fontSize:24, borderStyle:'solid', borderRadius:5, borderWidth: 1, padding:5, paddingLeft:10, paddingRight:10}}>{h2}:{m2}</Text>
+                            </TouchableOpacity>
                         </View>
-                        {this.montarDiasSemana()}
+                        <Divider style={{marginTop:10}}></Divider>
+                        {this.montarDiasSemana(false)}
+                        <Divider style={{margin:10}}></Divider>
+                        {this.montarDiasSemana(true)}
                     </Card>
                     {this.montarTimePicker(this.oDadosTela.num_hora_escolher)}
                 </View>
