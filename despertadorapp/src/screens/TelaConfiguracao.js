@@ -425,13 +425,13 @@ export default class TelaConfiguracao extends Component {
         
         if(this.oDadosControleApp.em_edicao_agenda) {
             return(
-                <View style={{flex: 0.1, margin: 3, marginLeft:50, flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-evenly'}}>
-                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
+                <View style={{flex: 0.1, margin: 3, flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'space-evenly'}}>
+                    <View style={{flexDirection:'row', marginLeft:10, alignItems:'center', justifyContent:'space-between'}}>
                         {this.montarIcone('trash-can-outline', 'Excluir', this.excluirIntervalosSelecionados, null, habilitado)}
                         {this.montarIcone('alarm-note-off', 'Desativar', this.desativarIntervalosSelecionados, null, habilitado)}
                         {this.montarIcone('alarm-note', 'Ativar', this.ativarIntervalosSelecionados, null, habilitado)}
                     </View>
-                    <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
+                    <View style={{flexDirection:'row', marginLeft:10, alignItems:'center', justifyContent:'space-between'}}>
                         {this.montarIcone(iconeSelecaoMultipla, '', this.alterarSelecaoEdicaoTodos, () => {}, true)}
                         {this.montarIcone('close', '', this.fecharEdicao, () => {}, true)}
                     </View>
@@ -461,7 +461,7 @@ export default class TelaConfiguracao extends Component {
             return (
                 <TouchableOpacity onPress={oFuncaoOnPress} >
                     <View style={{flexDirection:'column', width:60, marginRight:10, marginLeft:10, alignItems:'center', justifyContent:'center'}}>
-                        <Icon name={nomeIcone} size={35} color={corIcone} />
+                        <Icon name={nomeIcone} size={30} color={corIcone} />
                         <Text style={{color:corIcone}}>{descricao}</Text>
                     </View>
                 </TouchableOpacity>
@@ -470,7 +470,7 @@ export default class TelaConfiguracao extends Component {
             return(
                 <TouchableOpacity onPress={oFuncaoOnPress} onLongPress={oFuncaoOnLongPress}>
                     <View style={{flexDirection:'column', width:50, alignItems:'center', justifyContent:'center'}}>
-                        <Icon name={nomeIcone} size={30} color={corIcone} />
+                        <Icon name={nomeIcone} size={25} color={corIcone} />
                     </View>
                 </TouchableOpacity>
             )
