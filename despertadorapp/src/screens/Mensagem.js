@@ -116,7 +116,7 @@ export default class Mensagem {
 
     async salvarDadosMensagensNoDispositivo (callback) {
         console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() ++++++++++++ iniciou ++++++++++++');
-        console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() salvando dados_mensagens = ', this.oDadosApp.dados_mensagens);
+        console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() salvando as mensagens no dispositivo (dados_mensagens)...');
 
         try {                   
 

@@ -194,7 +194,10 @@ export default class TelaConfiguracao extends Component {
                                     step={1} min={1} 
                                     max={5} 
                                     value={oDiaSemana.qtd_mensagens_dia} 
-                                    onChange={(value, iDiaSemana) => {this.atribuirMensagensPorDia(iDiaSemana, value); this.oGerenciadorContextoApp.atualizarEstadoTela(this);}} 
+                                    onChange={(value) => {
+                                        this.atribuirMensagensPorDia(iDiaSemana, value); 
+                                        this.oGerenciadorContextoApp.atualizarEstadoTela(this);}
+                                    }
                                 >
                                 </InputSpinner>
                             </View>

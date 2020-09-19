@@ -373,6 +373,7 @@ export default class Configuracao {
                     if(adicionar) {
                         // Incrementa o numero de mensagens a exibir do intervalo.
                         oDiaSemana.intervalos[indiceAdicionar].qtd_mensagens_intervalo++;
+                        this.oDadosControleApp.alterou_agenda = true;
 
                         oIntervalosAdicionados.push(indiceAdicionar);
                         
