@@ -135,6 +135,8 @@ export default class Configuracao {
                 if(valor) {
 
                     this.oDadosTelaConfiguracao.agenda_notificacoes = JSON.parse(valor);;
+                } else {
+                    //colocar aqui intervalos iniciais
                 }
                 if(callback) {
                     callback();

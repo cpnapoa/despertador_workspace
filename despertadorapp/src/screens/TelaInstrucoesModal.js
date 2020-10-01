@@ -137,11 +137,13 @@ export default class TelaInstrucoesModal extends Component {
                                 mas sinta-se livre para alterá-los!{'\n\t\t'}
                                 Na tela de configurações, procure
                                 pelo ícone de adicionar novo horário. Defina um horário inicial e um horário final para o seu intervalo.
-                                Tenha em mente que o tamanho mínimo de um intervalo é 30 minutos, e o tempo mínimo entre um intervalo e
-                                outro também é de 30 minutos!{'\n\t\t'}
+                                Para o bom funcionamento do aplicativo, recomendamos que o tamanho mínimo de um intervalo seja de
+                                30 minutos, e o tempo mínimo entre um intervalo e
+                                outro também seja de 30 minutos!{'\n\t\t'}
                                 Em seguida, marque os dias da semana que gostaria de implementar esse intervalo. Clique no ok.
-                                Parabéns, voce acabou de adicionar intervalos!{'\n\t\t'}
-                                Para excluí-los, basta clicar no ícone de 'lixeira' ao lado do intervalo.
+                                Parabéns, voce acabou de adicionar novos intervalos!{'\n\t\t'}
+                                Para excluí-los, basta clicar no ícone 'editar', selecionar os intervalos que deseja excluir,
+                                e selecionar 'excluir'.
                             </Text>
                             <Text style={styles.textos}>
                                 {'\t\t'}O próximo passo é definir quantas mensagens deseja receber ao longo do dia.{'\n\t\t'}
@@ -169,13 +171,14 @@ export default class TelaInstrucoesModal extends Component {
                             </Text>
                             <Text style={styles.textos}>
                                 {'\t\t'}Quando as suas mensagens acabarem, não se preocupe! Elas serão automaticamente sincronizadas
-                                com as mensagens do servidor assim que o aplicativo for aberto e o
-                                acesso à internet estiver disponível.
+                                com as mensagens do servidor assim que o acesso à internet estiver disponível.
                             </Text>
                             <Text style={styles.textos}>
-                                {'\t\t'}As configurações de energia de alguns celualres podem afetar o agendamento de notificações caso
-                                as notificações sejam canceladas (arrastadas para o lado). Caso não queria abrir o aplicativo, prefira
-                                sempre apertar o botão 'ok' presente junto da notificação para o bom funcionamento do aplicativo.
+                                {'\t\t'}As configurações de gerenciamento de energia de alguns celualres podem afetar o agendamento de
+                                notificações. Isso acontece principalmente no casos de 'cancelamento' das notificações
+                                (notificações dispensadas, 'arrastadas para o lado').
+                                Prefira sempre apertar o botão 'ok' presente junto da notificação ao invés de dispensá-la arrastando para o lado,
+                                para ajudar a manter o bom funcionamento do aplicativo.
                             </Text>
                             <Text style={styles.textos}>
                                 {'\t\t'}Qualquer dúvida ou sugestão, basta entrar em contato com Vladimir ou Gustavo ;)

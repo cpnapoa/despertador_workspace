@@ -232,6 +232,7 @@ export default class TelaMensagem extends Component {
 
                     <View style={{ flex: 0.17, alignItems: 'center', alignSelf: 'center', justifyContent: 'center' }}>
                         <TouchableOpacity style={{ height: '50%', alignItems: 'center', justifyContent: 'center' }}
+                            activeOpacity= '1'
                             delayLongPress='4000'
                             onLongPress={() => {
                                 console.log('apertou')
