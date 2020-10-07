@@ -113,7 +113,7 @@ export default class TelaMensagem extends Component {
         });
 
         BackgroundFetch.configure({
-            minimumFetchInterval: 120,      // <-- minutes (15 is minimum allowed)
+            minimumFetchInterval: 15,      // <-- minutes (15 is minimum allowed)
             // Android options
             forceAlarmManager: false,      // <-- Set true to bypass JobScheduler.
             stopOnTerminate: false,
@@ -145,8 +145,8 @@ export default class TelaMensagem extends Component {
 
             this.oGerenciadorContextoApp.atualizarEstadoTela(this);
             this.oMensagem.obterDadosMensagens(() => {
-             
-                if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
+                
+                //if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
              
                     this.oMensagem.definirMensagemExibir(() => {
 
@@ -154,13 +154,14 @@ export default class TelaMensagem extends Component {
                             this.oConfiguracao.agendarNotificacao();
                         });
                     });
-                }
+                //}
                 this.oGerenciadorContextoApp.atualizarEstadoTela(this);
             });
         });
 
         console.log('[despertadorapp] inicializar() ------------ terminou ------------');
     }
+    
     montarStatusConfig() {
 
         if(this.oConfiguracao.temIntervaloDefinido()) {

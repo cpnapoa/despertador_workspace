@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import Mensagem from './Mensagem';
 import {
     StyleSheet,
@@ -12,7 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import { DADOS_TELA_CONFIGURACAO_MODAL, DIAS_SEMANA } from '../contexts/DadosAppGeral';
-import { Card, Divider, Input } from 'react-native-elements';
+import { Card, Divider } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InputSpinner from "react-native-input-spinner";
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -211,7 +211,7 @@ export default class TelaConfiguracao extends Component {
             return (
                 <View style={{alignItems:'center', flexDirection:'column', justifyContent:'center'}}>
                     <Text style={{margin:20, fontSize:18}}>Nenhum intervalo definido.</Text>
-                    {this.montarIcone('calendar-refresh', 'Redefinir', this.redefinirParaAgendaPadrao, null, true)}
+                    {this.montarIcone('calendar-refresh', 'Padrão', this.redefinirParaAgendaPadrao, null, true)}
                 </View>
             )
         }

@@ -9,7 +9,6 @@ export default class GerenciadorContextoApp {
 
         this.oRegistradorLog = new RegistradorLog();
         this.oDadosReferencia.registros_log = this.oRegistradorLog.registrosLog;
-        this._transportarLogServidor = this._transportarLogServidor.bind(this);
         this.atualizarEstadoTela = this.atualizarEstadoTela.bind(this);
         this.atribuirDados = this.atribuirDados.bind(this);
         this.temDados = this.temDados.bind(this);
