@@ -146,7 +146,7 @@ export default class TelaMensagem extends Component {
             this.oGerenciadorContextoApp.atualizarEstadoTela(this);
             this.oMensagem.obterDadosMensagens(() => {
                 
-                //if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
+                if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
              
                     this.oMensagem.definirMensagemExibir(() => {
 
@@ -154,7 +154,7 @@ export default class TelaMensagem extends Component {
                             this.oConfiguracao.agendarNotificacao();
                         });
                     });
-                //}
+                }
                 this.oGerenciadorContextoApp.atualizarEstadoTela(this);
             });
         });
