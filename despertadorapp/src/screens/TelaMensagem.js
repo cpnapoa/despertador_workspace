@@ -252,20 +252,25 @@ export default class TelaMensagem extends Component {
                 qtdTotal = this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length + this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length;
                 if (this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length > 0) {
                     // Soma um para a mensagem_atual, que ainda não foi adicionada ao array de lidas.
-                    qtdTotal += 1; 
-                }
-                return (
-                    <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
-                        <View style={{flexDirection:'row'}}>
-                            <Text>Mensagem </Text> 
-                            <Text>{this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length}</Text>
-                            <Text> de </Text>
-                            <Text>{qtdTotal}</Text>
+                    qtdTotal += 1;
+                    return (
+                        <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                            <View style={{flexDirection:'row'}}>
+                                <Text>Mensagem </Text> 
+                                <Text>{this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length}</Text>
+                                <Text> de </Text>
+                                <Text>{qtdTotal}</Text>
+                            </View>
+                            {this.montarStatusConfig()}
                         </View>
-                        {this.montarStatusConfig()}
-                    </View>
-                );
-
+                    );
+                } else {
+                    return (
+                        <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                            {this.montarStatusConfig()}
+                        </View>
+                    );
+                }
             } else {
             
                 return(
