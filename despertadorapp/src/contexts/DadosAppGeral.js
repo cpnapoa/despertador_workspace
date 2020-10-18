@@ -65,6 +65,8 @@ export const FORMAS_AGENDAMENTO = {
     em_segundo_plano_ok: 'Em segundo plano pelo botão OK.',
     ao_abrir_notificacao: 'Ao abrir aplicativo pela notificação.',
     ao_abrir_aplicativo: 'Ao abrir aplicativo normalmente. Notificação foi ignorada.',
+    ao_abrir_aplicativo_primeira_vez: 'Ao abrir aplicativo normalmente. Primeira vez.',
+    ao_abrir_aplicativo_sem_data_hora: 'Ao abrir aplicativo normalmente. Não havia data-hora agendada.',
     ao_alterar_agenda: 'Ao alterar agenda.',
     ao_fechar_aplicativo: 'Ao fechar aplicativo, após alterar agenda.',
     ao_fechar_aplicativo_sem_prox_msg: 'Ao fechar aplicativo, após alterar agenda, sem próxima mensagem.',

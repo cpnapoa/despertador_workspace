@@ -1110,7 +1110,6 @@ export default class Configuracao {
         console.log('[despertadorapp] agendarNotificacao() ++++++++++++ iniciou ++++++++++++');
 
         try {
-            this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento = tipoAgendamento;
             let oDadosProximaDataHoraAgendar = this.obterProximaDataHoraExibicao();
             
             if(oDadosProximaDataHoraAgendar && oDadosProximaDataHoraAgendar.data_hora_agenda) {

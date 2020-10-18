@@ -169,7 +169,7 @@ export default class TelaMensagem extends Component {
                     this.oMensagem.definirMensagemExibir(() => {
 
                         this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-                            this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
+                            this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_primeira_vez);
 
                             console.log('É a primeira vez, então vai abrir a tela de instruções');
                             // Vai para a tela de instrucoes.
@@ -205,7 +205,7 @@ export default class TelaMensagem extends Component {
                                 console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada nao encontrada. Serah agendada...');
                                 
                                 this.oMensagem.definirMensagemExibir(() => {
-                                    this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
+                                    this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_sem_data_hora);
                                 });
                             }
                         } else {
