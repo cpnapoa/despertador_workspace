@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import BackgroundFetch from 'react-native-background-fetch';
 import MensagemModal from '../contexts/MensagemModal';
 import { RFPercentage } from 'react-native-responsive-fontsize';
+import { FORMAS_AGENDAMENTO } from '../contexts/DadosAppGeral';
 
 /// Execute a BackgroundFetch.scheduleTask
 ///
@@ -168,7 +169,7 @@ export default class TelaMensagem extends Component {
                     this.oMensagem.definirMensagemExibir(() => {
 
                         this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-                            this.oConfiguracao.agendarNotificacao();
+                            this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
 
                             console.log('É a primeira vez, então vai abrir a tela de instruções');
                             // Vai para a tela de instrucoes.
@@ -182,9 +183,6 @@ export default class TelaMensagem extends Component {
                     if(this.oDadosTelaConfiguracao && this.oDadosTelaConfiguracao.agenda_notificacoes) {
                                 
                         if(this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada) {
-                            if(this.oDadosControleApp) {
-                                this.oDadosControleApp.em_segundo_plano = false;
-                            }
                             let ultimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
                         
                             if(ultimaDataHoraAgendada && ultimaDataHoraAgendada.data_hora_agenda) {
@@ -198,7 +196,7 @@ export default class TelaMensagem extends Component {
                                     console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada passou e provavelmente a notificacao foi ignorada. Serah reagendada...');
                                     
                                     this.oMensagem.definirMensagemExibir(() => {    
-                                        this.oConfiguracao.agendarNotificacao(true);
+                                        this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
                                     });
                                 } else {
                                     console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada eh maior. Nada a ser feito...');
@@ -207,7 +205,7 @@ export default class TelaMensagem extends Component {
                                 console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada nao encontrada. Serah agendada...');
                                 
                                 this.oMensagem.definirMensagemExibir(() => {
-                                    this.oConfiguracao.agendarNotificacao(true);
+                                    this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
                                 });
                             }
                         } else {

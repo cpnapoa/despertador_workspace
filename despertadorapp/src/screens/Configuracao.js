@@ -5,7 +5,7 @@
  * @flow
  */
 import Util, { clonarObjeto } from '../common/Util';
-import {DIAS_SEMANA, DADOS_DIA_SEMANA, DADOS_DATA_HORA_AGENDAMENTO, DADOS_INTERVALO, DADOS_TELA_CONFIGURACAO_MODAL } from '../contexts/DadosAppGeral';
+import {FORMAS_AGENDAMENTO, DIAS_SEMANA, DADOS_DIA_SEMANA, DADOS_DATA_HORA_AGENDAMENTO, DADOS_INTERVALO, DADOS_TELA_CONFIGURACAO_MODAL } from '../contexts/DadosAppGeral';
 import {
     Alert
 } from 'react-native';
@@ -73,15 +73,24 @@ export default class Configuracao {
             this.oDadosControleApp.alterou_agenda = false;
 
             if(!this.oGerenciadorContextoApp.appAtivo || bAgendar === true) {
+                let formaAgendamento = FORMAS_AGENDAMENTO.ao_alterar_agenda;
+                
+                if(!this.oGerenciadorContextoApp.appAtivo) {
+
+                    formaAgendamento = FORMAS_AGENDAMENTO.ao_fechar_aplicativo;
+                    if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
+                        formaAgendamento = FORMAS_AGENDAMENTO.ao_fechar_aplicativo_sem_prox_msg;
+                    }
+                }
                 
                 this.salvarAgendaNotificacoesNoDispositivo(() => {
                     if(this.temIntervaloDefinido()) {
                         console.log('[despertadorapp] salvarConfiguracoes() salvando agenda e agendando... ');
                 
                         if(!this.oDadosApp.dados_mensagens.mensagem_proxima) {
-                            this.oMensagem.definirMensagemExibir(this.agendarNotificacao);
+                            this.oMensagem.definirMensagemExibir(() => {this.agendarNotificacao(formaAgendamento)});
                         } else {
-                            this.agendarNotificacao();
+                            this.agendarNotificacao(formaAgendamento);
                         }
                     }
                 });
@@ -654,6 +663,7 @@ export default class Configuracao {
             this.definirDistribuicaoMensagensIntervalosDia(diaSemana);            
             this.obterProximaDataHoraExibicao();
             this.oDadosControleApp.alterou_agenda = true;
+            this.oDadosTelaConfiguracao.agenda_notificacoes.forma_agendamento = '';
         }
 
         return indExcluiu;
@@ -1091,16 +1101,16 @@ export default class Configuracao {
     }
 
     registrarUltimaDataHoraAgendada(oDadosProximaDataHoraAgendar) {
-        oDadosProximaDataHoraAgendar.em_segundo_plano = this.oDadosControleApp.em_segundo_plano;
         this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada = oDadosProximaDataHoraAgendar;
 
         this.salvarAgendaNotificacoesNoDispositivo();
     }
 
-    agendarNotificacao(emSegundoPlano) {
+    agendarNotificacao(tipoAgendamento, emSegundoPlano) {
         console.log('[despertadorapp] agendarNotificacao() ++++++++++++ iniciou ++++++++++++');
 
         try {
+            this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento = tipoAgendamento;
             let oDadosProximaDataHoraAgendar = this.obterProximaDataHoraExibicao();
             
             if(oDadosProximaDataHoraAgendar && oDadosProximaDataHoraAgendar.data_hora_agenda) {
@@ -1111,12 +1121,10 @@ export default class Configuracao {
                     
                     let oDataHoraAgendar = new Date(oDadosProximaDataHoraAgendar.data_hora_agenda);
                     
-                    if(emSegundoPlano) {
-                        console.log('[despertadorapp] agendarNotificacao() Agendando em segundo plano...');
-                    } else {
-                        console.log('[despertadorapp] agendarNotificacao() Agendando com o app aberto...');
-                    }
-
+                    console.log('[despertadorapp] agendarNotificacao() Tipo de agendamento: ', tipoAgendamento);
+                    
+                    oDadosProximaDataHoraAgendar.forma_agendamento = tipoAgendamento;
+                    
                     this.oNotifService.scheduleNotif(oDataHoraAgendar, this.oDadosApp.dados_mensagens);
                     this.registrarUltimaDataHoraAgendada(oDadosProximaDataHoraAgendar);
                 } else {
@@ -1162,11 +1170,16 @@ export default class Configuracao {
             console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - this.oDadosTelaConfiguracao:', this.oDadosTelaConfiguracao);
             
             if(this.oDadosTelaConfiguracao && this.oDadosTelaConfiguracao.agenda_notificacoes) {
+                let emSegundoPlanoSistema = false;
+                let formaAgendamento = FORMAS_AGENDAMENTO.em_segundo_plano_ok;
+
+                if(taskId && new String(taskId).toUpperCase() !== 'Ok'.toUpperCase()) {
+                    emSegundoPlanoSistema = true;
+                    formaAgendamento = FORMAS_AGENDAMENTO.em_segundo_plano_sistema;
+                }
                                 
                 if(this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada) {
-                    if(this.oDadosControleApp) {
-                        this.oDadosControleApp.em_segundo_plano = true;
-                    }
+                    
                     let ultimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
                 
                     if(ultimaDataHoraAgendada && ultimaDataHoraAgendada.data_hora_agenda) {
@@ -1176,7 +1189,7 @@ export default class Configuracao {
                         console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - Ultima data-hora agendada: ', ultimaDataHoraAgendada.data_hora_agenda);
                         console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - Data-hora atual: ', oDataHoraAtual.toLocaleString());
                         
-                        if(taskId && new String(taskId).toUpperCase() !== 'Ok'.toUpperCase()) {
+                        if(emSegundoPlanoSistema) {
                             let horaAtual = oUltimaDataHoraAgendada.getHours();
                             oUltimaDataHoraAgendada.setHours((horaAtual + 2));
                             
@@ -1190,7 +1203,7 @@ export default class Configuracao {
                             console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada foi ignorada. Serah reagendada...');
                             
                             this.oMensagem.definirMensagemExibir(() => {    
-                                this.agendarNotificacao(true);
+                                this.agendarNotificacao(formaAgendamento, true);
                             });
                         } else {
                             console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada eh maior. Nada a ser feito...');
@@ -1199,7 +1212,7 @@ export default class Configuracao {
                         console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() Data-hora agendada nao encontrada. Serah agendada...');
                         
                         this.oMensagem.definirMensagemExibir(() => {
-                            this.agendarNotificacao(true);
+                            this.agendarNotificacao(formaAgendamento, true);
                         });
                     }
                 } else {
@@ -1249,7 +1262,7 @@ export default class Configuracao {
                     this.oGerenciadorContextoApp.atualizarEstadoTela();
 
                     this.oUtil.fecharMensagem();
-                    this.agendarNotificacao();
+                    this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao);
                 });
             });
         });

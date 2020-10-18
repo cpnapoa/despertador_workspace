@@ -100,6 +100,7 @@ export default class TelaConfiguracao extends Component {
                         text: "Sim", 
                         style: 'default', 
                         onPress: () => {
+                            this.oDadosTela.ver_detalhes = false;
                             this.oConfiguracao.excluirIntervalosSelecionados(true);
                             this.oDadosControleApp.todos_intervalos_selecionados = false;
                             if(!this.oConfiguracao.temIntervaloDefinido()) {
@@ -168,7 +169,7 @@ export default class TelaConfiguracao extends Component {
 
                     if (oDiaSemana.dia_semana < diaSemanaHoje) {
                         dataDiaMes = `Próximo dia: ${dataDiaMes}`;
-                        // Adiciona a lista de dias da semana menores, que serão posteriores ao dia de hoje (da semana seguinte).
+                        // Adiciona a lista de dias da semana menores que o dia de hoje, que terao notificacao na semana seguinte.
                         oListaExibicaoDiasPosteriores.push(
                             this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
                         )
@@ -190,7 +191,9 @@ export default class TelaConfiguracao extends Component {
                     }
                 }                
             }
-            oListaExibicao.push(oListaExibicaoDiasPosteriores);
+            if(oListaExibicaoDiasPosteriores.length > 0) {
+                oListaExibicao.push(oListaExibicaoDiasPosteriores);
+            }
         }
         if(!oListaExibicao || oListaExibicao.length == 0) {
             this.oDadosTela.ver_detalhes = false;
@@ -414,16 +417,12 @@ export default class TelaConfiguracao extends Component {
                 oDataHora = new Date(dataHora);
                 dataHora = `Data/Hora agendada: ${oDataHora.getDate()}/${oDataHora.getMonth() + 1}/${oDataHora.getFullYear()} ${oDataHora.getHours().toString().padStart(2, '0')}:${oDataHora.getMinutes().toString().padStart(2, '0')}:${oDataHora.getSeconds().toString().padStart(2, '0')}`
             }
-            let emSegundoPlano = 'Nao';
             
-            if(this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada.em_segundo_plano) {
-                emSegundoPlano = 'Sim';
-            }
-            let emSegundoPlanoTexto = `Em segundo plano: ${emSegundoPlano}`;
+            let formaAgendamento = `Forma de agendamento: ${this.oDadosTela.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento}`;
             return(
-                <View style={{flexDirection:'column'}}>
+                <View style={{flexDirection:'column', marginHorizontal: 20}}>
                     <Text>{dataHora}</Text>
-                    <Text>{emSegundoPlanoTexto}</Text>
+                    <Text>{formaAgendamento}</Text>
                 </View>
             );
         } else {

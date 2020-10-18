@@ -57,9 +57,18 @@ export const DADOS_DATA_HORA_AGENDAMENTO = {
     dia_semana: -1,
     indice_intervalo: -1,
     indice_hora: -1,
-    em_segundo_plano: false,
+    forma_agendamento: '',
 }
 
+export const FORMAS_AGENDAMENTO = {
+    em_segundo_plano_sistema: 'Em segundo plano pelo sistema, pois notificação foi ignorada.',
+    em_segundo_plano_ok: 'Em segundo plano pelo botão OK.',
+    ao_abrir_notificacao: 'Ao abrir aplicativo pela notificação.',
+    ao_abrir_aplicativo: 'Ao abrir aplicativo normalmente. Notificação foi ignorada.',
+    ao_alterar_agenda: 'Ao alterar agenda.',
+    ao_fechar_aplicativo: 'Ao fechar aplicativo, após alterar agenda.',
+    ao_fechar_aplicativo_sem_prox_msg: 'Ao fechar aplicativo, após alterar agenda, sem próxima mensagem.',
+}
 export const DADOS_TELA_CONFIGURACAO = {
     
     dh1: '',
@@ -91,8 +100,7 @@ export const DADOS_TELA_CONFIGURACAO_MODAL = {
 };
 
 export const DADOS_CONTROLE_APP = {
-    exibir_mensagem: false,
-    em_segundo_plano: false,
+    exibir_mensagem: false,    
     alterou_agenda: false,
     em_edicao_agenda: false,
     todos_intervalos_selecionados: false,
