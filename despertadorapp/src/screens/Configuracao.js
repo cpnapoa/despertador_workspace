@@ -1216,7 +1216,8 @@ export default class Configuracao {
         console.log('[despertadorapp] aoNotificar() - idClearTimeout', this.oDadosControleApp.idClearTimeout);
         
         if(this.oDadosControleApp.idClearTimeout) {
-            // Anula a chamada da funcao inicializar(), da tela inicial, cuja execucao foi suspensa na abertura do app pelo setTimeout()
+            // Anula a chamada da funcao inicializar(), da tela inicial (TelaMensagem), 
+            // cuja execucao foi postergada na abertura do app pelo setTimeout().
             clearTimeout(this.oDadosControleApp.idClearTimeout);
             this.oDadosControleApp.idClearTimeout = null;
         }
@@ -1226,33 +1227,16 @@ export default class Configuracao {
             this.oMensagem.obterDadosMensagens(() => {
              
                 this.oMensagem.definirMensagemExibir(() => {
-                    
-                    
-
-                    
-                    // const pop = StackActions.pop(1);
-
-                    // console.log('Removendo tela mensagem...', JSON.stringify(pop));
-                    // this.oNavegacao.dispatch(pop);
 
                     console.log('[despertadorapp] aoNotificar(), Vai recarregar a tela de mensagens...');                    
                     this.oGerenciadorContextoApp.atualizarEstadoTela();
+
                     this.oUtil.fecharMensagem();
-                    //this.oNavegacao.dispatch(StackActions.popToTop());                   
-                    
                     this.agendarNotificacao();
                 });
             });
         });
 
-        // this.oMensagem.obterDadosMensagens(() => {
-        // this.oMensagem.definirMensagemExibir(() => {
-        //     this.oNavegacao.navigate('Mensagem');
-        //     this.oGerenciadorContextoApp.atualizarEstadoTela(this.oDadosApp.tela_mensagem.objeto_tela);
-        //     this.obterAgendaNotificacoesDoDispositivo(() => {
-        //         this.agendarNotificacao();
-        //     });
-        // });
         console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');
     }
 }

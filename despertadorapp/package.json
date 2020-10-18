@@ -31,6 +31,7 @@
     "react-native-numeric-input": "^1.8.3",
     "react-native-push-notification": "^4.0.0",
     "react-native-reanimated": "^1.10.1",
+    "react-native-responsive-fontsize": "^0.4.3",
     "react-native-safe-area-context": "^0.7.3",
     "react-native-screens": "^2.9.0",
     "react-native-text-input-mask": "^2.0.0",

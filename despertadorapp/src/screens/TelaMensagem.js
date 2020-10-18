@@ -6,7 +6,6 @@ import {
     View,
     Text,
     ImageBackground,
-    Alert,
     TouchableOpacity,
     AppState
 } from 'react-native';
@@ -15,8 +14,9 @@ import { Image } from 'react-native-elements';
 import { ContextoApp } from '../contexts/ContextoApp';
 import Configuracao from './Configuracao';
 import AsyncStorage from '@react-native-community/async-storage';
-import BackgroundFetch, { BackgroundFetchStatus } from 'react-native-background-fetch';
+import BackgroundFetch from 'react-native-background-fetch';
 import MensagemModal from '../contexts/MensagemModal';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 
 /// Execute a BackgroundFetch.scheduleTask
 ///
@@ -104,15 +104,20 @@ export default class TelaMensagem extends Component {
     }
 
     componentDidMount() {
-        console.log('[despertadorapp] componentDidMount() ++++++++++++ iniciou ++++++++++++');
+        console.log('[despertadorapp] TelaMensagem.componentDidMount() ++++++++++++ iniciou ++++++++++++');
         
         this.oGerenciadorContextoApp.telaAtual = this;
-
+        
         this.oUtil.exibirMensagem('Inicializando...');
 
         AsyncStorage.flushGetRequests();
         
+        console.log('[despertadorapp] TelaMensagem.componentDidMount() idClearTimeout: ', this.oDadosControleApp.idClearTimeout);
+
         if(!this.oDadosControleApp.idClearTimeout) {
+            // Posterga a chamada da funcao inicializar(), para que a funcao aoNotificar(), da classe Configuracao,
+            // execute primeiro, caso o aplicativo tenha sido aberto a partir da notificação.
+            // Isso permite controlar se o aplicativo deve trocar a mensagem e reagendar ao abrir pelo icone, de forma normal.
             this.oDadosControleApp.idClearTimeout = setTimeout(this.inicializar, 3000);
         }
 
@@ -135,18 +140,20 @@ export default class TelaMensagem extends Component {
         }, 
         onBackgroundFetchEvent, 
         (status) => {
-            console.log('[despertadorapp] componentDidMount() [BackgroundFetch] status ', statusToString(status), status);
+            console.log('[despertadorapp] TelaMensagem.componentDidMount() [BackgroundFetch] status ', statusToString(status), status);
         });
-        console.log('[despertadorapp] componentDidMount() ------------ terminou ------------');
+        console.log('[despertadorapp] TelaMensagem.componentDidMount() ------------ terminou ------------');
     }
     
     inicializar() {
-        console.log('[despertadorapp] inicializar() ++++++++++++ iniciou ++++++++++++');
+        console.log('[despertadorapp] TelaMensagem.inicializar() ++++++++++++ iniciou ++++++++++++');
         console.log(this.oDadosApp.dados_mensagens.mensagem_proxima);
         
+        this.oDadosControleApp.idClearTimeout = null;
+
         if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
 
-            console.log('[despertadorapp] inicializar() Vai atribuir mensagem padrão.');
+            console.log('[despertadorapp] TelaMensagem.inicializar() Vai atribuir mensagem padrão.');
             this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
         }
         
@@ -184,30 +191,30 @@ export default class TelaMensagem extends Component {
                                 let oUltimaDataHoraAgendada = new Date(ultimaDataHoraAgendada.data_hora_agenda);
                                 let oDataHoraAtual = new Date();
         
-                                console.log('[despertadorapp] inicializar() - Ultima data-hora agendada: ', ultimaDataHoraAgendada.data_hora_agenda);
-                                console.log('[despertadorapp] inicializar() - Data-hora atual: ', oDataHoraAtual.toLocaleString());
+                                console.log('[despertadorapp] TelaMensagem.inicializar() - Ultima data-hora agendada: ', ultimaDataHoraAgendada.data_hora_agenda);
+                                console.log('[despertadorapp] TelaMensagem.inicializar() - Data-hora atual: ', oDataHoraAtual.toLocaleString());
                                 
                                 if(oUltimaDataHoraAgendada < oDataHoraAtual) {
-                                    console.log('[despertadorapp] inicializar() Data-hora agendada passou e provavelmente a notificacao foi ignorada. Serah reagendada...');
+                                    console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada passou e provavelmente a notificacao foi ignorada. Serah reagendada...');
                                     
                                     this.oMensagem.definirMensagemExibir(() => {    
                                         this.oConfiguracao.agendarNotificacao(true);
                                     });
                                 } else {
-                                    console.log('[despertadorapp] inicializar() Data-hora agendada eh maior. Nada a ser feito...');
+                                    console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada eh maior. Nada a ser feito...');
                                 }
                             } else {
-                                console.log('[despertadorapp] inicializar() Data-hora agendada nao encontrada. Serah agendada...');
+                                console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada nao encontrada. Serah agendada...');
                                 
                                 this.oMensagem.definirMensagemExibir(() => {
                                     this.oConfiguracao.agendarNotificacao(true);
                                 });
                             }
                         } else {
-                            console.log('[despertadorapp] inicializar() Nao encontrou dados de configuracoes salvos no dispositivo.');
+                            console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou dados de configuracoes salvos no dispositivo.');
                         }
                     } else {
-                        console.log('[despertadorapp] inicializar() Nao encontrou a agenda de notificacoes salva no dispositivo.');
+                        console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou a agenda de notificacoes salva no dispositivo.');
                     }
 
                     this.oUtil.fecharMensagem();
@@ -216,7 +223,7 @@ export default class TelaMensagem extends Component {
             });
         });
 
-        console.log('[despertadorapp] inicializar() ------------ terminou ------------');
+        console.log('[despertadorapp] TelaMensagem.inicializar() ------------ terminou ------------');
     }
     
     montarStatusConfig() {
@@ -326,7 +333,7 @@ const styles = StyleSheet.create({
     },
 
     formataFrase: {
-        fontSize: 45,
+        fontSize: RFPercentage(6.5),
         textAlign: 'center',
         fontFamily: 'ErisblueScript'
     }
