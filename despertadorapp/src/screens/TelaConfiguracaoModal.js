@@ -32,7 +32,7 @@ export default class TelaConfiguracaoModal extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
-            this.oUtil = new Util(this.oGerenciadorContextoApp);
+            this.oUtil = new Util();
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;

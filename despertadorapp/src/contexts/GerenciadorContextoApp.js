@@ -8,17 +8,23 @@ export default class GerenciadorContextoApp {
         this.oDadosReferencia = DADOS_APP_GERAL;
 
         this.oRegistradorLog = new RegistradorLog();
+        // this.oMensagemModal = new MensagemModal(null, this);
         this.oDadosReferencia.registros_log = this.oRegistradorLog.registrosLog;
         this.atualizarEstadoTela = this.atualizarEstadoTela.bind(this);
         this.atribuirDados = this.atribuirDados.bind(this);
         this.temDados = this.temDados.bind(this);
+        this.atualizarMensagemModal = this.atualizarMensagemModal.bind(this);
         this._atribuirDadosObjeto = this._atribuirDadosObjeto.bind(this);
         this._atribuir = this._atribuir.bind(this);
-        this._clonarObjeto = this._clonarObjeto.bind(this);
+        this._clrObjeto = this._clonarObjeto.bind(this);
         this._transportarLogServidor = this._transportarLogServidor.bind(this);
-        
+        this.oTelaAtual = null;
+        this.oTelaAnterior = null;        
     };
-
+    
+    set componenteMensagemModal(oComponente) {
+        this.oComponenteMensagemModal = oComponente;
+    };
     get dadosApp() {
         if(this.oDadosReferencia) {
             return this.oDadosReferencia.dados_app;
@@ -36,7 +42,7 @@ export default class GerenciadorContextoApp {
 
     get registradorLog() {
         return this.oRegistradorLog;
-    }
+    };
 
     get appAtivo() {
 
@@ -47,12 +53,38 @@ export default class GerenciadorContextoApp {
         return true;
     };
 
+    set telaAtual(oTela) {
+        this.oTelaAnterior = this.oTelaAtual;
+        this.oTelaAtual = oTela;
+    };
+
+    get telaAnterior() {
+        return this.oTelaAnterior;
+    };
+
     /*** FUNCOES DE ATRIBUICOES ****/
     atualizarEstadoTela(objetoTela) {
         if(this.oDadosReferencia) {
             objetoTela.setState(this.oDadosReferencia);
         }
     };
+
+    /*** FUNCOES DE ATRIBUICOES ****/
+    atualizarEstadoTela(objetoTela) {
+        let oTela = objetoTela;
+        
+        if(!oTela) {
+           oTela = this.oTelaAtual; 
+        }
+
+        if(oTela && this.oDadosReferencia) {
+            oTela.setState(this.oDadosReferencia);
+        }
+    };
+
+    atualizarMensagemModal() {
+        this.oComponenteMensagemModal.setState(this.oDadosReferencia);
+    }
 
     atribuirDados(nomeAtributo, oDadosAtribuir) {
         let oDados = this.oDadosReferencia.dados_app;

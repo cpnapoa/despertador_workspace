@@ -1,5 +1,16 @@
 import { clonarObjeto } from "../common/Util";
 
+export const DADOS_MENSAGEM_MODAL = {
+    exibir_modal : false,
+    mensagem : '',
+    botoes : []
+}
+
+export const DADOS_BOTAO = {
+    texto: '',
+    funcao: null
+}
+
 export const DADOS_MENSAGENS = {
     mensagem_atual: '',
     mensagem_proxima: '',
@@ -82,7 +93,10 @@ export const DADOS_CONTROLE_APP = {
     em_segundo_plano: false,
     alterou_agenda: false,
     em_edicao_agenda: false,
-    todos_intervalos_selecionados: false
+    todos_intervalos_selecionados: false,
+    config_modal: { DADOS_MENSAGEM_MODAL },
+    primeira_vez: false,
+    idClearTimeout : null,
 };
 
 export const DADOS_APP_GERAL = {

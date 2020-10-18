@@ -27,6 +27,7 @@ function FluxoRaiz() {
         <StackRaiz.Screen name="Principal" component={FluxoPrincipal} />
         <StackRaiz.Screen name="Configuracao Intervalo" component={TelaConfiguracaoModal} />
         <StackRaiz.Screen name="Instrucao" component={TelaInstrucaoModal} />
+        {/* <StackRaiz.Screen name="Mensagem Modal" component={MensagemModal} /> */}
     </StackRaiz.Navigator>
   );
 }

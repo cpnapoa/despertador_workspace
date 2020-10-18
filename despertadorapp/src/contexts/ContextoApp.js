@@ -5,8 +5,8 @@ export const ContextoApp = React.createContext();
 
 export class ContextoAppProvider extends Component {
     dados = {gerenciador : null}
-    constructor(props) {
-        super(props);
+    constructor() {
+        super();
         this.dados.gerenciador = new GerenciadorContextoApp();
     }
     render() {

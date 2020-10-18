@@ -14,6 +14,7 @@ import PushNotification from 'react-native-push-notification';
 import BackgroundFetch from 'react-native-background-fetch';
 import NotifService from './NotifService';
 import Mensagem from './Mensagem';
+import { StackActions } from '@react-navigation/native';
 
 export default class Configuracao {
 
@@ -26,14 +27,13 @@ export default class Configuracao {
             this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
             this.oDadosTelaConfiguracaoModal = this.oDadosApp.tela_configuracao_modal;
             this.oMensagem = new Mensagem(gerenciadorContexto);
+            this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oNotifService = new NotifService(
                 this.aoRegistrarNotificacao.bind(this),
                 this.aoNotificar.bind(this)
             );
         }
         this.oNavegacao = oNavegacao;
-        
-        this.oUtil = new Util();
         
         this.salvarAgendaNotificacoesNoDispositivo = this.salvarAgendaNotificacoesNoDispositivo.bind(this);
         this.obterAgendaNotificacoesDoDispositivo = this.obterAgendaNotificacoesDoDispositivo.bind(this);
@@ -164,12 +164,11 @@ export default class Configuracao {
                 if(!valor) {
 
                     this.configurarAgendaPadrao(() => {
+                        this.oDadosControleApp.primeira_vez = true;
+                        
                         if(callback) {
                             callback();
                         }
-                        console.log('É a primeira vez, então vai abrir a tela de instruções');
-                        // Vai para a tela de instrucoes.
-                        this.oNavegacao.navigate('Instrucao');
                     });
 
                 } else if(callback) {
@@ -1214,15 +1213,46 @@ export default class Configuracao {
     
     aoNotificar(notif) {
         console.log('[despertadorapp] aoNotificar() ++++++++++++ iniciou ++++++++++++');
-        console.log('[despertadorapp] aoNotificar(), vai navegar para a tela de mensagens...');
+        console.log('[despertadorapp] aoNotificar() - idClearTimeout', this.oDadosControleApp.idClearTimeout);
+        
+        if(this.oDadosControleApp.idClearTimeout) {
+            // Anula a chamada da funcao inicializar(), da tela inicial, cuja execucao foi suspensa na abertura do app pelo setTimeout()
+            clearTimeout(this.oDadosControleApp.idClearTimeout);
+            this.oDadosControleApp.idClearTimeout = null;
+        }
 
-        this.oMensagem.definirMensagemExibir(() => {
-            this.oNavegacao.navigate('Mensagem');
-            this.oGerenciadorContextoApp.atualizarEstadoTela(this.oDadosApp.tela_mensagem.objeto_tela);
-            this.obterAgendaNotificacoesDoDispositivo(() => {
-                this.agendarNotificacao();
+        this.obterAgendaNotificacoesDoDispositivo(() => {
+
+            this.oMensagem.obterDadosMensagens(() => {
+             
+                this.oMensagem.definirMensagemExibir(() => {
+                    
+                    
+
+                    
+                    // const pop = StackActions.pop(1);
+
+                    // console.log('Removendo tela mensagem...', JSON.stringify(pop));
+                    // this.oNavegacao.dispatch(pop);
+
+                    console.log('[despertadorapp] aoNotificar(), Vai recarregar a tela de mensagens...');                    
+                    this.oGerenciadorContextoApp.atualizarEstadoTela();
+                    this.oUtil.fecharMensagem();
+                    //this.oNavegacao.dispatch(StackActions.popToTop());                   
+                    
+                    this.agendarNotificacao();
+                });
             });
         });
+
+        // this.oMensagem.obterDadosMensagens(() => {
+        // this.oMensagem.definirMensagemExibir(() => {
+        //     this.oNavegacao.navigate('Mensagem');
+        //     this.oGerenciadorContextoApp.atualizarEstadoTela(this.oDadosApp.tela_mensagem.objeto_tela);
+        //     this.obterAgendaNotificacoesDoDispositivo(() => {
+        //         this.agendarNotificacao();
+        //     });
+        // });
         console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');
     }
 }

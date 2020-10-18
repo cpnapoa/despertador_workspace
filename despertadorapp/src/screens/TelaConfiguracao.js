@@ -36,7 +36,8 @@ export default class TelaConfiguracao extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao;
-            this.oUtil = new Util(this.oGerenciadorContextoApp);
+            this.oUtil = new Util();
+            this.oMensagem = new Mensagem();
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
@@ -59,9 +60,6 @@ export default class TelaConfiguracao extends Component {
         this.fecharEdicao = this.fecharEdicao.bind(this);
         this.alterarSelecaoEdicaoTodos = this.alterarSelecaoEdicaoTodos.bind(this);
         this.montarCheckboxIntervalo = this.montarCheckboxIntervalo.bind(this);
-
-        this.oMensagem = new Mensagem();
-        this.oUtil = new Util();
     }
     
     irParaConfiguracaoIntervalo() {
@@ -494,7 +492,7 @@ export default class TelaConfiguracao extends Component {
                         <Text style={{fontSize: 24}}>Intervalos</Text>
                     </View>
                     <View style={{alignSelf:'center', width:50, flexDirection:'row', marginRight:20, alignItems:'center', justifyContent:'flex-start'}}>                       
-                        {this.montarIcone('information-variant', '', () => {this.oNavegacao.navigate('Instrucao')}, this.verDetalhes, true)}
+                        {this.montarIcone('information-variant', '', () => { this.oGerenciadorContextoApp.exibirMensagem()/*this.oNavegacao.navigate('Instrucao')*/}, this.verDetalhes, true)}
                     </View>
                 </View>
                 <SafeAreaView style={{flex: 0.8, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>

@@ -114,6 +114,23 @@ export default class Mensagem {
         console.log('[despertadorapp] definirMensagemExibir() ------------ terminou ------------');
    }
 
+//    voltarMensagemExibir() {
+//         //O atributo 'mensagem_proxima' deve conter sempre a mensagem para a próxima notificação.
+//         //Quando o usuario abre o app, o que está na 'mensagem_proxima' é atribuido para 'mensagem_atual' 
+//         //que vai ser exibida na tela inicial.
+//         //Após isso, uma nova mensagem é sorteada para a 'mensagem_proxima', para ser exibida na próxima notificação.
+//         if(this.oDadosApp.dados_mensagens.mensagem_proxima) {
+
+//             this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.push(this.oDadosApp.dados_mensagens.mensagem_atual);
+//             this.oDadosApp.dados_mensagens.mensagem_atual = this.oDadosApp.dados_mensagens.mensagem_proxima;
+
+//             console.log('[despertadorapp] definirMensagemExibir() atribuiu mensagem_proxima para mensagem_atual = ', this.oDadosApp.dados_mensagens.mensagem_atual);
+//         }
+    
+//         this.oDadosApp.dados_mensagens.mensagem_proxima = this.obterProximaMensagem();
+//         this.salvarDadosMensagensNoDispositivo(callback);
+//    }
+
     async salvarDadosMensagensNoDispositivo (callback) {
         console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() ++++++++++++ iniciou ++++++++++++');
         console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() salvando as mensagens no dispositivo (dados_mensagens)...');
