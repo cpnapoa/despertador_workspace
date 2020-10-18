@@ -5,7 +5,7 @@
  * @flow
  */
 import Util, { clonarObjeto } from '../common/Util';
-import {DADOS_DIA_SEMANA, DADOS_DATA_HORA_AGENDAMENTO, DADOS_INTERVALO, DADOS_TELA_CONFIGURACAO_MODAL } from '../contexts/DadosAppGeral';
+import {DIAS_SEMANA, DADOS_DIA_SEMANA, DADOS_DATA_HORA_AGENDAMENTO, DADOS_INTERVALO, DADOS_TELA_CONFIGURACAO_MODAL } from '../contexts/DadosAppGeral';
 import {
     Alert
 } from 'react-native';
@@ -14,7 +14,6 @@ import PushNotification from 'react-native-push-notification';
 import BackgroundFetch from 'react-native-background-fetch';
 import NotifService from './NotifService';
 import Mensagem from './Mensagem';
-import { StackActions } from '@react-navigation/native';
 
 export default class Configuracao {
 
@@ -210,6 +209,8 @@ export default class Configuracao {
                 if(!adicionou) {
                     adicionou = true;
                 }
+            } else {
+                return false;
             }
         }
         
@@ -218,6 +219,8 @@ export default class Configuracao {
                 if(!adicionou) {
                     adicionou = true;
                 }
+            } else {
+                return false;
             }
         }
 
@@ -226,6 +229,8 @@ export default class Configuracao {
                 if(!adicionou) {
                     adicionou = true;
                 }
+            } else {
+                return false;
             }
         }
 
@@ -234,6 +239,8 @@ export default class Configuracao {
                 if(!adicionou) {
                     adicionou = true;
                 }
+            } else {
+                return false;
             }
         }
         if(this.oDadosTelaConfiguracaoModal.qui) {
@@ -241,6 +248,8 @@ export default class Configuracao {
                 if(!adicionou) {
                     adicionou = true;
                 }
+            } else {
+                return false;
             }
         }
 
@@ -249,6 +258,8 @@ export default class Configuracao {
                 if(!adicionou) {
                     adicionou = true;
                 }
+            } else {
+                return false;
             }
         }
 
@@ -257,6 +268,8 @@ export default class Configuracao {
                 if(!adicionou) {
                     adicionou = true;
                 }
+            } else {
+                return false;
             }
         }
         return adicionou;
@@ -688,7 +701,11 @@ export default class Configuracao {
                     if(!(hora_inicial_validar > hora_final_item && hora_final_validar > hora_final_item) &&
                        !(hora_inicial_validar < hora_inicial_item && hora_final_validar < hora_inicial_item)) {
                         
-                        Alert.alert('Despertador de Consciência', `A intervalo informado coincide com outro. \nInforme a hora inicial maior que ${hora_final_item.toLocaleTimeString()} ou a hora final menor que ${hora_inicial_item.toLocaleTimeString()}.`);
+                        let h1 = `${oIntervaloDiaItem.hora_inicial.hora}`.padStart(2, '0');
+                        let m1 = `${oIntervaloDiaItem.hora_inicial.minuto}`.padStart(2, '0');
+                        let h2 = `${oIntervaloDiaItem.hora_final.hora}`.padStart(2, '0');
+                        let m2 = `${oIntervaloDiaItem.hora_final.minuto}`.padStart(2, '0');
+                        Alert.alert('Despertador de Consciência', `O intervalo informado coincide com o seguinte intervalo de ${DIAS_SEMANA[oIntervaloDiaItem.dia_semana]}:\n\n => ${h1}:${m1} às ${h2}:${m2}.\n\nAjuste o novo intervalo para que as horas de início e fim não coincidam.`);
                         intervaloOk = false;
                         break;
                     }

@@ -3,7 +3,6 @@ import {
     Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import {DADOS_MENSAGENS} from '../contexts/DadosAppGeral';
 
 export default class Mensagem {
 
@@ -14,6 +13,7 @@ export default class Mensagem {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
+            this.oUtil = new Util(this.oGerenciadorContextoApp);
         }
 
         this.tratarBuscarMensagens = this.tratarBuscarMensagens.bind(this);
@@ -23,8 +23,6 @@ export default class Mensagem {
         this.obterProximaMensagem = this.obterProximaMensagem.bind(this);
         this.salvarDadosMensagensNoDispositivo = this.salvarDadosMensagensNoDispositivo.bind(this);
         this.obterDadosMensagens = this.obterDadosMensagens.bind(this);
-
-        this.oUtil = new Util();
     }
 
     async tratarBuscarMensagens(oJsonMensagens) {
@@ -37,13 +35,17 @@ export default class Mensagem {
         } else {
             this.oDadosTela.dados_mensagens.lista_mensagens_exibir = null;
         }
+        this.oUtil.fecharMensagem();
     }
 
     listar(funcaoTratamentoRetono, callback) {
 
         try {
             let url = this.oUtil.getURL('/mensagens');
-            
+
+            this.oUtil.fecharMensagem();
+            this.oUtil.exibirMensagem('Buscando mensagens do servidor.\nAguarde...');
+
             this.chamarServico(url, {method: 'GET'}, funcaoTratamentoRetono, callback);
         } catch (exc) {
             Alert.alert('Despertador de Consciência', exc);

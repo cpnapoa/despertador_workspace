@@ -115,10 +115,10 @@ export default class TelaMensagem extends Component {
         console.log('[despertadorapp] TelaMensagem.componentDidMount() idClearTimeout: ', this.oDadosControleApp.idClearTimeout);
 
         if(!this.oDadosControleApp.idClearTimeout) {
-            // Posterga a chamada da funcao inicializar(), para que a funcao aoNotificar(), da classe Configuracao,
+            // Posterga a chamada da funcao inicializar(), em 2,5 segundos, para que a funcao Configuracao.aoNotificar(), 
             // execute primeiro, caso o aplicativo tenha sido aberto a partir da notificação.
             // Isso permite controlar se o aplicativo deve trocar a mensagem e reagendar ao abrir pelo icone, de forma normal.
-            this.oDadosControleApp.idClearTimeout = setTimeout(this.inicializar, 3000);
+            this.oDadosControleApp.idClearTimeout = setTimeout(this.inicializar, 2500);
         }
 
         this.oNavegacao.addListener('focus', () => {

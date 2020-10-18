@@ -15,17 +15,6 @@ import {
     TouchableHighlight,
     ActivityIndicator
 } from 'react-native';
-import {
-  BallIndicator,
-  BarIndicator,
-  DotIndicator,
-  MaterialIndicator,
-  PacmanIndicator,
-  PulseIndicator,
-  SkypeIndicator,
-  UIActivityIndicator,
-  WaveIndicator,
-} from 'react-native-indicators';
 import Util from '../common/Util';
 import { ContextoApp } from '../contexts/ContextoApp';
 
@@ -33,8 +22,6 @@ export default class MensagemModal extends Component {
 
     constructor(props, contexto) {
         super();
-        console.log('props recebido na modal ...', props);
-        console.log('Contexto recebido na modal ...', contexto);
 
         if(props && props.navigation) {
           this.oNavegacao = props.navigation;
@@ -59,7 +46,7 @@ export default class MensagemModal extends Component {
 
     componentDidMount() {
       console.log('[despertadorapp] MensagemModal.componentDidMount() ++++++++++++ iniciou ++++++++++++');
-//      this.oNavegacao.goBack();
+
       console.log('[despertadorapp] MensagemModal.componentDidMount() ------------ terminou ------------');
   }
 
@@ -80,9 +67,6 @@ export default class MensagemModal extends Component {
         
                 oConfigBotao = oListaBotoes[i];
                 console.log('Botao em lista ... ', JSON.stringify(oConfigBotao));
-                // if(oConfigBotao.funcao) {
-                //   oConfigBotao.funcao();
-                // }
 
                 oElementosBotoes.push(
                     <TouchableHighlight key={i}
@@ -115,70 +99,33 @@ export default class MensagemModal extends Component {
     }
 
     render() {
-        // let linhas = [<TouchableHighlight key={0}
-        //   style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
-        //   onPress={() => {
-        //     console.log('aaa');
-        //   }}
-        // >
-        //   <Text style={styles.textStyle}>Hide Modal</Text>
-        // </TouchableHighlight>, 
-        // <TouchableHighlight key={1}
-        //   style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
-        //   onPress={() => {
-        //     console.log('bbb');
-        //   }}
-        // >
-        //   <Text style={styles.textStyle}>Hide Modal</Text>
-        // </TouchableHighlight>]
-        //this.oDadosControleApp.config_modal.exibir_modal = false;
         let exibir = false;
         let mensagem = '';
+
         if(this.oDadosControleApp) {
           exibir = this.oDadosControleApp.config_modal.exibir_modal;
           mensagem = this.oDadosControleApp.config_modal.mensagem;
           console.log('Configuracao Mensagem Modal ... ', this.oDadosControleApp.config_modal);
         }
         return (
-          // <View style={styles.centeredView}>
-              <Modal
-                animationType="none"
-                transparent={true}
-                visible={exibir}
-                onRequestClose={() => {
-                  
-                }}
-              >
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                    <ActivityIndicator color='#2196F3' size='large'/>
-                    <Text style={styles.modalText}>{mensagem}</Text>            
-                    <View style={{flexDirection:'row'}}> 
-                      {this.montarBotoes()}
-                    </View>
-                  </View>
+          <Modal
+            animationType="none"
+            transparent={true}
+            visible={exibir}
+            onRequestClose={() => {
+
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <ActivityIndicator color='#2196F3' size='large'/>
+                <Text style={styles.modalText}>{mensagem}</Text>            
+                <View style={{flexDirection:'row'}}> 
+                {this.montarBotoes()}
                 </View>
-              </Modal>
-          /* </View> */
-        // <View style={styles.centeredView}>
-        //     <Modal
-        //         animationType="slide"
-        //         //presentationStyle='fullScreen'
-        //         transparent={true}
-        //         visible={this.oDadosControleApp.config_modal.exibir_modal}
-        //         onRequestClose={() => {
-        //           Alert.alert("Modal has been closed.");
-        //         }}
-        //     >
-        //         <View style={styles.centeredView}>
-        //             <View style={styles.modalView}>
-        //                 <Text style={styles.modalText}>{this.oDadosControleApp.config_modal.mensagem}</Text>                        
-        //             </View>
-        //             {this.montarBotoes()}
-        //         </View>
-        //     </Modal>
-        // </View>
-        
+              </View>
+            </View>
+          </Modal>
         )
     }
 }

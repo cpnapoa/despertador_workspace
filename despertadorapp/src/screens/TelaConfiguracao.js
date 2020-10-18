@@ -21,7 +21,7 @@ import CheckBox from '@react-native-community/checkbox';
 export default class TelaConfiguracao extends Component {
 
     constructor(props, value) {
-        super(props);
+        super();
         
         if(props) {
             if(props.navigation) {
@@ -60,6 +60,9 @@ export default class TelaConfiguracao extends Component {
         this.fecharEdicao = this.fecharEdicao.bind(this);
         this.alterarSelecaoEdicaoTodos = this.alterarSelecaoEdicaoTodos.bind(this);
         this.montarCheckboxIntervalo = this.montarCheckboxIntervalo.bind(this);
+        this.obterDataDiaMesNoDiaSemana = this.obterDataDiaMesNoDiaSemana.bind(this);
+        this.identificarDiaMesNoDiaSemana = this.identificarDiaMesNoDiaSemana.bind(this);
+        this.criarCartaoIntervalo = this.criarCartaoIntervalo.bind(this);
     }
     
     irParaConfiguracaoIntervalo() {
@@ -146,6 +149,8 @@ export default class TelaConfiguracao extends Component {
         if(oAgendaIntervalosDias && oAgendaIntervalosDias.length > 0) { 
             let oDiaSemana;
             let a = 0;
+            let dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
+            let oListaExibicaoDiasPosteriores = [];
 
             for(let i = 0; i < oAgendaIntervalosDias.length; i++) {
                 a++;
@@ -156,56 +161,37 @@ export default class TelaConfiguracao extends Component {
                 oDiaSemana = this.oConfiguracao.obterDia(a);
 
                 if(oDiaSemana) {
-                    tituloDia = `${DIAS_SEMANA[oDiaSemana.dia_semana]}`;
                     oListaIntervalos = this.listarHorasDia(oDiaSemana);
-                    let iDiaSemana = oDiaSemana.dia_semana;
-
-                    oListaExibicao.push(
+                    tituloDia = `${DIAS_SEMANA[oDiaSemana.dia_semana]}`;
+                    dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
+                    
+                    if (oDiaSemana.ind_data_dia_hoje){
+                        dataDiaMes = `Hoje: ${dataDiaMes}`;
+                        oListaExibicao.push(
+                            this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes, true)
+                        );
+                        oListaExibicao.push(oListaExibicaoDiasPosteriores);
+                    } else {
                         
-                        <Card key={iDiaSemana} 
-                            title={
-                            <View style={{flexDirection:'row', alignSelf:'stretch', justifyContent:'space-between'}}>
-                                <View style={{ alignSelf:'flex-start', width:80}}>
-                                </View>
-                                <View style={{flexDirection:'row', alignSelf:'center', justifyContent:'center'}}>
-                                    <Text style={{fontSize:18}}>{tituloDia}</Text>
-                                </View>
-                                <View style={{flexDirection:'row', alignSelf:'flex-end', width:80, alignItems:'center', justifyContent:'flex-end'}}>
-                                </View>
-                            </View>} 
-                            containerStyle={{backgroundColor: '#f0f5f5', borderWidth: 0, borderRadius:5, flexDirection:'column', width:300}} 
-                        >
-                            <Divider style={{margin:10}}></Divider>
-
-                            {oListaIntervalos}
-                            
-                            <Divider style={{margin:10}}></Divider>
-                            <View  style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'center' }}>
-                                <Text style={{fontSize:16}}>Mensagens por dia</Text>
-                                <InputSpinner 
-                                    type='int' 
-                                    style={{width:90, height:30, alignItems:'center', marginLeft:10}} 
-                                    inputStyle={{fontSize:16}} 
-                                    buttonStyle={{height:30, width:30, padding:0, backgroundColor:'#009999'}} 
-                                    rounded={false} 
-                                    showBorder={true} 
-                                    step={1} min={1} 
-                                    max={5} 
-                                    value={oDiaSemana.qtd_mensagens_dia} 
-                                    onChange={(value) => {
-                                        this.atribuirMensagensPorDia(iDiaSemana, value); 
-                                        this.oGerenciadorContextoApp.atualizarEstadoTela(this);}
-                                    }
-                                >
-                                </InputSpinner>
-                            </View>
-                        </Card>
-                    )                            
+                        dataDiaMes = `Próximo dia: ${dataDiaMes}`;
+                        
+                        if(oListaExibicao.length == 0) {
+                            // Adiciona a lista de dia posteriores ao dia de hoje.
+                            oListaExibicaoDiasPosteriores.push(
+                                this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
+                            )
+                        } else {
+                            oListaExibicao.push(
+                                this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
+                            );
+                        }
+                    }
                 }                
             }
         }
         if(!oListaExibicao || oListaExibicao.length == 0) {
             this.oDadosTela.ver_detalhes = false;
+        
             return (
                 <View style={{alignItems:'center', flexDirection:'column', justifyContent:'center'}}>
                     <Text style={{margin:20, fontSize:18}}>Nenhum intervalo definido.</Text>
@@ -221,6 +207,54 @@ export default class TelaConfiguracao extends Component {
         )
     }
 
+    criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes, diaAtualHoje) {
+        let corFundo = '#f0f5f5';
+        let corFonte = 'black';
+        let tamanhoFonte = 14;
+        let espessuraFonte = 'none';
+        
+        if(diaAtualHoje) {
+            corFundo = 'white';
+            corFonte = 'green';
+            tamanhoFonte = 18;
+            espessuraFonte = 'bold';
+        }
+
+        return (
+        <Card key={oDiaSemana.dia_semana}
+            title={
+                <View style={{flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                    <Text style={{fontSize:20, fontWeight:'bold', margin: 5}}>{tituloDia}</Text>
+                    <Text style={{fontSize: tamanhoFonte, fontWeight: espessuraFonte, color: corFonte}}>{dataDiaMes}</Text>
+                </View>} 
+            containerStyle={{backgroundColor: corFundo, borderWidth: 0, borderRadius:5, flexDirection:'column', width:300}} 
+        >
+            <Divider style={{margin:10}}></Divider>
+
+            {oListaIntervalos}
+            
+            <Divider style={{margin:10}}></Divider>
+            <View  style={{flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'center' }}>
+                <Text style={{fontSize:16}}>Mensagens por dia</Text>
+                <InputSpinner 
+                    type='int' 
+                    style={{width:90, height:30, alignItems:'center', marginLeft:10}} 
+                    inputStyle={{fontSize:16}} 
+                    buttonStyle={{height:30, width:30, padding:0, backgroundColor:'#009999'}} 
+                    rounded={false} 
+                    showBorder={true} 
+                    step={1} min={1} 
+                    max={5} 
+                    value={oDiaSemana.qtd_mensagens_dia} 
+                    onChange={(value) => {
+                        this.atribuirMensagensPorDia(oDiaSemana.dia_semana, value); 
+                        this.oGerenciadorContextoApp.atualizarEstadoTela(this);}
+                    }
+                >
+                </InputSpinner>
+            </View>
+        </Card>)
+    }
     listarHorasDia(oDiaSemana) {
         
         let oIntervalo;
@@ -462,7 +496,7 @@ export default class TelaConfiguracao extends Component {
             return (
                 <TouchableOpacity onPress={oFuncaoOnPress} >
                     <View style={{flexDirection:'column', width:60, marginRight:10, marginLeft:10, alignItems:'center', justifyContent:'center'}}>
-                        <Icon name={nomeIcone} size={30} color={corIcone} />
+                        <Icon name={nomeIcone} size={25} color={corIcone} />
                         <Text style={{color:corIcone}}>{descricao}</Text>
                     </View>
                 </TouchableOpacity>
@@ -477,6 +511,47 @@ export default class TelaConfiguracao extends Component {
             )
         }
     }
+    
+    identificarDiaMesNoDiaSemana(oDiaSemana) {
+        let oDataDiaMes = this.obterDataDiaMesNoDiaSemana(oDiaSemana);
+        let dataHora = '';
+
+        if(oDataDiaMes) {
+            dataHora = `${oDataDiaMes.getDate()}/${oDataDiaMes.getMonth() + 1}/${oDataDiaMes.getFullYear()}`
+        }
+
+        return dataHora;
+    }
+
+    obterDataDiaMesNoDiaSemana(oDiaSemana) {
+        let oDataDiaMes;
+
+        if(oDiaSemana) {
+        
+            let diaSemana = oDiaSemana.dia_semana;
+            let numDiasAcrescentar = 0;
+            let oHoje = new Date();
+            let diaSemanaHoje = oHoje.getDay();
+            let diferencaDias = diaSemana - diaSemanaHoje;
+            
+            oDiaSemana.ind_data_dia_hoje = false;
+            // Calcula o numero de dias para o proximo dia da semana.
+            if (diferencaDias == 0) {
+                
+                oDiaSemana.ind_data_dia_hoje = true;
+            } else {
+                if (diferencaDias > 0) {
+                    numDiasAcrescentar = diferencaDias;
+                } else {
+                    numDiasAcrescentar = (7 + diferencaDias) + diaSemanaHoje;
+                }
+                oHoje.setDate(oHoje.getDate() + numDiasAcrescentar);
+            }
+            oDataDiaMes = oHoje;
+            oDiaSemana.data_proximo_dia_mes = oDataDiaMes;
+        }
+        return oDataDiaMes;
+    }
 
     render() {
 
@@ -485,14 +560,14 @@ export default class TelaConfiguracao extends Component {
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
                     <View style={{alignSelf:'center', width:50, alignItems:'center', marginLeft:10, justifyContent:'flex-end'}}>
                         <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
-                            <Icon name="arrow-left" size={40} color="#009999" />
+                            <Icon name="arrow-left" size={35} color="#009999" />
                         </TouchableOpacity>
                     </View>
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
                         <Text style={{fontSize: 24}}>Intervalos</Text>
                     </View>
                     <View style={{alignSelf:'center', width:50, flexDirection:'row', marginRight:20, alignItems:'center', justifyContent:'flex-start'}}>                       
-                        {this.montarIcone('information-variant', '', () => { this.oGerenciadorContextoApp.exibirMensagem()/*this.oNavegacao.navigate('Instrucao')*/}, this.verDetalhes, true)}
+                        {this.montarIcone('information-variant', '', () => { this.oNavegacao.navigate('Instrucao')}, this.verDetalhes, true)}
                     </View>
                 </View>
                 <SafeAreaView style={{flex: 0.8, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>

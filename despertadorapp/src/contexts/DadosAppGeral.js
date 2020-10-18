@@ -30,6 +30,8 @@ export const AGENDA = {
 export const DADOS_DIA_SEMANA = {
     dia_semana: 0,
     qtd_mensagens_dia: 0,
+    data_proximo_dia_mes: null,
+    ind_data_dia_hoje: false,
     intervalos: [],
 }
 

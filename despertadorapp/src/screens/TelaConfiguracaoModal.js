@@ -215,7 +215,7 @@ export default class TelaConfiguracaoModal extends Component {
                 <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
                     <View style={{alignSelf:'center', width:50, alignItems:'center', marginLeft:10,  justifyContent:'flex-end'}}>
                         <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
-                            <Icon name="arrow-left" size={40} color="#009999" />
+                            <Icon name="arrow-left" size={35} color="#009999" />
                         </TouchableOpacity>
                     </View>
                     <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
