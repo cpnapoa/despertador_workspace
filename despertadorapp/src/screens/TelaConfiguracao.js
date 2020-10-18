@@ -151,6 +151,7 @@ export default class TelaConfiguracao extends Component {
             let a = 0;
             let dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
             let oListaExibicaoDiasPosteriores = [];
+            let diaSemanaHoje = new Date().getDay();
 
             for(let i = 0; i < oAgendaIntervalosDias.length; i++) {
                 a++;
@@ -164,30 +165,32 @@ export default class TelaConfiguracao extends Component {
                     oListaIntervalos = this.listarHorasDia(oDiaSemana);
                     tituloDia = `${DIAS_SEMANA[oDiaSemana.dia_semana]}`;
                     dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
+
+                    if (oDiaSemana.dia_semana < diaSemanaHoje) {
+                        dataDiaMes = `Próximo dia: ${dataDiaMes}`;
+                        // Adiciona a lista de dias da semana menores, que serão posteriores ao dia de hoje (da semana seguinte).
+                        oListaExibicaoDiasPosteriores.push(
+                            this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
+                        )
+                    } else if (oDiaSemana.ind_data_dia_hoje){
                     
-                    if (oDiaSemana.ind_data_dia_hoje){
                         dataDiaMes = `Hoje: ${dataDiaMes}`;
-                        oListaExibicao.push(
+                        let oListaComPrimeiroDiaHoje = [];
+                        // Adiciona o dia de hoje como o primeiro da lista.
+                        oListaComPrimeiroDiaHoje.push(
                             this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes, true)
                         );
-                        oListaExibicao.push(oListaExibicaoDiasPosteriores);
+                        oListaComPrimeiroDiaHoje.push(oListaExibicao);
+                        oListaExibicao = oListaComPrimeiroDiaHoje;
                     } else {
-                        
                         dataDiaMes = `Próximo dia: ${dataDiaMes}`;
-                        
-                        if(oListaExibicao.length == 0) {
-                            // Adiciona a lista de dia posteriores ao dia de hoje.
-                            oListaExibicaoDiasPosteriores.push(
-                                this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
-                            )
-                        } else {
-                            oListaExibicao.push(
-                                this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
-                            );
-                        }
+                        oListaExibicao.push(
+                            this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
+                        );
                     }
                 }                
             }
+            oListaExibicao.push(oListaExibicaoDiasPosteriores);
         }
         if(!oListaExibicao || oListaExibicao.length == 0) {
             this.oDadosTela.ver_detalhes = false;
@@ -211,7 +214,7 @@ export default class TelaConfiguracao extends Component {
         let corFundo = '#f0f5f5';
         let corFonte = 'black';
         let tamanhoFonte = 14;
-        let espessuraFonte = 'none';
+        let espessuraFonte = 'normal';
         
         if(diaAtualHoje) {
             corFundo = 'white';
