@@ -1120,10 +1120,8 @@ export default class Configuracao {
                     
                     let oDataHoraAgendar = new Date(oDadosProximaDataHoraAgendar.data_hora_agenda);
                     
-                    console.log('[despertadorapp] agendarNotificacao() Tipo de agendamento: ', tipoAgendamento);
-                    
                     oDadosProximaDataHoraAgendar.forma_agendamento = tipoAgendamento;
-                    
+                    this.oDadosControleApp.primeira_vez = false;
                     this.oNotifService.scheduleNotif(oDataHoraAgendar, this.oDadosApp.dados_mensagens);
                     this.registrarUltimaDataHoraAgendada(oDadosProximaDataHoraAgendar);
                 } else {
@@ -1190,9 +1188,9 @@ export default class Configuracao {
                         
                         if(emSegundoPlanoSistema) {
                             let horaAtual = oUltimaDataHoraAgendada.getHours();
-                            oUltimaDataHoraAgendada.setHours((horaAtual + 2));
+                            oUltimaDataHoraAgendada.setHours((horaAtual + 1));
                             
-                            console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - Ultima data-hora agendada + 2 horas: ', oUltimaDataHoraAgendada.toLocaleString());
+                            console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - Ultima data-hora agendada + 1 horas: ', oUltimaDataHoraAgendada.toLocaleString());
                         } else {
 
                             console.log('[despertadorapp] reagendarNotificacaoEmSegundoPlano() - Ultima data-hora agendada: ', oUltimaDataHoraAgendada.toLocaleString());

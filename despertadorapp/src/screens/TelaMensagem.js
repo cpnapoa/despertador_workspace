@@ -171,7 +171,6 @@ export default class TelaMensagem extends Component {
                         this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
                             this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_primeira_vez);
 
-                            console.log('É a primeira vez, então vai abrir a tela de instruções');
                             // Vai para a tela de instrucoes.
                             this.oNavegacao.navigate('Instrucao');
                             

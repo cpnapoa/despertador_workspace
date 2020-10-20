@@ -170,7 +170,7 @@ export default class TelaConfiguracao extends Component {
                     if (oDiaSemana.dia_semana < diaSemanaHoje) {
                         dataDiaMes = `Próximo dia: ${dataDiaMes}`;
                         // Adiciona a lista de dias da semana menores que o dia de hoje, que terao notificacao na semana seguinte.
-                        oListaExibicaoDiasPosteriores.push(
+                        oListaExibicaoDiasPosteriores.unshift(
                             this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
                         )
                     } else if (oDiaSemana.ind_data_dia_hoje){
@@ -192,7 +192,7 @@ export default class TelaConfiguracao extends Component {
                 }                
             }
             if(oListaExibicaoDiasPosteriores.length > 0) {
-                oListaExibicao.push(oListaExibicaoDiasPosteriores);
+                oListaExibicao = oListaExibicao.concat(oListaExibicaoDiasPosteriores);
             }
         }
         if(!oListaExibicao || oListaExibicao.length == 0) {
@@ -545,7 +545,7 @@ export default class TelaConfiguracao extends Component {
                 if (diferencaDias > 0) {
                     numDiasAcrescentar = diferencaDias;
                 } else {
-                    numDiasAcrescentar = (7 + diferencaDias) + diaSemanaHoje;
+                    numDiasAcrescentar = 7 - diaSemanaHoje + diaSemana;
                 }
                 oHoje.setDate(oHoje.getDate() + numDiasAcrescentar);
             }
