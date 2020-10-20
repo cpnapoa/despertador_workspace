@@ -64,20 +64,13 @@ export default class GerenciadorContextoApp {
 
     /*** FUNCOES DE ATRIBUICOES ****/
     atualizarEstadoTela(objetoTela) {
-        if(this.oDadosReferencia) {
-            objetoTela.setState(this.oDadosReferencia);
-        }
-    };
-
-    /*** FUNCOES DE ATRIBUICOES ****/
-    atualizarEstadoTela(objetoTela) {
         let oTela = objetoTela;
         
         if(!oTela) {
            oTela = this.oTelaAtual; 
         }
 
-        if(oTela && this.oDadosReferencia) {
+        if(oTela && this.oDadosReferencia && !this.dadosControleApp.em_segundo_plano) {
             oTela.setState(this.oDadosReferencia);
         }
     };
@@ -92,8 +85,7 @@ export default class GerenciadorContextoApp {
         let oItemArray;
         let oDadosItemModelo;
         let oDadosItem;
-        let oArrayAtribuir;                        
-        let campoItem;
+        let oArrayAtribuir;
         let campo;
         let pilhaObjetosContinuar = [];
         let oObjetoPreencher = oDados;

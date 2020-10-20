@@ -7,7 +7,8 @@ import {
     Text,
     ImageBackground,
     TouchableOpacity,
-    AppState
+    AppState,
+    Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Image } from 'react-native-elements';
@@ -95,6 +96,12 @@ export default class TelaMensagem extends Component {
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
             this.oDadosApp.tela_mensagem.objeto_tela = this;
+
+            if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
+
+                console.log('[despertadorapp] TelaMensagem.inicializar() Vai atribuir mensagem padrão.');
+                this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
+            }
         }
 
         AppState.addEventListener('change', this.oConfiguracao.salvarConfiguracoes);
@@ -102,24 +109,24 @@ export default class TelaMensagem extends Component {
         this.inicializar = this.inicializar.bind(this);
         this.montarStatus = this.montarStatus.bind(this);
         this.montarStatusConfig = this.montarStatusConfig.bind(this);
+        this.montarBotaoProxima = this.montarBotaoProxima.bind(this);
+        this.testarAgendarProxima = this.testarAgendarProxima.bind(this);
     }
 
     componentDidMount() {
         console.log('[despertadorapp] TelaMensagem.componentDidMount() ++++++++++++ iniciou ++++++++++++');
-        
+        this.oUtil.fecharMensagem();
         this.oGerenciadorContextoApp.telaAtual = this;
         
-        this.oUtil.exibirMensagem('Inicializando...');
-
         AsyncStorage.flushGetRequests();
         
-        console.log('[despertadorapp] TelaMensagem.componentDidMount() idClearTimeout: ', this.oDadosControleApp.idClearTimeout);
+        console.log('[despertadorapp] TelaMensagem.componentDidMount() id_clear_timeout: ', this.oDadosControleApp.id_clear_timeout);
 
-        if(!this.oDadosControleApp.idClearTimeout) {
+        if(!this.oDadosControleApp.id_clear_timeout) {
             // Posterga a chamada da funcao inicializar(), em 2,5 segundos, para que a funcao Configuracao.aoNotificar(), 
             // execute primeiro, caso o aplicativo tenha sido aberto a partir da notificação.
             // Isso permite controlar se o aplicativo deve trocar a mensagem e reagendar ao abrir pelo icone, de forma normal.
-            this.oDadosControleApp.idClearTimeout = setTimeout(this.inicializar, 2500);
+            this.oDadosControleApp.id_clear_timeout = setTimeout(this.inicializar, 1300);
         }
 
         this.oNavegacao.addListener('focus', () => {
@@ -150,7 +157,7 @@ export default class TelaMensagem extends Component {
         console.log('[despertadorapp] TelaMensagem.inicializar() ++++++++++++ iniciou ++++++++++++');
         console.log(this.oDadosApp.dados_mensagens.mensagem_proxima);
         
-        this.oDadosControleApp.idClearTimeout = null;
+        this.oDadosControleApp.id_clear_timeout = null;
 
         if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
 
@@ -196,6 +203,7 @@ export default class TelaMensagem extends Component {
                                     
                                     this.oMensagem.definirMensagemExibir(() => {    
                                         this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
+                                        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
                                     });
                                 } else {
                                     console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada eh maior. Nada a ser feito...');
@@ -205,6 +213,7 @@ export default class TelaMensagem extends Component {
                                 
                                 this.oMensagem.definirMensagemExibir(() => {
                                     this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_sem_data_hora);
+                                    this.oGerenciadorContextoApp.atualizarEstadoTela(this);
                                 });
                             }
                         } else {
@@ -213,8 +222,6 @@ export default class TelaMensagem extends Component {
                     } else {
                         console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou a agenda de notificacoes salva no dispositivo.');
                     }
-
-                    this.oUtil.fecharMensagem();
                 }
                 this.oGerenciadorContextoApp.atualizarEstadoTela(this);
             });
@@ -244,11 +251,11 @@ export default class TelaMensagem extends Component {
         if(this.oDadosApp.dados_mensagens.lista_mensagens_exibir) {
             let qtdTotal = 0;
 
-            if(this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length > 0) {
+            if(!this.oDadosControleApp.fazendo_requisicao) {
                 
                 qtdTotal = this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length + this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length;
                 if (this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length > 0) {
-                    // Soma um para a mensagem_atual, que ainda não foi adicionada ao array de lidas.
+                    // Soma um para a mensagem_proxima, que ainda não foi adicionada ao array de lidas.
                     qtdTotal += 1;
                     return (
                         <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
@@ -290,6 +297,23 @@ export default class TelaMensagem extends Component {
         }
     }
 
+    testarAgendarProxima() {
+        this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
+            this.oConfiguracao.removerUltimaDataHoraAgendada();
+            this.oConfiguracao.salvarAgendaNotificacoesNoDispositivo(
+                this.inicializar
+            );
+        });
+    }
+
+    montarBotaoProxima() {
+        if(__DEV__) {
+            return (
+                <Icon name='arrow-right' onPress={this.testarAgendarProxima}></Icon>
+            );
+        }
+    }
+
     render() {
         
         return (
@@ -307,6 +331,7 @@ export default class TelaMensagem extends Component {
                         <Text style={styles.formataFrase}>
                             {this.oDadosApp.dados_mensagens.mensagem_atual}
                         </Text>
+                        {this.montarBotaoProxima()}
                     </View>
                     {this.montarStatus()}
                 </ImageBackground>

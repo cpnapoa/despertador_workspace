@@ -23,11 +23,12 @@ export default class Util {
         protocol = 'https://';
         domain = 'despertadorserverapp.herokuapp.com';
 
-        // if (__DEV__) {
+        if (__DEV__) {
+            protocol = 'https://';
+            domain = 'despertadorserverapptestes.herokuapp.com';
             // protocol = 'http://';
-            // // domain = '192.168.2.151:8000';
-            // domain = '10.0.0.105:8000';
-        // }
+            // domain = '192.168.0.103:8000';
+        }
         return protocol + domain + metodo;
     }
 

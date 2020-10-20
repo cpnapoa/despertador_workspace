@@ -141,6 +141,8 @@ export default class TelaConfiguracao extends Component {
         let oListaIntervalos; 
         let tituloDia;
         let oAgendaIntervalosDias;
+        let oElementosTelaSemanaAtual = <View></View>;
+        let oElementosTelaSemanaProxima = <View></View>;
         
         if(this.oDadosTela.agenda_notificacoes && this.oDadosTela.agenda_notificacoes.agenda_intervalos_dias) {
 
@@ -153,6 +155,7 @@ export default class TelaConfiguracao extends Component {
             let dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
             let oListaExibicaoDiasPosteriores = [];
             let diaSemanaHoje = new Date().getDay();
+            
 
             for(let i = 0; i < oAgendaIntervalosDias.length; i++) {
                 a++;
@@ -192,10 +195,26 @@ export default class TelaConfiguracao extends Component {
                 }                
             }
             if(oListaExibicaoDiasPosteriores.length > 0) {
-                oListaExibicao = oListaExibicao.concat(oListaExibicaoDiasPosteriores);
+                oElementosTelaSemanaProxima = (
+                    <View style={{flexDirection:'column', alignItems:'center'}}>
+                        <View style={{alignSelf:'stretch', alignItems:'center', marginTop:20, backgroundColor:'lightgray'}}>
+                            <Text style={{fontSize:20, fontWeight:'bold', margin:2}}>Semana seguinte</Text>
+                        </View>
+                        {oListaExibicaoDiasPosteriores}
+                    </View>
+                )
             }
         }
-        if(!oListaExibicao || oListaExibicao.length == 0) {
+        if(oListaExibicao || oListaExibicao.length > 0) {
+            oElementosTelaSemanaAtual = (
+                <View style={{flexDirection:'column', alignItems:'center'}}>
+                    <View style={{alignSelf:'stretch', alignItems:'center', marginTop:10, backgroundColor:'lightgray'}}>
+                        <Text style={{fontSize:20, fontWeight:'bold', margin:2}}>Semana atual</Text>
+                    </View>
+                    {oListaExibicao}
+                </View>
+            )
+        } else {
             this.oDadosTela.ver_detalhes = false;
         
             return (
@@ -208,7 +227,8 @@ export default class TelaConfiguracao extends Component {
 
         return (
             <ScrollView>
-                {oListaExibicao}
+                {oElementosTelaSemanaAtual}
+                {oElementosTelaSemanaProxima}
             </ScrollView>
         )
     }

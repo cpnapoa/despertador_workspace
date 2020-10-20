@@ -1146,6 +1146,8 @@ export default class Configuracao {
 
     verificarNotificacaoEmSegundoPlano(pTaskId) {
         console.log('[despertadorapp] verificarNotificacaoEmSegundoPlano() ++++++++++++ iniciou ++++++++++++');
+        
+        this.oDadosControleApp.em_segundo_plano = true;
 
         this.obterAgendaNotificacoesDoDispositivo(() => {
             if(new String(pTaskId).toUpperCase() === 'Ok'.toUpperCase()) {
@@ -1240,13 +1242,13 @@ export default class Configuracao {
     
     aoNotificar(notif) {
         console.log('[despertadorapp] aoNotificar() ++++++++++++ iniciou ++++++++++++');
-        console.log('[despertadorapp] aoNotificar() - idClearTimeout', this.oDadosControleApp.idClearTimeout);
+        console.log('[despertadorapp] aoNotificar() - id_clear_timeout', this.oDadosControleApp.id_clear_timeout);
         
-        if(this.oDadosControleApp.idClearTimeout) {
+        if(this.oDadosControleApp.id_clear_timeout) {
             // Anula a chamada da funcao inicializar(), da tela inicial (TelaMensagem), 
             // cuja execucao foi postergada na abertura do app pelo setTimeout().
-            clearTimeout(this.oDadosControleApp.idClearTimeout);
-            this.oDadosControleApp.idClearTimeout = null;
+            clearTimeout(this.oDadosControleApp.id_clear_timeout);
+            this.oDadosControleApp.id_clear_timeout = null;
         }
 
         this.obterAgendaNotificacoesDoDispositivo(() => {
@@ -1256,8 +1258,8 @@ export default class Configuracao {
                 this.oMensagem.definirMensagemExibir(() => {
 
                     console.log('[despertadorapp] aoNotificar(), Vai recarregar a tela de mensagens...');                    
+                    this.oNavegacao.navigate('Mensagem');
                     this.oGerenciadorContextoApp.atualizarEstadoTela();
-
                     this.oUtil.fecharMensagem();
                     this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao);
                 });

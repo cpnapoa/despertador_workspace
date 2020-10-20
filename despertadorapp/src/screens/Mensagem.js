@@ -20,6 +20,7 @@ export default class Mensagem {
         this.listar = this.listar.bind(this);
         this.chamarServico = this.chamarServico.bind(this);
         this.tratarRespostaHTTP = this.tratarRespostaHTTP.bind(this);
+        this.fazerTransicaoNovasMensagens = this.fazerTransicaoNovasMensagens.bind(this);
         this.obterProximaMensagem = this.obterProximaMensagem.bind(this);
         this.salvarDadosMensagensNoDispositivo = this.salvarDadosMensagensNoDispositivo.bind(this);
         this.obterDadosMensagens = this.obterDadosMensagens.bind(this);
@@ -30,34 +31,39 @@ export default class Mensagem {
 
             this.oDadosApp.dados_mensagens.lista_mensagens_exibir = oJsonMensagens
             this.oDadosApp.dados_mensagens.lista_mensagens_exibidas = [];
-            await this.salvarDadosMensagensNoDispositivo();
+            this.fazerTransicaoNovasMensagens();
+            await this.salvarDadosMensagensNoDispositivo(this.oUtil.fecharMensagem);
 
         } else {
             this.oDadosTela.dados_mensagens.lista_mensagens_exibir = null;
+            this.oUtil.fecharMensagem();
         }
-        this.oUtil.fecharMensagem();
     }
 
-    listar(funcaoTratamentoRetono, callback) {
+    listar(funcaoTratamentoRetorno, callback) {
 
         try {
             let url = this.oUtil.getURL('/mensagens');
-
-            this.oUtil.fecharMensagem();
-            this.oUtil.exibirMensagem('Buscando mensagens do servidor.\nIsso pode demorar um pouco.\n\nPor favor, aguarde...');
-
-            this.chamarServico(url, {method: 'GET'}, funcaoTratamentoRetono, callback);
+            this.oDadosControleApp.fazendo_requisicao = true;
+            
+            if(!this.oDadosControleApp.em_segundo_plano) {
+                this.oUtil.fecharMensagem();
+                this.oUtil.exibirMensagem('Buscando mensagens do servidor.\nIsso pode demorar um pouco.\n\nPor favor, aguarde...');
+            }
+            
+            this.chamarServico(url, {method: 'GET'}, funcaoTratamentoRetorno, callback);
         } catch (exc) {
             Alert.alert('Despertador de Consciência', exc);
         }
     }
     
-    chamarServico(url, parametrosHTTP, funcaoTratamentoRetono, callback) {
+    chamarServico(url, parametrosHTTP, funcaoTratamentoRetorno, callback) {
         fetch(url, parametrosHTTP)
         .then(this.tratarRespostaHTTP)
         .then((oJsonDadosRetorno) => {
-            funcaoTratamentoRetono(oJsonDadosRetorno);
+            funcaoTratamentoRetorno(oJsonDadosRetorno);
             callback();
+            this.oDadosControleApp.fazendo_requisicao = false;
         })
         .catch(function (erro) {
             Alert.alert('Despertador de Consciência', erro.message);
@@ -76,7 +82,20 @@ export default class Mensagem {
     //Faz o sorteio da mensagem a partir da lista salva no dispositivo.
     obterProximaMensagem() {
         let listaMensagensExibir = this.oDadosApp.dados_mensagens.lista_mensagens_exibir;
+        let texto;
 
+        //O atributo 'mensagem_proxima' deve conter sempre a mensagem para a próxima notificação.
+        //Quando o usuario abre o app, o que está na 'mensagem_proxima' é atribuido para 'mensagem_atual' 
+        //que vai ser exibida na tela inicial.
+        //Após isso, uma nova mensagem é sorteada para a 'mensagem_proxima', para ser exibida na próxima notificação.
+        if(this.oDadosApp.dados_mensagens.mensagem_proxima) {
+
+            this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.push(this.oDadosApp.dados_mensagens.mensagem_atual);
+            this.oDadosApp.dados_mensagens.mensagem_atual = this.oDadosApp.dados_mensagens.mensagem_proxima;
+
+            console.log('[despertadorapp] definirMensagemExibir() atribuiu mensagem_proxima para mensagem_atual = ', this.oDadosApp.dados_mensagens.mensagem_atual);
+        }
+        
         if (listaMensagensExibir instanceof Array && listaMensagensExibir.length > 0){
             let indiceMensagem = 0;
 
@@ -88,37 +107,41 @@ export default class Mensagem {
 
             listaMensagensExibir.splice(indiceMensagem, 1);
             
-            return oMensagem.texto;
-        } else {
-            Alert.alert('Despertador de Consciência', 'Você não tem novas mensagens. :(');
+            texto = oMensagem.texto;
         }
+        
+        this.oDadosApp.dados_mensagens.mensagem_proxima = texto;
+    }
+
+    fazerTransicaoNovasMensagens() {
+        this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
     }
 
     definirMensagemExibir(callback) {
         console.log('[despertadorapp] definirMensagemExibir() ++++++++++++ iniciou ++++++++++++');
 
         this.obterDadosMensagens(() => {
-            //O atributo 'mensagem_proxima' deve conter sempre a mensagem para a próxima notificação.
-            //Quando o usuario abre o app, o que está na 'mensagem_proxima' é atribuido para 'mensagem_atual' 
-            //que vai ser exibida na tela inicial.
-            //Após isso, uma nova mensagem é sorteada para a 'mensagem_proxima', para ser exibida na próxima notificação.
+            
+            this.obterProximaMensagem();
+
             if(this.oDadosApp.dados_mensagens.mensagem_proxima) {
-
-                this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.push(this.oDadosApp.dados_mensagens.mensagem_atual);
-                this.oDadosApp.dados_mensagens.mensagem_atual = this.oDadosApp.dados_mensagens.mensagem_proxima;
-
-                console.log('[despertadorapp] definirMensagemExibir() atribuiu mensagem_proxima para mensagem_atual = ', this.oDadosApp.dados_mensagens.mensagem_atual);
+                console.log('[despertadorapp] obterDadosMensagens() salvando mensagens do servidor .........');
+                this.salvarDadosMensagensNoDispositivo(callback);
+            } else {
+                console.log('[despertadorapp] obterDadosMensagens() buscando mensagens do servidor pq acabaram as mensagens...');
+    
+                this.listar(this.tratarBuscarMensagens, () => {
+                    this.obterProximaMensagem();
+                    this.salvarDadosMensagensNoDispositivo(callback);
+                });                
             }
-        
-            this.oDadosApp.dados_mensagens.mensagem_proxima = this.obterProximaMensagem();
-            this.salvarDadosMensagensNoDispositivo(callback);
         });
         console.log('[despertadorapp] definirMensagemExibir() ------------ terminou ------------');
-   }
+    }
 
     async salvarDadosMensagensNoDispositivo (callback) {
         console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() ++++++++++++ iniciou ++++++++++++');
-        console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() salvando as mensagens no dispositivo (dados_mensagens)...');
+        console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() salvando as mensagens no dispositivo (dados_mensagens)...', JSON.stringify(this.oDadosApp.dados_mensagens));
 
         try {                   
 
@@ -139,7 +162,7 @@ export default class Mensagem {
         console.log('[despertadorapp] obterDadosMensagens() ++++++++++++ iniciou ++++++++++++');
 
         try {
-            if(!this.oDadosApp.dados_mensagens ||  
+            if(!this.oDadosApp.dados_mensagens ||
                (this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length <= 0 &&
                this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length <= 0)) {
 
@@ -155,15 +178,11 @@ export default class Mensagem {
                             if(callback) {
                                 callback();
                             }
-                        } else {
-                            console.log('[despertadorapp] obterDadosMensagens() buscando mensagens do servidor pq acabaram as mensagens...');
-
-                            this.listar(this.tratarBuscarMensagens, callback);
-                        }                    
+                        } 
                     } else {
-                        console.log('[despertadorapp] obterDadosMensagens() buscando mensagens do servidor a primeira vez...');
-
-                        this.listar(this.tratarBuscarMensagens, callback);
+                        if(callback) {
+                            callback();
+                        }
                     }
                 });
             } else {

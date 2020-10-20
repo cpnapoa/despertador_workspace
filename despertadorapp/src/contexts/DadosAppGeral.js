@@ -104,11 +104,13 @@ export const DADOS_TELA_CONFIGURACAO_MODAL = {
 export const DADOS_CONTROLE_APP = {
     exibir_mensagem: false,    
     alterou_agenda: false,
+    fazendo_requisicao: false,
     em_edicao_agenda: false,
     todos_intervalos_selecionados: false,
     config_modal: { DADOS_MENSAGEM_MODAL },
     primeira_vez: false,
-    idClearTimeout : null,
+    id_clear_timeout: null,
+    em_segundo_plano: false,
 };
 
 export const DADOS_APP_GERAL = {
