@@ -197,7 +197,7 @@ export default class TelaConfiguracao extends Component {
             if(oListaExibicaoDiasPosteriores.length > 0) {
                 oElementosTelaSemanaProxima = (
                     <View style={{flexDirection:'column', alignItems:'center'}}>
-                        <View style={{alignSelf:'stretch', alignItems:'center', marginTop:20, backgroundColor:'lightgray'}}>
+                        <View style={{alignSelf:'stretch', alignItems:'center', marginTop:30, backgroundColor:'powderblue'}}>
                             <Text style={{fontSize:20, fontWeight:'bold', margin:2}}>Semana seguinte</Text>
                         </View>
                         {oListaExibicaoDiasPosteriores}
@@ -205,10 +205,10 @@ export default class TelaConfiguracao extends Component {
                 )
             }
         }
-        if(oListaExibicao || oListaExibicao.length > 0) {
+        if(oListaExibicao && oListaExibicao.length > 0) {
             oElementosTelaSemanaAtual = (
                 <View style={{flexDirection:'column', alignItems:'center'}}>
-                    <View style={{alignSelf:'stretch', alignItems:'center', marginTop:10, backgroundColor:'lightgray'}}>
+                    <View style={{alignSelf:'stretch', alignItems:'center', marginTop:10, backgroundColor:'powderblue'}}>
                         <Text style={{fontSize:20, fontWeight:'bold', margin:2}}>Semana atual</Text>
                     </View>
                     {oListaExibicao}
