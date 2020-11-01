@@ -70,6 +70,7 @@ export default class Configuracao {
         console.log(`[despertadorapp] salvarConfiguracoes() Parametros: bAgendar = ${bAgendar}, alterou_agenda = ${this.oDadosControleApp.alterou_agenda}`);
 
         if(this.oDadosControleApp.alterou_agenda) {
+            
             this.oDadosControleApp.alterou_agenda = false;
 
             if(!this.oGerenciadorContextoApp.appAtivo || bAgendar === true) {
@@ -84,6 +85,7 @@ export default class Configuracao {
                 }
                 
                 this.salvarAgendaNotificacoesNoDispositivo(() => {
+                    
                     if(this.temIntervaloDefinido()) {
                         console.log('[despertadorapp] salvarConfiguracoes() salvando agenda e agendando... ');
                 
@@ -107,16 +109,19 @@ export default class Configuracao {
     salvarAgendaNotificacoesNoDispositivo(callback) {
         try {
             console.log('[despertadorapp] salvarAgendaNotificacoesNoDispositivo() salvando a agenda: ', JSON.stringify(this.oDadosTelaConfiguracao.agenda_notificacoes));
+            this.oDadosControleApp.salvando_agenda_alterada = true;
 
             AsyncStorage.setItem('agenda_notificacoes', JSON.stringify(this.oDadosTelaConfiguracao.agenda_notificacoes))
             .then(() => {
-            
+
+                this.oDadosControleApp.salvando_agenda_alterada = false;            
                 if(callback) {
                     callback();
                 };
             });
 
         } catch (error) {
+            this.oDadosControleApp.salvando_agenda_alterada = false;
             console.log('[despertadorapp] salvarAgendaNotificacoesNoDispositivo() Erro ao salvar intervalos no dispositivo: ', error);
             
             Alert.alert('Despertador de Consciência', 'Erro ao salvar intervalos no dispositivo: ' + error);
@@ -794,6 +799,8 @@ export default class Configuracao {
         } else {
             console.log('[despertadorapp] obterProximaDataHoraExibicao() Nao tem data-hora agendada.');
         }
+        console.log('[despertadorapp] obterProximaDataHoraExibicao() this.oDadosTelaConfiguracao.agenda_notificacoes', this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada);
+        console.log('[despertadorapp] obterProximaDataHoraExibicao() oDadosProximaDataHoraAgendar', oDadosProximaDataHoraAgendar);
         console.log('[despertadorapp] obterProximaDataHoraExibicao() ------------ terminou ------------');
         
         return oDadosProximaDataHoraAgendar;
@@ -1131,7 +1138,7 @@ export default class Configuracao {
                 }
             } else {
                 console.log('[despertadorapp] agendarNotificacao() Nao foi possivel determinar a proxima data-hora.');
-                this.oUtil.exibirMensagem('Não foi encontrado um intervalo disponível para agendar a próxima notificação.\nVerifique se há intervalos agendados ou habilitados.', true);
+                Alert.alert('Não foi encontrado um intervalo disponível para agendar a próxima notificação.\nVerifique se há intervalos agendados ou habilitados.', true);
                 // Remove a ultima data hora agendada, pois sera fornecida nova data hora
                 this.removerUltimaDataHoraAgendada();
             }
@@ -1243,13 +1250,38 @@ export default class Configuracao {
         console.log('aoRegistrarNotificacao: ', token);
     }
     
-    aoNotificar(notif) {
+    aoNotificar(notification) {
         console.log('[despertadorapp] aoNotificar() ++++++++++++ iniciou ++++++++++++');
+        console.log('[despertadorapp] aoNotificar() this.oDadosControleApp.app_estava_fechado: ', this.oDadosControleApp.app_estava_fechado);
+        console.log('[despertadorapp] aoNotificar() parametro notification: ', notification);
 
-        this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento = FORMAS_AGENDAMENTO.ao_abrir_notificacao;
+        if(!notification || !notification.action) {
+            if(!this.oDadosControleApp.app_estava_fechado) {
+                // Se o aplicativo estava aberto quando clicou na notificação, 
+                // vai agendar por aqui, pois nao passou pela funcao inicializar() da TelaMensagem.
+                this.obterAgendaNotificacoesDoDispositivo(() => {
 
-        this.salvarAgendaNotificacoesNoDispositivo();
-        this.oNavegacao.navigate('Principal', {screen: 'Mensagem'});
-        console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');
+                    this.oMensagem.obterDadosMensagens(() => {
+                        
+                        this.oMensagem.definirMensagemExibir(() => {
+                            this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao_com_app_aberto);
+
+                            // Vai para a tela de incial, da mensagem.
+                            this.oNavegacao.reset({
+                                index: 0,
+                                routes: [{ name: 'Principal' }],
+                            });
+                            this.oUtil.fecharMensagem();
+                        });                    
+                    });
+                });
+            } else {
+                this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento = FORMAS_AGENDAMENTO.ao_abrir_notificacao;
+
+                this.salvarAgendaNotificacoesNoDispositivo();
+                this.oNavegacao.navigate('Principal', {screen: 'Mensagem'});
+            }
+        }
+        console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');    
     }
 }

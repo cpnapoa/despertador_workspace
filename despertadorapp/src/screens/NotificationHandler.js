@@ -33,14 +33,19 @@ onAction(notification) {
         console.log ('[despertadorapp] onAction() - Saindo do app...');
         BackHandler.exitApp();
     }
-    if(notification.action === 'Abrir') {
-        console.log ('[despertadorapp] onAction() - invocando o app');
-        PushNotification.invokeApp(notification);
+    if(notification) {
+      if(notification.action && notification.action.toUpperCase().indexOf('ABRIR') >= 0) {
+          console.log ('[despertadorapp] onAction() - invocando o app');
+          PushNotification.invokeApp(notification);
+      } else {
+          console.log ('[despertadorapp] onAction() - Vai agendar novo horario.');
+          
+          // Reagenda...
+          oConfiguracao.verificarNotificacaoEmSegundoPlano(notification.action);
+      }
     } else {
-        console.log ('[despertadorapp] onAction() - Vai agendar novo horario.');
-        
-        // Reagenda...
-        oConfiguracao.verificarNotificacaoEmSegundoPlano(notification.action);
+      // Provavelmente nunca cairah aqui.
+      oConfiguracao.verificarNotificacaoEmSegundoPlano('OBJETO_NOTIFICACAO_NULA');
     }
 
     console.log('[despertadorapp] onAction() ------------ terminou ------------');

@@ -166,14 +166,15 @@ export default class TelaConfiguracao extends Component {
                     dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
 
                     if(oDiaSemana.dia_semana == 0) {
-                        dataDiaMes = `Próximo dia: ${dataDiaMes}`;
-                        oDiaDomingo = this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes);
 
                         if(oDiaSemana.ind_data_dia_hoje) {
-                            oDiaDomingo = this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes, true);
                             dataDiaMes = `Hoje: ${dataDiaMes}`;
+                            oDiaDomingo = this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes, true);
                             // Domingo fica sempre na semana atual.
                             oListaExibicao.push(oDiaDomingo)
+                        } else {
+                            dataDiaMes = `Próximo dia: ${dataDiaMes}`;
+                            oDiaDomingo = this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes);
                         }
                     } else if (diaSemanaHoje == 0 || oDiaSemana.dia_semana < diaSemanaHoje) {
 

@@ -118,12 +118,11 @@ export default class TelaMensagem extends Component {
         console.log('[despertadorapp] TelaMensagem.componentDidMount() ++++++++++++ iniciou ++++++++++++');
         this.oUtil.fecharMensagem();
         this.oGerenciadorContextoApp.telaAtual = this;
+        this.oDadosControleApp.app_estava_fechado = true;
         
         AsyncStorage.flushGetRequests();
 
-        this.oNavegacao.addListener('focus', () => {
-            this.inicializar();
-        });
+        this.oNavegacao.addListener('focus', this.inicializar);
 
         BackgroundFetch.configure({
             minimumFetchInterval: 15,      // <-- minutes (15 is minimum allowed)
@@ -148,70 +147,76 @@ export default class TelaMensagem extends Component {
     inicializar() {
         try {
             console.log('[despertadorapp] TelaMensagem.inicializar() ++++++++++++ iniciou ++++++++++++');
-            console.log(this.oDadosApp.dados_mensagens.mensagem_proxima);
-             
-            if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
+            console.log('[despertadorapp] TelaMensagem.inicializar() this.oDadosApp.dados_mensagens.mensagem_proxima', this.oDadosApp.dados_mensagens.mensagem_proxima);
+            console.log('[despertadorapp] TelaMensagem.inicializar() this.oDadosControleApp.app_estava_fechado: ', this.oDadosControleApp.app_estava_fechado);
+            console.log('[despertadorapp] TelaMensagem.inicializar() this.oDadosControleApp.salvando_agenda_alterada: ', this.oDadosControleApp.salvando_agenda_alterada);
 
-                console.log('[despertadorapp] TelaMensagem.inicializar() Vai atribuir mensagem padrão.');
-                this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
-            }
-            
-            this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-
-                //this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+            this.oDadosControleApp.app_estava_fechado = false;
+            if(!this.oDadosControleApp.salvando_agenda_alterada) {
                 
-                this.oMensagem.obterDadosMensagens(() => {
-                    
-                    if(this.oDadosControleApp.primeira_vez) {
-                        // Primeira ez
-                        this.oMensagem.definirMensagemExibir(() => {
+                if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
 
-                            this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-                                this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_primeira_vez);
+                    console.log('[despertadorapp] TelaMensagem.inicializar() Vai atribuir mensagem padrão.');
+                    this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
+                }
+                
+                this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
 
-                                // Vai para a tela de instrucoes.
-                                this.oNavegacao.navigate('Instrucao');
-                                
-                                this.oUtil.fecharMensagem();
-                            });
-                        });
-                    } else {
-                        let ultimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
-
-                        if(ultimaDataHoraAgendada) {
+                    this.oMensagem.obterDadosMensagens(() => {
                         
-                            if(ultimaDataHoraAgendada && ultimaDataHoraAgendada.data_hora_agenda) {
-                                let oUltimaDataHoraAgendada = new Date(ultimaDataHoraAgendada.data_hora_agenda);
-                                let oDataHoraAtual = new Date();
-        
-                                console.log('[despertadorapp] TelaMensagem.inicializar() - Ultima data-hora agendada: ', ultimaDataHoraAgendada.data_hora_agenda);
-                                console.log('[despertadorapp] TelaMensagem.inicializar() - Data-hora atual: ', oDataHoraAtual.toLocaleString());
-                                
-                                if(oUltimaDataHoraAgendada < oDataHoraAtual) {
-                                    console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada passou e provavelmente a notificacao foi ignorada. Serah reagendada...');
+                        if(this.oDadosControleApp.primeira_vez) {
+                            // Primeira vez
+                            this.oMensagem.definirMensagemExibir(() => {
+                                // Obtem novamente a agenda porque salvou a agenda padrao da primeira vez.
+                                this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
+                                    this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_primeira_vez);
+
+                                    // Vai para a tela de instrucoes.
+                                    this.oNavegacao.navigate('Instrucao');
                                     
-                                    this.oMensagem.definirMensagemExibir(() => {    
-                                        this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
+                                    this.oUtil.fecharMensagem();
+                                });
+                            });
+                        } else {
+                            let ultimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
+                            console.log('TelaMensagem.inicializar() - this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada', this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada);
+
+                            if(ultimaDataHoraAgendada) {
+                            
+                                if(ultimaDataHoraAgendada && ultimaDataHoraAgendada.data_hora_agenda) {
+                                    let oUltimaDataHoraAgendada = new Date(ultimaDataHoraAgendada.data_hora_agenda);
+                                    let oDataHoraAtual = new Date();
+            
+                                    console.log('[despertadorapp] TelaMensagem.inicializar() - Ultima data-hora agendada: ', ultimaDataHoraAgendada.data_hora_agenda);
+                                    console.log('[despertadorapp] TelaMensagem.inicializar() - Data-hora atual: ', oDataHoraAtual.toLocaleString());
+                                    
+                                    if(oUltimaDataHoraAgendada < oDataHoraAtual) {
+                                        console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada passou e provavelmente a notificacao foi ignorada. Serah reagendada...');
+                                        
+                                        this.oMensagem.definirMensagemExibir(() => {    
+                                            this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
+                                            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                                        });
+                                    } else {
+                                        console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada eh maior. Nada a ser feito...');
+                                        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                                    }
+                                } else {
+                                    console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada nao encontrada. Serah agendada...');
+                                    
+                                    this.oMensagem.definirMensagemExibir(() => {
+                                        this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_sem_data_hora);
                                         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
                                     });
-                                } else {
-                                    console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada eh maior. Nada a ser feito...');
                                 }
                             } else {
-                                console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada nao encontrada. Serah agendada...');
-                                
-                                this.oMensagem.definirMensagemExibir(() => {
-                                    this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_sem_data_hora);
-                                    this.oGerenciadorContextoApp.atualizarEstadoTela(this);
-                                });
+                                console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou dados de configuracoes salvos no dispositivo.');
+                                this.oGerenciadorContextoApp.atualizarEstadoTela(this);
                             }
-                        } else {
-                            console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou dados de configuracoes salvos no dispositivo.');
                         }
-                    }
-                    this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                    });
                 });
-            });
+            }
 
             console.log('[despertadorapp] TelaMensagem.inicializar() ------------ terminou ------------');
         } catch (error) {
@@ -286,7 +291,7 @@ export default class TelaMensagem extends Component {
     testarAgendarProxima() {
         console.log('testarAgendarProxima() ...-');
         this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-            this.oConfiguracao.removerUltimaDataHoraAgendada();
+            //this.oConfiguracao.removerUltimaDataHoraAgendada();
             this.oConfiguracao.salvarAgendaNotificacoesNoDispositivo(
                 this.inicializar
             );

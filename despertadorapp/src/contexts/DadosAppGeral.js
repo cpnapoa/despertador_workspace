@@ -65,6 +65,7 @@ export const DADOS_DATA_HORA_AGENDAMENTO = {
 export const FORMAS_AGENDAMENTO = {
     em_segundo_plano_sistema: 'Em segundo plano pelo sistema, pois notificação foi ignorada.',
     em_segundo_plano_ok: 'Em segundo plano pelo botão OK.',
+    ao_abrir_notificacao_com_app_aberto: 'Ao tocar na area da notificação, com o aplicativo aberto.',
     ao_abrir_notificacao: 'Ao iniciar o aplicativo, pela notificação.',
     ao_abrir_aplicativo: 'Ao iniciar o aplicativo. Notificação foi ignorada.',
     ao_abrir_aplicativo_primeira_vez: 'Ao iniciar o aplicativo. Primeira vez.',
@@ -105,7 +106,9 @@ export const DADOS_CONTROLE_APP = {
     exibir_mensagem: false,    
     alterou_agenda: false,
     fazendo_requisicao: false,
+    salvando_agenda_alterada: false,
     em_edicao_agenda: false,
+    app_estava_fechado: false,
     todos_intervalos_selecionados: false,
     config_modal: { DADOS_MENSAGEM_MODAL },
     primeira_vez: false,
@@ -120,7 +123,7 @@ export const DADOS_APP_GERAL = {
         tela_configuracao: DADOS_TELA_CONFIGURACAO,
         tela_configuracao_modal: DADOS_TELA_CONFIGURACAO_MODAL,
     },
-    'registros_log': null,
+    registros_log: null,
 };
 
 export const DIAS_SEMANA = [
