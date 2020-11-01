@@ -1251,37 +1251,76 @@ export default class Configuracao {
     }
     
     aoNotificar(notification) {
+        this.oDadosControleApp.abrindo_por_notificacao = true;
+
         console.log('[despertadorapp] aoNotificar() ++++++++++++ iniciou ++++++++++++');
+        console.log('[despertadorapp] aoNotificar() this.oDadosControleApp.inicializando: ', this.oDadosControleApp.inicializando);
         console.log('[despertadorapp] aoNotificar() this.oDadosControleApp.app_estava_fechado: ', this.oDadosControleApp.app_estava_fechado);
         console.log('[despertadorapp] aoNotificar() parametro notification: ', notification);
 
-        if(!notification || !notification.action) {
-            if(!this.oDadosControleApp.app_estava_fechado) {
-                // Se o aplicativo estava aberto quando clicou na notificação, 
-                // vai agendar por aqui, pois nao passou pela funcao inicializar() da TelaMensagem.
-                this.obterAgendaNotificacoesDoDispositivo(() => {
+        if((!this.oDadosControleApp.app_estava_fechado && (!notification || !notification.action))) {
+            // Se o aplicativo estava aberto quando clicou na notificação, 
+            // vai agendar por aqui, pois nao passou pela funcao inicializar() da TelaMensagem.
+            this.obterAgendaNotificacoesDoDispositivo(() => {
 
-                    this.oMensagem.obterDadosMensagens(() => {
-                        
-                        this.oMensagem.definirMensagemExibir(() => {
-                            this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao_com_app_aberto);
+                this.oMensagem.obterDadosMensagens(() => {
+                    
+                    this.oMensagem.definirMensagemExibir(() => {
+                        this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao_com_app_aberto);
 
-                            // Vai para a tela de incial, da mensagem.
-                            this.oNavegacao.reset({
-                                index: 0,
-                                routes: [{ name: 'Principal' }],
-                            });
-                            this.oUtil.fecharMensagem();
-                        });                    
-                    });
+                        // Vai para a tela de incial, da mensagem.
+                        this.oNavegacao.reset({
+                            index: 0,
+                            routes: [{ name: 'Principal' }],
+                        });
+                        this.oUtil.fecharMensagem();
+                        this.oDadosControleApp.abrindo_por_notificacao = false;
+                    });                    
                 });
-            } else {
-                this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento = FORMAS_AGENDAMENTO.ao_abrir_notificacao;
-
-                this.salvarAgendaNotificacoesNoDispositivo();
-                this.oNavegacao.navigate('Principal', {screen: 'Mensagem'});
+            });
+        } else if (notification && notification.action && notification.action.toUpperCase().indexOf('ABRIR') >= 0) {
+            
+            console.log('[despertadorapp] aoNotificar() notification.action: ', notification.action);
+            if(this.oDadosControleApp.inicializando) {
+                this.oDadosControleApp.abrindo_por_notificacao = false;
+                return;
             }
+            if(this.oNavegacao) {
+                // Vai para a tela de incial, da mensagem.
+                this.oNavegacao.reset({
+                    index: 0,
+                    routes: [{ name: 'Principal' }],
+                });
+            }
+            this.oDadosControleApp.abrindo_por_notificacao = false;
+        } else {
+            
+            if(this.oDadosControleApp.inicializando) {
+                this.oDadosControleApp.abrindo_por_notificacao = false;
+                return;
+            }
+            
+            // Se o aplicativo estava aberto quando clicou na notificação, 
+            // vai agendar por aqui, pois nao passou pela funcao inicializar() da TelaMensagem.
+            this.obterAgendaNotificacoesDoDispositivo(() => {
+
+                this.oMensagem.obterDadosMensagens(() => {
+                    
+                    this.oMensagem.definirMensagemExibir(() => {
+                        this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao);
+
+                        // Vai para a tela de incial, da mensagem.
+                        this.oNavegacao.reset({
+                            index: 0,
+                            routes: [{ name: 'Principal' }],
+                        });
+                        this.oUtil.fecharMensagem();
+                        this.oDadosControleApp.abrindo_por_notificacao = false;
+                    });                    
+                });
+            });
         }
+        this.oDadosControleApp.app_estava_fechado = false;
         console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');    
     }
 }

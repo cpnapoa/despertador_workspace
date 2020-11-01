@@ -145,13 +145,20 @@ export default class TelaMensagem extends Component {
     }
     
     inicializar() {
+        this.oDadosControleApp.inicializando = true;
         try {
             console.log('[despertadorapp] TelaMensagem.inicializar() ++++++++++++ iniciou ++++++++++++');
+
+            if(this.oDadosControleApp.abrindo_por_notificacao) {
+                console.log('[despertadorapp] TelaMensagem.inicializar() this.oDadosControleApp.abrindo_por_notificacao', this.oDadosControleApp.abrindo_por_notificacao);
+                this.oDadosControleApp.inicializando = false;
+                return;
+            }
+            
             console.log('[despertadorapp] TelaMensagem.inicializar() this.oDadosApp.dados_mensagens.mensagem_proxima', this.oDadosApp.dados_mensagens.mensagem_proxima);
             console.log('[despertadorapp] TelaMensagem.inicializar() this.oDadosControleApp.app_estava_fechado: ', this.oDadosControleApp.app_estava_fechado);
             console.log('[despertadorapp] TelaMensagem.inicializar() this.oDadosControleApp.salvando_agenda_alterada: ', this.oDadosControleApp.salvando_agenda_alterada);
 
-            this.oDadosControleApp.app_estava_fechado = false;
             if(!this.oDadosControleApp.salvando_agenda_alterada) {
                 
                 if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
@@ -175,6 +182,7 @@ export default class TelaMensagem extends Component {
                                     this.oNavegacao.navigate('Instrucao');
                                     
                                     this.oUtil.fecharMensagem();
+                                    this.oDadosControleApp.inicializando = false;
                                 });
                             });
                         } else {
@@ -195,33 +203,47 @@ export default class TelaMensagem extends Component {
                                         
                                         this.oMensagem.definirMensagemExibir(() => {    
                                             this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo);
-                                            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                                            // Recarrega a tela inicial.
+                                            this.oNavegacao.reset({
+                                                index: 0,
+                                                routes: [{ name: 'Principal' }],
+                                            });
+                                            this.oDadosControleApp.inicializando = false;
                                         });
                                     } else {
                                         console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada eh maior. Nada a ser feito...');
                                         this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                                        this.oDadosControleApp.inicializando = false;
                                     }
                                 } else {
                                     console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada nao encontrada. Serah agendada...');
                                     
                                     this.oMensagem.definirMensagemExibir(() => {
                                         this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_sem_data_hora);
-                                        this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                                        this.oNavegacao.reset({
+                                            index: 0,
+                                            routes: [{ name: 'Principal' }],
+                                        });
                                     });
+                                    this.oDadosControleApp.inicializando = false;
                                 }
                             } else {
                                 console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou dados de configuracoes salvos no dispositivo.');
                                 this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                                this.oDadosControleApp.inicializando = false;
                             }
                         }
                     });
                 });
+            } else {
+                this.oDadosControleApp.inicializando = false;
             }
 
             console.log('[despertadorapp] TelaMensagem.inicializar() ------------ terminou ------------');
         } catch (error) {
             console.log('[despertadorapp] TelaMensagem.inicializar() Erro ao inicializar: ', error);
             Alert.alert('Despertador de Consciência', 'Erro ao inicializar: ', error);
+            this.oDadosControleApp.inicializando = false;
         }
     }
     
@@ -291,10 +313,8 @@ export default class TelaMensagem extends Component {
     testarAgendarProxima() {
         console.log('testarAgendarProxima() ...-');
         this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-            //this.oConfiguracao.removerUltimaDataHoraAgendada();
-            this.oConfiguracao.salvarAgendaNotificacoesNoDispositivo(
-                this.inicializar
-            );
+            this.oConfiguracao.removerUltimaDataHoraAgendada();
+            this.oConfiguracao.salvarAgendaNotificacoesNoDispositivo(this.inicializar);
         });
     }
 

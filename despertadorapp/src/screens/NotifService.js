@@ -69,7 +69,7 @@ export default class NotifService {
       largeIcon: 'ic_stat_name', // (optional) default: "ic_launcher"
       smallIcon: 'ic_stat_name_small', // (optional) default: "ic_notification" with fallback for "ic_launcher"
       //bigText: this.oMensagem.texto, // (optional) default: "message" prop
-      subText: 'Nova Acrópole', // (optional) default: none
+      subText: '', // (optional) default: none
       color: 'blue', // (optional) default: system default
       vibrate: true, // (optional) default: true
       vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000

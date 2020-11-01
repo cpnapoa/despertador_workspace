@@ -1,7 +1,6 @@
 import PushNotification from 'react-native-push-notification';
 import GerenciadorContextoApp from '../contexts/GerenciadorContextoApp';
 import Configuracao from './Configuracao';
-import Mensagem from './Mensagem';
 import { AppState, BackHandler } from 'react-native';
 
 class NotificationHandler {
