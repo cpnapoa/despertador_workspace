@@ -35,7 +35,7 @@ export default class MensagemModal extends Component {
           this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
           this.oDadosTela = this.oDadosApp.tela_mensagem;
           this.oDadosTelaConfiguracao = this.oDadosApp.tela_configuracao;
-          this.oUtil = new Util();
+          this.oUtil = new Util(this.oGerenciadorContextoApp);
           this.state = this.oGerenciadorContextoApp.dadosAppGeral;
       }
 

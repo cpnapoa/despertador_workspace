@@ -1,4 +1,4 @@
-import Util, { clonarObjeto } from '../common/Util';
+import Util from '../common/Util';
 import {
     Alert,
 } from 'react-native';
@@ -26,18 +26,29 @@ export default class Mensagem {
         this.obterDadosMensagens = this.obterDadosMensagens.bind(this);
     }
 
-    async tratarBuscarMensagens(oJsonMensagens) {
+    async tratarBuscarMensagens(oJsonMensagens, callback) {
         if(oJsonMensagens && oJsonMensagens.length > 0) {
 
-            this.oDadosApp.dados_mensagens.lista_mensagens_exibir = oJsonMensagens
-            this.oDadosApp.dados_mensagens.lista_mensagens_exibidas = [];
-            this.fazerTransicaoNovasMensagens();
-            await this.salvarDadosMensagensNoDispositivo(this.oUtil.fecharMensagem);
+            this.fazerTransicaoNovasMensagens(oJsonMensagens);
 
+            await this.salvarDadosMensagensNoDispositivo(() => {
+                if(callback){
+                    callback();
+                }
+                this.oUtil.fecharMensagem();
+            });
+            
         } else {
             this.oDadosTela.dados_mensagens.lista_mensagens_exibir = null;
             this.oUtil.fecharMensagem();
         }
+    }
+
+    fazerTransicaoNovasMensagens(oJsonMensagens) {
+        this.oDadosApp.dados_mensagens.lista_mensagens_exibir = oJsonMensagens;
+        this.oDadosApp.dados_mensagens.qtd_mensagens_exibidas = this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length;
+        this.oDadosApp.dados_mensagens.qtd_total_mensagens = this.oDadosApp.dados_mensagens.qtd_mensagens_exibidas;
+        this.oDadosApp.dados_mensagens.lista_mensagens_exibidas = [];
     }
 
     listar(funcaoTratamentoRetorno, callback) {
@@ -53,7 +64,9 @@ export default class Mensagem {
             
             this.chamarServico(url, {method: 'GET'}, funcaoTratamentoRetorno, callback);
         } catch (exc) {
-            Alert.alert('Despertador de Consciência', exc);
+            console.log('[despertadorapp] Mensagem.listar() Erro ao buscar mensagens do servidor.', exc);
+
+            Alert.alert('Despertador de Consciência', 'Erro buscar mensagens do servidor: ' + exc);
         }
     }
     
@@ -61,12 +74,14 @@ export default class Mensagem {
         fetch(url, parametrosHTTP)
         .then(this.tratarRespostaHTTP)
         .then((oJsonDadosRetorno) => {
-            funcaoTratamentoRetorno(oJsonDadosRetorno);
-            callback();
+            funcaoTratamentoRetorno(oJsonDadosRetorno, callback);
             this.oDadosControleApp.fazendo_requisicao = false;
         })
         .catch(function (erro) {
-            Alert.alert('Despertador de Consciência', erro.message);
+            console.log('[despertadorapp] Mensagem.chamarServico() Erro ao buscar mensagens do servidor.', erro);
+            Alert.alert('Despertador de Consciência', erro);
+            
+            this.oDadosControleApp.fazendo_requisicao = false;
             throw erro;
         });
     }
@@ -75,6 +90,7 @@ export default class Mensagem {
         if (oRespostaHTTP.ok) {
             return oRespostaHTTP.json();
         } else {
+            
             Alert.alert('Despertador de Consciência', "Erro: " + oRespostaHTTP.status);
         }
     }
@@ -92,12 +108,16 @@ export default class Mensagem {
 
             this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.push(this.oDadosApp.dados_mensagens.mensagem_atual);
             this.oDadosApp.dados_mensagens.mensagem_atual = this.oDadosApp.dados_mensagens.mensagem_proxima;
-
+            this.oDadosApp.dados_mensagens.qtd_mensagens_exibidas = this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length;
             console.log('[despertadorapp] definirMensagemExibir() atribuiu mensagem_proxima para mensagem_atual = ', this.oDadosApp.dados_mensagens.mensagem_atual);
         }
         
         if (listaMensagensExibir instanceof Array && listaMensagensExibir.length > 0){
             let indiceMensagem = 0;
+
+            if (this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length > 0) {
+                this.oDadosApp.dados_mensagens.qtd_total_mensagens = this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length + this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length;
+            }
 
             if(listaMensagensExibir.length > 1) {
                 indiceMensagem = this.oUtil.getRand(listaMensagensExibir.length);
@@ -109,12 +129,8 @@ export default class Mensagem {
             
             texto = oMensagem.texto;
         }
-        
-        this.oDadosApp.dados_mensagens.mensagem_proxima = texto;
-    }
 
-    fazerTransicaoNovasMensagens() {
-        this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
+        this.oDadosApp.dados_mensagens.mensagem_proxima = texto;
     }
 
     definirMensagemExibir(callback) {
@@ -125,6 +141,7 @@ export default class Mensagem {
             this.obterProximaMensagem();
 
             if(this.oDadosApp.dados_mensagens.mensagem_proxima) {
+                
                 console.log('[despertadorapp] obterDadosMensagens() salvando mensagens do servidor .........');
                 this.salvarDadosMensagensNoDispositivo(callback);
             } else {
@@ -151,6 +168,7 @@ export default class Mensagem {
                 }
             });
         } catch (error) {
+            console.log('[despertadorapp] salvarDadosMensagensNoDispositivo() Erro ao salvar mensagens no dispositivo: ', error);
             
             Alert.alert('Despertador de Consciência', 'Erro ao salvar mensagens no dispositivo: ' + error);
         }
@@ -160,39 +178,27 @@ export default class Mensagem {
 
     obterDadosMensagens (callback) {
         console.log('[despertadorapp] obterDadosMensagens() ++++++++++++ iniciou ++++++++++++');
-
+        
         try {
-            if(!this.oDadosApp.dados_mensagens ||
-               (this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length <= 0 &&
-               this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length <= 0)) {
-
-                AsyncStorage.getItem('dados_mensagens').then((valor) => {
+            AsyncStorage.getItem('dados_mensagens').then((valor) => {
+                
+                if(valor) {
+                    this.oDadosApp.dados_mensagens = JSON.parse(valor);
                     
-                    if(valor) {
-                        this.oDadosApp.dados_mensagens = JSON.parse(valor);
-                        let listaMensagensExibir = this.oDadosApp.dados_mensagens.lista_mensagens_exibir;
-
-                        if(listaMensagensExibir && listaMensagensExibir.length > 0) {
-                            console.log('[despertadorapp] obterDadosMensagens() lista_mensagens_exibir.length = ', listaMensagensExibir.length);
-                            
-                            if(callback) {
-                                callback();
-                            }
-                        } 
-                    } else {
-                        if(callback) {
-                            callback();
-                        }
+                    console.log('[despertadorapp] obterDadosMensagens() this.oDadosApp.dados_mensagens obtidos do dispositivo: ', JSON.stringify(this.oDadosApp.dados_mensagens));
+                    
+                    if(callback) {
+                        callback();
                     }
-                });
-            } else {
-                if(callback) {
-                    callback();
+                } else {
+                    if(callback) {
+                        callback();
+                    }
                 }
-            }
+            });
         } catch (error) {
-            
-            Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens a exibir: ' + error);
+            console.log('[despertadorapp] obterDadosMensagens() Erro ao ler mensagens do dispositivo: ', error);    
+            Alert.alert('Despertador de Consciência', 'Erro ao ler mensagens do dispositivo: ' + error);
         }
         console.log('[despertadorapp] obterDadosMensagens() ------------ terminou ------------');
     }

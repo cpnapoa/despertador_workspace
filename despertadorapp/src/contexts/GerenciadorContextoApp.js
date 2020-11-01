@@ -1,15 +1,10 @@
 import { DADOS_APP_GERAL } from './DadosAppGeral';
-import RegistradorLog from './RegistradorLog';
 import { AppState } from 'react-native';
 
 export default class GerenciadorContextoApp {
     
     constructor() {
         this.oDadosReferencia = DADOS_APP_GERAL;
-
-        this.oRegistradorLog = new RegistradorLog();
-        // this.oMensagemModal = new MensagemModal(null, this);
-        this.oDadosReferencia.registros_log = this.oRegistradorLog.registrosLog;
         this.atualizarEstadoTela = this.atualizarEstadoTela.bind(this);
         this.atribuirDados = this.atribuirDados.bind(this);
         this.temDados = this.temDados.bind(this);
@@ -69,14 +64,16 @@ export default class GerenciadorContextoApp {
         if(!oTela) {
            oTela = this.oTelaAtual; 
         }
-
+        console.log(`Atualizando tela ${oTela}. Em segundo plano? :`, this.dadosControleApp.em_segundo_plano)
         if(oTela && this.oDadosReferencia && !this.dadosControleApp.em_segundo_plano) {
             oTela.setState(this.oDadosReferencia);
         }
     };
 
     atualizarMensagemModal() {
-        this.oComponenteMensagemModal.setState(this.oDadosReferencia);
+        if(!this.dadosControleApp.em_segundo_plano) {
+            this.oComponenteMensagemModal.setState(this.oDadosReferencia);
+        }
     }
 
     atribuirDados(nomeAtributo, oDadosAtribuir) {

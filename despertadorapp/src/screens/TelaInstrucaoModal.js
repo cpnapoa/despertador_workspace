@@ -27,7 +27,7 @@ export default class TelaInstrucaoModal extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
-            this.oUtil = new Util();
+            this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oMensagem = new Mensagem(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             

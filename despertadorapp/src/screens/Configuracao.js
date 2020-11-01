@@ -117,6 +117,7 @@ export default class Configuracao {
             });
 
         } catch (error) {
+            console.log('[despertadorapp] salvarAgendaNotificacoesNoDispositivo() Erro ao salvar intervalos no dispositivo: ', error);
             
             Alert.alert('Despertador de Consciência', 'Erro ao salvar intervalos no dispositivo: ' + error);
         }
@@ -133,6 +134,7 @@ export default class Configuracao {
             });
 
         } catch (error) {
+            console.log('[despertadorapp] excluirAgendaNotificacoesNoDispositivo() Erro ao remover intervalos no dispositivo: ', error);
             
             Alert.alert('Despertador de Consciência', 'Erro ao remover intervalos no dispositivo: ' + error);
         }
@@ -168,9 +170,11 @@ export default class Configuracao {
                 if(valor) {
 
                     this.oDadosTelaConfiguracao.agenda_notificacoes = JSON.parse(valor);
-                } 
-                if(!valor) {
-
+                    
+                    if(callback) {
+                        callback();
+                    }
+                } else {
                     this.configurarAgendaPadrao(() => {
                         this.oDadosControleApp.primeira_vez = true;
                         
@@ -178,13 +182,11 @@ export default class Configuracao {
                             callback();
                         }
                     });
-
-                } else if(callback) {
-                    callback();
                 }
             });
 
         } catch (error) {
+            console.log('[despertadorapp] obterAgendaNotificacoesDoDispositivo() Erro ao ler intervalos do dispositivo: ', error);
 
             Alert.alert('Despertador de Consciência', 'Erro ao ler intervalos do dispositivo: ' + error);
         }
@@ -663,7 +665,7 @@ export default class Configuracao {
             this.definirDistribuicaoMensagensIntervalosDia(diaSemana);            
             this.obterProximaDataHoraExibicao();
             this.oDadosControleApp.alterou_agenda = true;
-            this.oDadosTelaConfiguracao.agenda_notificacoes.forma_agendamento = '';
+            this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento = '';
         }
 
         return indExcluiu;
@@ -1129,6 +1131,7 @@ export default class Configuracao {
                 }
             } else {
                 console.log('[despertadorapp] agendarNotificacao() Nao foi possivel determinar a proxima data-hora.');
+                this.oUtil.exibirMensagem('Não foi encontrado um intervalo disponível para agendar a próxima notificação.\nVerifique se há intervalos agendados ou habilitados.', true);
                 // Remove a ultima data hora agendada, pois sera fornecida nova data hora
                 this.removerUltimaDataHoraAgendada();
             }
@@ -1136,7 +1139,7 @@ export default class Configuracao {
             console.log('[despertadorapp] agendarNotificacao() Erro ao determinar a proxima data-hora.', exc);
 
             if(!emSegundoPlano) {
-                Alert.alert('Despertador de Consciência', 'Erro ao determinar a proxima data-hora.');
+                Alert.alert('Despertador de Consciência', 'Erro ao determinar a proxima data-hora. ' + exc);
             }                
             // Remove a ultima data hora agendada, pois sera fornecida nova data hora
             this.removerUltimaDataHoraAgendada();
@@ -1242,30 +1245,11 @@ export default class Configuracao {
     
     aoNotificar(notif) {
         console.log('[despertadorapp] aoNotificar() ++++++++++++ iniciou ++++++++++++');
-        console.log('[despertadorapp] aoNotificar() - id_clear_timeout', this.oDadosControleApp.id_clear_timeout);
-        
-        if(this.oDadosControleApp.id_clear_timeout) {
-            // Anula a chamada da funcao inicializar(), da tela inicial (TelaMensagem), 
-            // cuja execucao foi postergada na abertura do app pelo setTimeout().
-            clearTimeout(this.oDadosControleApp.id_clear_timeout);
-            this.oDadosControleApp.id_clear_timeout = null;
-        }
 
-        this.obterAgendaNotificacoesDoDispositivo(() => {
+        this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada.forma_agendamento = FORMAS_AGENDAMENTO.ao_abrir_notificacao;
 
-            this.oMensagem.obterDadosMensagens(() => {
-             
-                this.oMensagem.definirMensagemExibir(() => {
-
-                    console.log('[despertadorapp] aoNotificar(), Vai recarregar a tela de mensagens...');                    
-                    this.oNavegacao.navigate('Mensagem');
-                    this.oGerenciadorContextoApp.atualizarEstadoTela();
-                    this.oUtil.fecharMensagem();
-                    this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao);
-                });
-            });
-        });
-
+        this.salvarAgendaNotificacoesNoDispositivo();
+        this.oNavegacao.navigate('Principal', {screen: 'Mensagem'});
         console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');
     }
 }

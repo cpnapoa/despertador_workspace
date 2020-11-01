@@ -8,7 +8,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     AppState,
-    Alert
+    Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Image } from 'react-native-elements';
@@ -79,7 +79,7 @@ export default class TelaMensagem extends Component {
     
     constructor(props, value) {
         super();
-
+        
         if(props && props.navigation) {
             this.oNavegacao = props.navigation;
         }
@@ -96,10 +96,11 @@ export default class TelaMensagem extends Component {
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
             this.oDadosApp.tela_mensagem.objeto_tela = this;
-
+            this.oDadosControleApp.em_segundo_plano = false;
+            
             if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
 
-                console.log('[despertadorapp] TelaMensagem.inicializar() Vai atribuir mensagem padrão.');
+                console.log('[despertadorapp] TelaMensagem.constructor() Vai atribuir mensagem padrão.');
                 this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
             }
         }
@@ -119,18 +120,9 @@ export default class TelaMensagem extends Component {
         this.oGerenciadorContextoApp.telaAtual = this;
         
         AsyncStorage.flushGetRequests();
-        
-        console.log('[despertadorapp] TelaMensagem.componentDidMount() id_clear_timeout: ', this.oDadosControleApp.id_clear_timeout);
-
-        if(!this.oDadosControleApp.id_clear_timeout) {
-            // Posterga a chamada da funcao inicializar(), em 2,5 segundos, para que a funcao Configuracao.aoNotificar(), 
-            // execute primeiro, caso o aplicativo tenha sido aberto a partir da notificação.
-            // Isso permite controlar se o aplicativo deve trocar a mensagem e reagendar ao abrir pelo icone, de forma normal.
-            this.oDadosControleApp.id_clear_timeout = setTimeout(this.inicializar, 1300);
-        }
 
         this.oNavegacao.addListener('focus', () => {
-            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+            this.inicializar();
         });
 
         BackgroundFetch.configure({
@@ -154,42 +146,39 @@ export default class TelaMensagem extends Component {
     }
     
     inicializar() {
-        console.log('[despertadorapp] TelaMensagem.inicializar() ++++++++++++ iniciou ++++++++++++');
-        console.log(this.oDadosApp.dados_mensagens.mensagem_proxima);
-        
-        this.oDadosControleApp.id_clear_timeout = null;
+        try {
+            console.log('[despertadorapp] TelaMensagem.inicializar() ++++++++++++ iniciou ++++++++++++');
+            console.log(this.oDadosApp.dados_mensagens.mensagem_proxima);
+             
+            if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
 
-        if(!this.oDadosApp.dados_mensagens.mensagem_proxima && !this.oDadosApp.dados_mensagens.mensagem_atual) {
-
-            console.log('[despertadorapp] TelaMensagem.inicializar() Vai atribuir mensagem padrão.');
-            this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
-        }
-        
-        this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-
-            this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                console.log('[despertadorapp] TelaMensagem.inicializar() Vai atribuir mensagem padrão.');
+                this.oDadosApp.dados_mensagens.mensagem_atual = '"Honrai as verdades com a prática." - Helena Blavatsky';
+            }
             
-            this.oMensagem.obterDadosMensagens(() => {
+            this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
+
+                //this.oGerenciadorContextoApp.atualizarEstadoTela(this);
                 
-                if(this.oDadosControleApp.primeira_vez) {
-                    // Primeira ez
-                    this.oMensagem.definirMensagemExibir(() => {
+                this.oMensagem.obterDadosMensagens(() => {
+                    
+                    if(this.oDadosControleApp.primeira_vez) {
+                        // Primeira ez
+                        this.oMensagem.definirMensagemExibir(() => {
 
-                        this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
-                            this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_primeira_vez);
+                            this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
+                                this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_primeira_vez);
 
-                            // Vai para a tela de instrucoes.
-                            this.oNavegacao.navigate('Instrucao');
-                            
-                            this.oUtil.fecharMensagem();
-                        });
-                    });
-                } else {
-
-                    if(this.oDadosTelaConfiguracao && this.oDadosTelaConfiguracao.agenda_notificacoes) {
+                                // Vai para a tela de instrucoes.
+                                this.oNavegacao.navigate('Instrucao');
                                 
-                        if(this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada) {
-                            let ultimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
+                                this.oUtil.fecharMensagem();
+                            });
+                        });
+                    } else {
+                        let ultimaDataHoraAgendada = this.oDadosTelaConfiguracao.agenda_notificacoes.ultima_data_hora_agendada;
+
+                        if(ultimaDataHoraAgendada) {
                         
                             if(ultimaDataHoraAgendada && ultimaDataHoraAgendada.data_hora_agenda) {
                                 let oUltimaDataHoraAgendada = new Date(ultimaDataHoraAgendada.data_hora_agenda);
@@ -219,15 +208,16 @@ export default class TelaMensagem extends Component {
                         } else {
                             console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou dados de configuracoes salvos no dispositivo.');
                         }
-                    } else {
-                        console.log('[despertadorapp] TelaMensagem.inicializar() Nao encontrou a agenda de notificacoes salva no dispositivo.');
                     }
-                }
-                this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                    this.oGerenciadorContextoApp.atualizarEstadoTela(this);
+                });
             });
-        });
 
-        console.log('[despertadorapp] TelaMensagem.inicializar() ------------ terminou ------------');
+            console.log('[despertadorapp] TelaMensagem.inicializar() ------------ terminou ------------');
+        } catch (error) {
+            console.log('[despertadorapp] TelaMensagem.inicializar() Erro ao inicializar: ', error);
+            Alert.alert('Despertador de Consciência', 'Erro ao inicializar: ', error);
+        }
     }
     
     montarStatusConfig() {
@@ -249,21 +239,17 @@ export default class TelaMensagem extends Component {
 
     montarStatus() {
         if(this.oDadosApp.dados_mensagens.lista_mensagens_exibir) {
-            let qtdTotal = 0;
-
+            
             if(!this.oDadosControleApp.fazendo_requisicao) {
                 
-                qtdTotal = this.oDadosApp.dados_mensagens.lista_mensagens_exibir.length + this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length;
-                if (this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length > 0) {
-                    // Soma um para a mensagem_proxima, que ainda não foi adicionada ao array de lidas.
-                    qtdTotal += 1;
+                if (this.oDadosApp.dados_mensagens.qtd_mensagens_exibidas > 0) {
                     return (
                         <View style={{flex: 0.16, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
                             <View style={{flexDirection:'row'}}>
                                 <Text>Mensagem </Text> 
-                                <Text>{this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length}</Text>
+                                <Text>{this.oDadosApp.dados_mensagens.qtd_mensagens_exibidas}</Text>
                                 <Text> de </Text>
-                                <Text>{qtdTotal}</Text>
+                                <Text>{this.oDadosApp.dados_mensagens.qtd_total_mensagens}</Text>
                             </View>
                             {this.montarStatusConfig()}
                         </View>
@@ -298,6 +284,7 @@ export default class TelaMensagem extends Component {
     }
 
     testarAgendarProxima() {
+        console.log('testarAgendarProxima() ...-');
         this.oConfiguracao.obterAgendaNotificacoesDoDispositivo(() => {
             this.oConfiguracao.removerUltimaDataHoraAgendada();
             this.oConfiguracao.salvarAgendaNotificacoesNoDispositivo(

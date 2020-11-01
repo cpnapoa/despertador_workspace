@@ -16,6 +16,8 @@ export const DADOS_MENSAGENS = {
     mensagem_proxima: '',
     lista_mensagens_exibir: [],
     lista_mensagens_exibidas: [],
+    qtd_total_mensagens: 0,
+    qtd_mensagens_exibidas: 0
 };
 
 export const DADOS_TELA_MENSAGEM = {
@@ -63,10 +65,10 @@ export const DADOS_DATA_HORA_AGENDAMENTO = {
 export const FORMAS_AGENDAMENTO = {
     em_segundo_plano_sistema: 'Em segundo plano pelo sistema, pois notificação foi ignorada.',
     em_segundo_plano_ok: 'Em segundo plano pelo botão OK.',
-    ao_abrir_notificacao: 'Ao abrir aplicativo pela notificação.',
-    ao_abrir_aplicativo: 'Ao abrir aplicativo normalmente. Notificação foi ignorada.',
-    ao_abrir_aplicativo_primeira_vez: 'Ao abrir aplicativo normalmente. Primeira vez.',
-    ao_abrir_aplicativo_sem_data_hora: 'Ao abrir aplicativo normalmente. Não havia data-hora agendada.',
+    ao_abrir_notificacao: 'Ao iniciar o aplicativo, pela notificação.',
+    ao_abrir_aplicativo: 'Ao iniciar o aplicativo. Notificação foi ignorada.',
+    ao_abrir_aplicativo_primeira_vez: 'Ao iniciar o aplicativo. Primeira vez.',
+    ao_abrir_aplicativo_sem_data_hora: 'Ao iniciar o aplicativo. Não havia data-hora agendada.',
     ao_alterar_agenda: 'Ao alterar agenda.',
     ao_fechar_aplicativo: 'Ao fechar aplicativo, após alterar agenda.',
     ao_fechar_aplicativo_sem_prox_msg: 'Ao fechar aplicativo, após alterar agenda, sem próxima mensagem.',
@@ -77,8 +79,6 @@ export const DADOS_TELA_CONFIGURACAO = {
     dh2: '',
     hora_notificacao: '',
     agenda_notificacoes: clonarObjeto(AGENDA),
-    qtd_mensagens_exibir: 0,
-    qtd_mensagens_exibidas: 0,
     scroll_enabled: true,
     ver_detalhes: false,
 };
@@ -109,7 +109,6 @@ export const DADOS_CONTROLE_APP = {
     todos_intervalos_selecionados: false,
     config_modal: { DADOS_MENSAGEM_MODAL },
     primeira_vez: false,
-    id_clear_timeout: null,
     em_segundo_plano: false,
 };
 

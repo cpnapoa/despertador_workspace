@@ -36,7 +36,7 @@ export default class TelaConfiguracao extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao;
-            this.oUtil = new Util();
+            this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oMensagem = new Mensagem();
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
@@ -151,29 +151,35 @@ export default class TelaConfiguracao extends Component {
 
         if(oAgendaIntervalosDias && oAgendaIntervalosDias.length > 0) { 
             let oDiaSemana;
-            let a = 0;
-            let dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
+            let dataDiaMes;
             let oListaExibicaoDiasPosteriores = [];
             let diaSemanaHoje = new Date().getDay();
+            let oDiaDomingo;
             
 
             for(let i = 0; i < oAgendaIntervalosDias.length; i++) {
-                a++;
-                
-                if((i + 1) == oAgendaIntervalosDias.length) {
-                    a = 0;
-                }
-                oDiaSemana = this.oConfiguracao.obterDia(a);
+                oDiaSemana = this.oConfiguracao.obterDia(i);
 
                 if(oDiaSemana) {
                     oListaIntervalos = this.listarHorasDia(oDiaSemana);
                     tituloDia = `${DIAS_SEMANA[oDiaSemana.dia_semana]}`;
                     dataDiaMes = this.identificarDiaMesNoDiaSemana(oDiaSemana);
 
-                    if (oDiaSemana.dia_semana < diaSemanaHoje) {
+                    if(oDiaSemana.dia_semana == 0) {
+                        dataDiaMes = `Próximo dia: ${dataDiaMes}`;
+                        oDiaDomingo = this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes);
+
+                        if(oDiaSemana.ind_data_dia_hoje) {
+                            oDiaDomingo = this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes, true);
+                            dataDiaMes = `Hoje: ${dataDiaMes}`;
+                            // Domingo fica sempre na semana atual.
+                            oListaExibicao.push(oDiaDomingo)
+                        }
+                    } else if (diaSemanaHoje == 0 || oDiaSemana.dia_semana < diaSemanaHoje) {
+
                         dataDiaMes = `Próximo dia: ${dataDiaMes}`;
                         // Adiciona a lista de dias da semana menores que o dia de hoje, que terao notificacao na semana seguinte.
-                        oListaExibicaoDiasPosteriores.unshift(
+                        oListaExibicaoDiasPosteriores.push(
                             this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
                         )
                     } else if (oDiaSemana.ind_data_dia_hoje){
@@ -192,7 +198,10 @@ export default class TelaConfiguracao extends Component {
                             this.criarCartaoIntervalo(oListaIntervalos, oDiaSemana, tituloDia, dataDiaMes)
                         );
                     }
-                }                
+                }
+            }
+            if(diaSemanaHoje > 0 && oDiaDomingo) {
+                oListaExibicao.push(oDiaDomingo); 
             }
             if(oListaExibicaoDiasPosteriores.length > 0) {
                 oElementosTelaSemanaProxima = (
@@ -238,12 +247,14 @@ export default class TelaConfiguracao extends Component {
         let corFonte = 'black';
         let tamanhoFonte = 14;
         let espessuraFonte = 'normal';
+        let elevacao = 3;
         
         if(diaAtualHoje) {
             corFundo = 'white';
             corFonte = 'green';
             tamanhoFonte = 18;
             espessuraFonte = 'bold';
+            elevacao = 6;
         }
 
         return (
@@ -253,7 +264,15 @@ export default class TelaConfiguracao extends Component {
                     <Text style={{fontSize:20, fontWeight:'bold', margin: 5}}>{tituloDia}</Text>
                     <Text style={{fontSize: tamanhoFonte, fontWeight: espessuraFonte, color: corFonte}}>{dataDiaMes}</Text>
                 </View>} 
-            containerStyle={{backgroundColor: corFundo, borderWidth: 0, borderRadius:5, flexDirection:'column', width:300}} 
+            containerStyle={{backgroundColor: corFundo, borderWidth: 0, borderRadius:5, flexDirection:'column', width:300, 
+            shadowColor: "#000",
+            shadowOffset: {
+                width: 0,
+                height: 2
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: elevacao,}} 
         >
             <Divider style={{margin:10}}></Divider>
 
@@ -539,7 +558,9 @@ export default class TelaConfiguracao extends Component {
         let dataHora = '';
 
         if(oDataDiaMes) {
-            dataHora = `${oDataDiaMes.getDate()}/${oDataDiaMes.getMonth() + 1}/${oDataDiaMes.getFullYear()}`
+            let dia = `${oDataDiaMes.getDate()}`.padStart(2, '0');
+            let mes = `${oDataDiaMes.getMonth() + 1}`.padStart(2, '0');
+            dataHora = `${dia}/${mes}/${oDataDiaMes.getFullYear()}`
         }
 
         return dataHora;

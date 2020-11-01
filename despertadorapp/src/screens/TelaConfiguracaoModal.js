@@ -5,7 +5,6 @@ import {
     View,
     Button,
     Text,
-    Alert,
 } from 'react-native';
 import Util, { clonarObjeto } from '../common/Util';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -32,7 +31,7 @@ export default class TelaConfiguracaoModal extends Component {
             this.oDadosApp = this.oGerenciadorContextoApp.dadosApp;
             this.oDadosControleApp = this.oGerenciadorContextoApp.dadosControleApp;
             this.oDadosTela = this.oDadosApp.tela_configuracao_modal;
-            this.oUtil = new Util();
+            this.oUtil = new Util(this.oGerenciadorContextoApp);
             this.oConfiguracao = new Configuracao(this.oGerenciadorContextoApp, this.oNavegacao);
             
             this.state = this.oGerenciadorContextoApp.dadosAppGeral;
@@ -47,7 +46,6 @@ export default class TelaConfiguracaoModal extends Component {
         this.voltar = this.voltar.bind(this);
 
         this.oMensagem = new Mensagem();
-        this.oUtil = new Util();
         
         this.oDadosTela.h1 = 0;
         this.oDadosTela.m1 = 0;
@@ -225,7 +223,15 @@ export default class TelaConfiguracaoModal extends Component {
                     </View>
                 </View>
                 <View style={styles.areaIntervaloDefinicao}>
-                    <Card containerStyle={{ alignItems:'center', marginTop:10, backgroundColor: '#f0f5f5', borderWidth: 1, borderRadius:5}} >
+                    <Card containerStyle={{ alignItems:'center', marginTop:10, backgroundColor: '#f0f5f5', borderWidth: 1, borderRadius:5,
+                        shadowColor: "#000",
+                        shadowOffset: {
+                            width: 0,
+                            height: 2
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 4}} >
                         <View style={{ flexDirection: 'row', margin: 20, justifyContent: 'space-evenly', alignItems:'flex-end' }}>
                             <TouchableOpacity onPress={() => this.exibirTimePicker(1)} 
                                                 style={{flexDirection:'column', alignItems:'center' }}>
@@ -246,7 +252,7 @@ export default class TelaConfiguracaoModal extends Component {
                     </Card>
                     {this.montarTimePicker(this.oDadosTela.num_hora_escolher)}
                 </View>
-                <View style={{ flex: .17, margin: 3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{flex: .25, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center' }}>
                     <Button title='Adicionar' onPress={this.adicionarIntervalo} color={'#009999'}></Button>
                 </View>
             </View>
@@ -265,10 +271,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#faf9eb'
     },
     areaIntervaloDefinicao: {
-        flex: .70,
+        flex: .65,
         flexDirection:'column', 
         justifyContent: 'flex-start',
         alignItems: 'center',
         alignContent: 'stretch',
+        marginTop: 30
     },
 });
