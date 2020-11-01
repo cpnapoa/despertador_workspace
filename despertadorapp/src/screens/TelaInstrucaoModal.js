@@ -162,7 +162,7 @@ export default class TelaInstrucaoModal extends Component {
                         </View>
                     </ScrollView>
                 </View>
-                <View style={{ flex: .17, margin: 3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flex: .1, margin: 3, flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     
                 </View>
             </View>
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     areaIntervaloDefinicao: {
-        flex: .90,
+        flex: .8,
         flexDirection: 'column',
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
