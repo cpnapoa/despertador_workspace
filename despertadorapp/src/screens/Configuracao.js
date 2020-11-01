@@ -1136,9 +1136,12 @@ export default class Configuracao {
                 } else {
                     console.log('[despertadorapp] agendarNotificacao() Proxima data-hora: ', oDadosProximaDataHoraAgendar.data_hora_agenda);
                 }
+                return true;
             } else {
                 console.log('[despertadorapp] agendarNotificacao() Nao foi possivel determinar a proxima data-hora.');
-                Alert.alert('Não foi encontrado um intervalo disponível para agendar a próxima notificação.\nVerifique se há intervalos agendados ou habilitados.', true);
+                if(!emSegundoPlano) {
+                    Alert.alert('Despertador de Consciência', 'Não foi encontrado um intervalo disponível para agendar a próxima notificação.\nVerifique se há intervalos agendados ou habilitados.');
+                }
                 // Remove a ultima data hora agendada, pois sera fornecida nova data hora
                 this.removerUltimaDataHoraAgendada();
             }
@@ -1151,6 +1154,7 @@ export default class Configuracao {
             // Remove a ultima data hora agendada, pois sera fornecida nova data hora
             this.removerUltimaDataHoraAgendada();
         }
+        return false;
         console.log('[despertadorapp] agendarNotificacao() ------------ terminou ------------');
     }
 

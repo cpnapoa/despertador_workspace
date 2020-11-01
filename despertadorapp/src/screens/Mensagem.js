@@ -3,6 +3,7 @@ import {
     Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
+import NetInfo from "@react-native-community/netinfo";
 
 export default class Mensagem {
 
@@ -147,10 +148,22 @@ export default class Mensagem {
             } else {
                 console.log('[despertadorapp] obterDadosMensagens() buscando mensagens do servidor pq acabaram as mensagens...');
     
-                this.listar(this.tratarBuscarMensagens, () => {
-                    this.obterProximaMensagem();
-                    this.salvarDadosMensagensNoDispositivo(callback);
-                });                
+                NetInfo.fetch().then(state => {
+
+                    if(state.isConnected) {
+                        this.listar(this.tratarBuscarMensagens, () => {
+                            this.obterProximaMensagem();
+                            this.salvarDadosMensagensNoDispositivo(callback);
+                        });
+                    } else {
+                        if(!this.oDadosControleApp.em_segundo_plano) {
+                            Alert.alert('Não há conexão com a Internet.');
+                            if(this.oDadosApp.dados_mensagens.lista_mensagens_exibidas.length > 0) {
+                                this.fazerTransicaoNovasMensagens(this.oDadosApp.dados_mensagens.lista_mensagens_exibidas);
+                            }
+                        }
+                    }
+                  });                
             }
         });
         console.log('[despertadorapp] definirMensagemExibir() ------------ terminou ------------');

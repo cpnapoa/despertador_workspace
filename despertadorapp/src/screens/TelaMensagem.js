@@ -219,11 +219,12 @@ export default class TelaMensagem extends Component {
                                     console.log('[despertadorapp] TelaMensagem.inicializar() Data-hora agendada nao encontrada. Serah agendada...');
                                     
                                     this.oMensagem.definirMensagemExibir(() => {
-                                        this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_sem_data_hora);
-                                        this.oNavegacao.reset({
-                                            index: 0,
-                                            routes: [{ name: 'Principal' }],
-                                        });
+                                        if(this.oConfiguracao.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_aplicativo_sem_data_hora)) {
+                                            this.oNavegacao.reset({
+                                                index: 0,
+                                                routes: [{ name: 'Principal' }],
+                                            });
+                                        }
                                     });
                                     this.oDadosControleApp.inicializando = false;
                                 }
