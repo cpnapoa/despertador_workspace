@@ -25,8 +25,11 @@ SECRET_KEY = '946!z8#-gfafw^y!6mu0(imk=$5%mk1*i^i3c9t9kjanm%==p@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '10.0.0.100', '192.168.0.103']
+ALLOWED_HOSTS = ['192.168.0.105']
 
+FILE_UPLOAD_HANDLERS = {
+    'mensagem.models.MensagemLote'
+}
 
 # Application definition
 
