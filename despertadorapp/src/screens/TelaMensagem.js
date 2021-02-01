@@ -127,7 +127,7 @@ export default class TelaMensagem extends Component {
         BackgroundFetch.configure({
             minimumFetchInterval: 15,      // <-- minutes (15 is minimum allowed)
             // Android options
-            forceAlarmManager: false,      // <-- Set true to bypass JobScheduler.
+            forceAlarmManager: true,      // <-- Set true to bypass JobScheduler.
             stopOnTerminate: false,
             enableHeadless: true,
             startOnBoot: true,
