@@ -67,7 +67,7 @@ export default class TelaConfiguracao extends Component {
     
     irParaConfiguracaoIntervalo() {
         this.oDadosApp.tela_configuracao_modal = clonarObjeto(DADOS_TELA_CONFIGURACAO_MODAL);
-        this.oNavegacao.navigate('Configuracao Intervalo');
+        this.oNavegacao.navigate('Inclusao Intervalo');
     }
 
     redefinirParaAgendaPadrao() {
@@ -601,20 +601,8 @@ export default class TelaConfiguracao extends Component {
 
         return (
             <View style={styles.areaTotal}>
-                <View style={{flex: 0.1, borderBottomWidth:1, marginBottom: 10,  borderColor:'#e0ebeb', flexDirection:'row', alignItems: 'center', alignSelf:'stretch', justifyContent:'space-between'}} >
-                    <View style={{alignSelf:'center', width:50, alignItems:'center', marginLeft:10, justifyContent:'flex-end'}}>
-                        <TouchableOpacity onPress={this.voltar} style={{alignItems:'stretch'}}>
-                            <Icon name="arrow-left" size={35} color="#009999" />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={{alignSelf:'center', alignItems:'center', justifyContent:'center'}}>
-                        <Text style={{fontSize: 24}}>Intervalos</Text>
-                    </View>
-                    <View style={{alignSelf:'center', width:50, flexDirection:'row', marginRight:20, alignItems:'center', justifyContent:'flex-start'}}>                       
-                        {this.montarIcone('information-variant', '', () => { this.oNavegacao.navigate('Instrucao')}, this.verDetalhes, true)}
-                    </View>
-                </View>
-                <SafeAreaView style={{flex: 0.8, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                
+                <SafeAreaView style={{flex: .85, flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
                     {this.verDataHoraAgendada()}
                     
                     {this.listarDiasSemana()}

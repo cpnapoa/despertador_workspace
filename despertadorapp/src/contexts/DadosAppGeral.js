@@ -110,7 +110,7 @@ export const DADOS_CONTROLE_APP = {
     em_edicao_agenda: false,
     app_estava_fechado: false,
     todos_intervalos_selecionados: false,
-    config_modal: { DADOS_MENSAGEM_MODAL },
+    config_modal: DADOS_MENSAGEM_MODAL,
     primeira_vez: false,
     em_segundo_plano: false,
     inicializando: false,

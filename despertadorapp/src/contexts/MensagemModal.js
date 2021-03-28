@@ -98,7 +98,15 @@ export default class MensagemModal extends Component {
         this.fechar();      
     }
 
+    controlarIndicadorAtividade(indExibir) {
+      if(indExibir) {
+        return(<ActivityIndicator color='#2196F3' size='large' style={{marginBottom: 20}}/>)
+      }
+      return(<View></View>)
+    }
+
     render() {
+        let indExibirIndicador = !(this.oDadosControleApp.config_modal.botoes.length > 0);
         let exibir = false;
         let mensagem = '';
 
@@ -118,7 +126,7 @@ export default class MensagemModal extends Component {
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                <ActivityIndicator color='#2196F3' size='large'/>
+                {this.controlarIndicadorAtividade(indExibirIndicador)}
                 <Text style={styles.modalText}>{mensagem}</Text>            
                 <View style={{flexDirection:'row'}}> 
                 {this.montarBotoes()}
@@ -155,8 +163,9 @@ const styles = StyleSheet.create({
     },
     openButton: {
       backgroundColor: "#F194FF",
-      borderRadius: 20,
+      borderRadius: 10,
       padding: 10,
+      marginHorizontal: 5,
       elevation: 2
     },
     textStyle: {

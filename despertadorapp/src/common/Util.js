@@ -59,46 +59,6 @@ export default class Util {
         return d3;
     }
 
-    // definirBotaoMensagem (textoBotao, oFuncaoAcao) {
-        
-    //     let oBotoesModal = this.oDadosControleApp.config_modal.botoes;
-    //     let oBotao = clonarObjeto(DADOS_BOTAO);
-        
-    //     oBotao.texto = textoBotao;
-    //     oBotao.funcao = oFuncaoAcao;
-
-    //     oBotoesModal.push(oBotao);
-    // }
-
-    // exibirMensagem(textoMensagem, indAlerta, oFuncaoAlerta, indFixarHorizontal) {
-        
-    //     if(textoMensagem && textoMensagem.trim()) {
-    //         if(indAlerta) {
-
-    //             let oBotao = clonarObjeto(DADOS_BOTAO);
-            
-    //             oBotao.texto = 'OK';
-    //             oBotao.funcao = oFuncaoAlerta;
-
-    //             this.oDadosControleApp.config_modal.botoes.push(oBotao);
-    //         }
-
-    //         this.oDadosControleApp.config_modal.mensagem = textoMensagem;
-    //         this.oDadosControleApp.config_modal.exibir_modal = true;
-    //     } else {
-    //         this.oDadosControleApp.config_modal = clonarObjeto(DADOS_MENSAGEM_MODAL);    
-    //     }
-
-    //     this.oGerenciadorContextoApp.atualizarMensagemModal();
-    // }
-
-    // fecharMensagem() {
-    //     this.oDadosControleApp.config_modal.mensagem = '';
-    //     this.oDadosControleApp.config_modal.exibir_modal = false;
-
-    //     this.oGerenciadorContextoApp.atualizarMensagemModal();
-    // }
-
     definirBotaoMensagem (textoBotao, oFuncaoAcao) {
         
         let oBotoesModal = this.oDadosControleApp.config_modal.botoes;
@@ -110,30 +70,100 @@ export default class Util {
         oBotoesModal.push(oBotao);
     }
 
-    exibirMensagem(textoMensagem, indAlerta) {
-        
-        if(indAlerta) {
-            this.oDadosControleApp.config_modal.botoes = [];
+    exibirMensagem(textoMensagem, indAlerta, oFuncaoAlerta) {
+        let nomeFuncao = 'exibirMensagem';
 
-            let oBotao = clonarObjeto(DADOS_BOTAO);
+        //this.oRegistradorLog.registrarInicio(NOME_COMPONENTE, nomeFuncao);
         
-            oBotao.texto = 'OK';
+        if(textoMensagem && textoMensagem.trim()) {
+            if(indAlerta) {
 
-            this.oDadosControleApp.config_modal.botoes.push(oBotao);
+                let oBotao = clonarObjeto(DADOS_BOTAO);
+            
+                oBotao.texto = 'OK';
+                oBotao.funcao = oFuncaoAlerta;
+
+                this.oDadosControleApp.config_modal.botoes.push(oBotao);
+            }
+
+            this.oDadosControleApp.config_modal.mensagem = textoMensagem;
+            this.oDadosControleApp.config_modal.exibir_modal = true;
+        } else {
+            this.oDadosControleApp.config_modal = clonarObjeto(DADOS_MENSAGEM_MODAL);    
         }
 
-        this.oDadosControleApp.config_modal.mensagem = textoMensagem;
-        this.oDadosControleApp.config_modal.exibir_modal = true;
+        // if(indFixarHorizontal === undefined) {
 
+        //     Orientation.getOrientation((err, orientacaoAtual) => {
+            
+        //         if(!err) {
+        //             this.oDadosControleApp.tela_na_horizontal = false;
+                    
+        //             if (orientacaoAtual && orientacaoAtual.trim().toUpperCase().indexOf('LANDSCAPE') >= 0) {
+        //                 this.oDadosControleApp.tela_na_horizontal = true;
+        //             }
+
+        //             this.oGerenciadorContextoApp.atualizarMensagemModal();
+        //         } else {
+        //             this.tratarExcecao(err);
+        //         }
+        //     });
+        // } else {
+        //     this.oDadosControleApp.tela_na_horizontal = indFixarHorizontal;
+            
+        //     this.oGerenciadorContextoApp.atualizarMensagemModal();
+        // }
         this.oGerenciadorContextoApp.atualizarMensagemModal();
+        //this.oRegistradorLog.registrarFim(NOME_COMPONENTE, nomeFuncao);
     }
 
     fecharMensagem() {
+        let nomeFuncao = 'fecharMensagem';
+
+        //this.oRegistradorLog.registrarInicio(NOME_COMPONENTE, nomeFuncao);
+
         this.oDadosControleApp.config_modal.mensagem = '';
         this.oDadosControleApp.config_modal.exibir_modal = false;
 
         this.oGerenciadorContextoApp.atualizarMensagemModal();
+        //this.oRegistradorLog.registrarFim(NOME_COMPONENTE, nomeFuncao);
     }
+
+    // definirBotaoMensagem (textoBotao, oFuncaoAcao) {
+        
+    //     let oBotoesModal = this.oDadosControleApp.config_modal.botoes;
+    //     let oBotao = clonarObjeto(DADOS_BOTAO);
+        
+    //     oBotao.texto = textoBotao;
+    //     oBotao.funcao = oFuncaoAcao;
+
+    //     oBotoesModal.push(oBotao);
+    // }
+
+    // exibirMensagem(textoMensagem, indAlerta) {
+        
+    //     if(indAlerta) {
+    //         this.oDadosControleApp.config_modal.botoes = [];
+
+    //         let oBotao = clonarObjeto(DADOS_BOTAO);
+        
+    //         oBotao.texto = 'OK';
+
+    //         this.oDadosControleApp.config_modal.botoes.push(oBotao);
+    //     }
+
+    //     this.oDadosControleApp.config_modal.mensagem = textoMensagem;
+    //     this.oDadosControleApp.config_modal.exibir_modal = true;
+
+    //     this.oGerenciadorContextoApp.atualizarMensagemModal();
+    // }
+
+    // fecharMensagem() {
+    //     this.oDadosControleApp.config_modal.mensagem = '';
+    //     this.oDadosControleApp.config_modal.exibir_modal = false;
+
+    //     this.oGerenciadorContextoApp.atualizarMensagemModal();
+    // }
 }
 
 export function clonarObjeto(obj) {

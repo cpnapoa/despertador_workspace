@@ -20,6 +20,14 @@ import MensagemModal from '../contexts/MensagemModal';
 import { RFPercentage } from 'react-native-responsive-fontsize';
 import { FORMAS_AGENDAMENTO } from '../contexts/DadosAppGeral';
 
+// import BatteryWhitelist from "react-native-battery-whitelist";
+// import AndroidWhitelist from 'react-native-android-whitelist';
+// import {checkNotifications} from 'react-native-permissions';
+// import {check, PERMISSIONS, RESULTS} from 'react-native-permissions';
+// import {openSettings} from 'react-native-permissions';
+// import {changeNotificationSetting,checkNotificationPermission} from 'react-native-check-notification-permission';
+// import AutoStart from 'react-native-autostart';
+
 /// Execute a BackgroundFetch.scheduleTask
 ///
 export const scheduleTask = async (name) => {
@@ -74,6 +82,15 @@ export const statusToString = (status) => {
     }
     return 'unknown';
   };
+
+// const configWhiteList = {
+//     title: 'Android Whitelist',
+//     text: 'To ensure timely delivery of push notifications, please whitelist our app.',
+//     doNotShowAgainText: 'Do not show again',
+//     positiveText: 'Whitelist',
+//     negativeText: 'Cancel'
+// }
+// AndroidWhitelist.alert(configWhiteList);
 
 export default class TelaMensagem extends Component {
     
@@ -330,7 +347,8 @@ export default class TelaMensagem extends Component {
     render() {
         
         return (
-            
+            //{this.verificarConfiguracaoNotificacoes}
+            //
             <View style={styles.areaTotal}>
                 <ImageBackground source={require('../images/parchment_back.png')} style={styles.imgBG} resizeMode='stretch'>
                     <View style={{flex: 0.17, flexDirection:'row', alignItems:'center', alignSelf:'stretch', justifyContent:'flex-end'}} >

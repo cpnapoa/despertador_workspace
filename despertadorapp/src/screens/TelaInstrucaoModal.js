@@ -42,7 +42,9 @@ export default class TelaInstrucaoModal extends Component {
         
     }
 
+    
     voltar() {
+        
         
         this.oNavegacao.goBack();
     }
