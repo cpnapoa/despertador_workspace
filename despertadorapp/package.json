@@ -18,6 +18,8 @@
     "@react-native-community/netinfo": "^5.9.7",
     "@react-native-community/slider": "^2.0.9",
     "@react-native-community/toolbar-android": "0.1.0-rc.2",
+    "@react-native-firebase/app": "^12.4.0",
+    "@react-native-firebase/messaging": "^12.4.0",
     "@react-navigation/drawer": "^5.8.7",
     "@react-navigation/material-top-tabs": "^5.3.14",
     "@react-navigation/native": "^5.7.2",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -10,11 +10,22 @@ import TelaInstrucaoModal from '../screens/TelaInstrucaoModal';
 import TelaConfiguracaoNotificacao from '../screens/TelaConfiguracaoNotificacao';
 import {TabBarConfiguracao} from '../screens/TabBarConfiguracao';
 import { Value } from 'react-native-reanimated';
+import messaging from '@react-native-firebase/messaging';
 
 const StackPrincipal = createStackNavigator();
 const StackRaiz = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
+  const handleNotifOpen = (remoteMessage) => {
+    if(remoteMessage) {
+      console.log('Abriu o app com:', remoteMessage);
+
+      if(remoteMessage.data.newStatus) {
+        setOrderStatus(remoteMessage.data.newStatus);
+      }
+    }
+  }
+  
 function FluxoPrincipal() {
   
 return (
@@ -52,6 +63,39 @@ function FluxoRaiz() {
 }
 
 export default function App() {
+  const [orderStatus, setOrderStatus] = useState('feito');
+  
+  useEffect(() => {
+    // Pedindo permissão de notificação
+    const requestNotifPermission = async() =>{
+      const authStatus = await messaging().requestPermission();
+  
+      console.log('Permissão', authStatus);
+    }
+    requestNotifPermission();
+
+    // Obter o token do dispositivo.
+    messaging().getToken().then((token) => {
+      console.log('Token do dispositivo:', token);
+    })
+
+    // Recebendo notificação Foreground.
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      console.log('Recebido no Foreground', remoteMessage);
+      
+      if(remoteMessage.data.newStatus) {
+        setOrderStatus(remoteMessage.data.newStatus);
+      }
+    });
+
+    // Evento para clique na notificacao em background.
+    messaging().onNotificationOpenedApp(handleNotifOpen);
+
+    // Evento para clique na notificação com o aplicativo totalmente fechado.
+    messaging().getInitialNotification().then(handleNotifOpen);
+    return unsubscribe;
+  }, []);
+
     return (
       <ContextoAppProvider>
         <NavigationContainer>

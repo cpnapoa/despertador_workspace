@@ -82,7 +82,9 @@ export default class NotifService {
       /* iOS only properties */
       alertAction: 'view', // (optional) default: view
       category: '', // (optional) default: empty string
-      userInfo: {}, // (optional) default: {} (using null throws a JSON value '<null>' error)
+      userInfo: {
+        despertador_consciencia_local: true
+      }, // (optional) default: {} (using null throws a JSON value '<null>' error)
 
       /* iOS and Android properties */
       title: 'Mensagem', // (optional)

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import Mensagem from './Mensagem';
 import Util from '../common/Util';
 import {

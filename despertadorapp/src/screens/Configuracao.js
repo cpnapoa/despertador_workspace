@@ -63,6 +63,10 @@ export default class Configuracao {
         this.ativarIntervalosSelecionados = this.ativarIntervalosSelecionados.bind(this);
         this.ativarIntervaloDiaSemana = this.ativarIntervaloDiaSemana.bind(this);
         this.temIntervaloSelecionado = this.temIntervaloSelecionado.bind(this);
+        this.tratarNotificacaoLocal = this.tratarNotificacaoLocal.bind(this);
+        this.tratarNotificacaoRemota = this.tratarNotificacaoRemota.bind(this);
+        this.verificarNotificacaoRemota = this.verificarNotificacaoRemota.bind(this);
+        this.agendarNovaNotificacao = this.agendarNovaNotificacao.bind(this);
     }
     
     salvarConfiguracoes(bAgendar) {
@@ -1253,38 +1257,34 @@ export default class Configuracao {
     aoRegistrarNotificacao(token) {
         console.log('aoRegistrarNotificacao: ', token);
     }
-    
-    aoNotificar(notification) {
-        this.oDadosControleApp.abrindo_por_notificacao = true;
 
-        console.log('[despertadorapp] aoNotificar() ++++++++++++ iniciou ++++++++++++');
-        console.log('[despertadorapp] aoNotificar() this.oDadosControleApp.inicializando: ', this.oDadosControleApp.inicializando);
-        console.log('[despertadorapp] aoNotificar() this.oDadosControleApp.app_estava_fechado: ', this.oDadosControleApp.app_estava_fechado);
-        console.log('[despertadorapp] aoNotificar() parametro notification: ', notification);
+    tratarNotificacaoLocal(notification) {
+        console.log('[despertadorapp] tratarNotificacaoLocal() ++++++++++++ iniciou ++++++++++++');
 
         if((!this.oDadosControleApp.app_estava_fechado && (!notification || !notification.action))) {
             // Se o aplicativo estava aberto quando clicou na notificação, 
             // vai agendar por aqui, pois nao passou pela funcao inicializar() da TelaMensagem.
-            this.obterAgendaNotificacoesDoDispositivo(() => {
+            this.agendarNovaNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao_com_app_aberto);
+            // this.obterAgendaNotificacoesDoDispositivo(() => {
 
-                this.oMensagem.obterDadosMensagens(() => {
+            //     this.oMensagem.obterDadosMensagens(() => {
                     
-                    this.oMensagem.definirMensagemExibir(() => {
-                        this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao_com_app_aberto);
+            //         this.oMensagem.definirMensagemExibir(() => {
+            //             this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao_com_app_aberto);
 
-                        // Vai para a tela de incial, da mensagem.
-                        this.oNavegacao.reset({
-                            index: 0,
-                            routes: [{ name: 'Principal' }],
-                        });
-                        this.oUtil.fecharMensagem();
-                        this.oDadosControleApp.abrindo_por_notificacao = false;
-                    });                    
-                });
-            });
+            //             // Vai para a tela de incial, da mensagem.
+            //             this.oNavegacao.reset({
+            //                 index: 0,
+            //                 routes: [{ name: 'Principal' }],
+            //             });
+            //             this.oUtil.fecharMensagem();
+            //             this.oDadosControleApp.abrindo_por_notificacao = false;
+            //         });                    
+            //     });
+            // });
         } else if (notification && notification.action && notification.action.toUpperCase().indexOf('ABRIR') >= 0) {
             
-            console.log('[despertadorapp] aoNotificar() notification.action: ', notification.action);
+            console.log('[despertadorapp] tratarNotificacaoLocal() notification.action: ', notification.action);
             if(this.oDadosControleApp.inicializando) {
                 this.oDadosControleApp.abrindo_por_notificacao = false;
                 return;
@@ -1306,25 +1306,95 @@ export default class Configuracao {
             
             // Se o aplicativo estava aberto quando clicou na notificação, 
             // vai agendar por aqui, pois nao passou pela funcao inicializar() da TelaMensagem.
-            this.obterAgendaNotificacoesDoDispositivo(() => {
+            this.agendarNovaNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao);
 
-                this.oMensagem.obterDadosMensagens(() => {
+            // this.obterAgendaNotificacoesDoDispositivo(() => {
+
+            //     this.oMensagem.obterDadosMensagens(() => {
                     
-                    this.oMensagem.definirMensagemExibir(() => {
-                        this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao);
+            //         this.oMensagem.definirMensagemExibir(() => {
+            //             this.agendarNotificacao(FORMAS_AGENDAMENTO.ao_abrir_notificacao);
 
-                        // Vai para a tela de incial, da mensagem.
-                        this.oNavegacao.reset({
-                            index: 0,
-                            routes: [{ name: 'Principal' }],
-                        });
-                        this.oUtil.fecharMensagem();
-                        this.oDadosControleApp.abrindo_por_notificacao = false;
-                    });                    
-                });
-            });
+            //             // Vai para a tela de incial, da mensagem.
+            //             this.oNavegacao.reset({
+            //                 index: 0,
+            //                 routes: [{ name: 'Principal' }],
+            //             });
+            //             this.oUtil.fecharMensagem();
+            //             this.oDadosControleApp.abrindo_por_notificacao = false;
+            //         });                    
+            //     });
+            // });
         }
+        console.log('[despertadorapp] tratarNotificacaoLocal() ------------ terminou ------------');
+    }
+
+    tratarNotificacaoRemota(notification){
+        console.log('[despertadorapp] tratarNotificacaoRemota() ++++++++++++ iniciou ++++++++++++');
+
+        if(notification && notification.data && notification.data.msg) {
+    
+            this.oUtil.exibirMensagem(notification.data.msg, true);
+        } 
+        // else () {
+        //     this.agendarNotificacao();
+        //     FORMAS_AGENDAMENTO.ao_abrir_notificacao
+        // }
+        
+        console.log('[despertadorapp] tratarNotificacaoRemota() ------------ terminou ------------');
+    }
+
+    verificarNotificacaoRemota(notification) {
+        let remota = false;
+        
+        if(notification) {
+        
+            remota = true;        
+            if(notification.userInfo && notification.userInfo.despertador_consciencia_local) {
+        
+                remota = false;
+            }
+        }
+        return remota;
+    }
+
+    agendarNovaNotificacao (formaAgendamento) {
+        this.obterAgendaNotificacoesDoDispositivo(() => {
+
+            this.oMensagem.obterDadosMensagens(() => {
+                
+                this.oMensagem.definirMensagemExibir(() => {
+                    this.agendarNotificacao(formaAgendamento);
+
+                    // Vai para a tela de incial, da mensagem.
+                    this.oNavegacao.reset({
+                        index: 0,
+                        routes: [{ name: 'Principal' }],
+                    });
+                    this.oUtil.fecharMensagem();
+                    this.oDadosControleApp.abrindo_por_notificacao = false;
+                });                    
+            });
+        });
+    }
+    
+    aoNotificar(notification) {
+        this.oDadosControleApp.abrindo_por_notificacao = true;
+
+        console.log('[despertadorapp] aoNotificar() ++++++++++++ iniciou ++++++++++++');
+        console.log('[despertadorapp] aoNotificar() this.oDadosControleApp.inicializando: ', this.oDadosControleApp.inicializando);
+        console.log('[despertadorapp] aoNotificar() this.oDadosControleApp.app_estava_fechado: ', this.oDadosControleApp.app_estava_fechado);
+        console.log('[despertadorapp] aoNotificar() parametro notification: ', notification);
+
+        if(this.verificarNotificacaoRemota(notification)) {
+
+            this.tratarNotificacaoRemota(notification);
+        } else {
+
+            this.tratarNotificacaoLocal(notification);
+        }
+
         this.oDadosControleApp.app_estava_fechado = false;
-        console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');    
+        console.log('[despertadorapp] aoNotificar() ------------ terminou ------------');
     }
 }
