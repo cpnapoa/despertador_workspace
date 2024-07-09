@@ -20,6 +20,7 @@ As linhas iniciadas por "=>" são comandos a serem executados no terminal ou aç
 	Acessar o terminal de comandos (no windows, usar o prompt de comandos (cmd), não usar o PowerShell)
 	
 	3.1 Baixar os módulos Node do React-Native:
+   
    		=> npm install
 
 	3.2 Criar o virtual environment do python e baixar os pacotes necessários, na pasta do repositório:
