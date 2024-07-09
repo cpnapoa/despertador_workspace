@@ -19,12 +19,8 @@ As linhas iniciadas por "=>" são comandos a serem executados no terminal ou aç
 	
 	Acessar o terminal de comandos (no windows, usar o prompt de comandos (cmd), não usar o PowerShell)
 	
-	3.1 Criar um novo projeto React-Native temporario com a estrutura inicial, apenas para copiar a pasta node_modules:
-	
-		=> react-native init ra_excluir (Objetivo: baixar um cópia dos módulos do Node.js para a máquina do desenvolvedor).
-		
-		Mover a pasta "ra_excluir/node_modules" (do projeto recém criado) para a pasta do projeto baixado do GitHub "/despertadorapp_workspace/despertadorapp/".
-		Excluir toda a pasta do projeto temporário recém criado (<nome do projeto>_excluir).
+	3.1 Baixar os módulos Node do React-Native:
+   		=> npm install
 
 	3.2 Criar o virtual environment do python e baixar os pacotes necessários, na pasta do repositório:
 	
@@ -86,7 +82,7 @@ As linhas iniciadas por "=>" são comandos a serem executados no terminal ou aç
 		=> Informar o usuário (admin) e senha (123456) cadastrados com o createsuperuser
 		=> Cadastrar mensagens.
 
-4. Emulador Android:
+5. Emulador Android:
 
 	4.1 Criar um emulador (este item rodar apenas a primeira vez):
 		=> Abrir o Android Studio.
@@ -103,7 +99,7 @@ As linhas iniciadas por "=>" são comandos a serem executados no terminal ou aç
 		=> emulator -list-avds
 		=> emulator -avd <Nome do emulador que aparece na lista> -dns-server 8.8.8.8
 	
-5. Rodar o projeto React-Native no emulador:
+6. Rodar o projeto React-Native no emulador:
 
 	5.1 Descobrir o IP local:
 		No Linux:
